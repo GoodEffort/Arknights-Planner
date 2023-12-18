@@ -1,0 +1,82 @@
+html.dark > body {
+    &, & a.list-group-item, & .list-group {
+        --text-color-normal: hsl(210, 10%, 62%);
+        --text-color-light: hsl(210, 15%, 35%);
+        --text-color-richer: hsl(210, 50%, 72%);
+        --text-color-highlight: hsl(25, 70%, 45%);
+        background-color: black;
+        color: white;
+    }
+
+    & a.list-group-item, & li.list-group-item {
+        border: var(--bs-list-group-border-width) solid rgb(255 255 255 / 13%);
+    }
+
+    & a.list-group-item.active {
+        --text-color-normal: hsl(210, 10%, 62%);
+        --text-color-light: hsl(210, 15%, 35%);
+        --text-color-richer: hsl(210, 50%, 72%);
+        --text-color-highlight: hsl(25, 70%, 45%);
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    & a {
+        color: hsl(210, 50%, 72%);
+    }
+
+    & a:hover {
+        color: hsl(25, 70%, 45%);
+    }
+
+    & a:visited {
+        color: hsl(210, 50%, 72%);
+    }
+
+    & a:visited:hover {
+        color: hsl(25, 70%, 45%);
+    }
+
+    & a:active {
+        color: hsl(25, 70%, 45%);
+    }
+
+    & a:active:hover {
+        color: hsl(25, 70%, 45%);
+    }
+
+    & a:focus {
+        color: hsl(25, 70%, 45%);
+    }
+
+    & a:focus:hover {
+        color: hsl(25, 70%, 45%);
+    }
+
+    & a:focus:active {
+        color: hsl(25, 70%, 45%);
+    }
+
+    & a:focus:active:hover {
+        color: hsl(25, 70%, 45%);
+    }
+
+    @media (hover: hover) {
+        & img.img-thumbnail {
+            opacity: .75;
+            transition: opacity .5s ease-in-out;
+            background-color: #424242;
+        }
+
+        & img:hover.img-thumbnail {
+            opacity: 1;
+        }
+    }
+
+    @media (hover: none) {
+        & img.img-thumbnail {
+            opacity: 1;
+            background-color: #424242;
+        }
+    }
+}
