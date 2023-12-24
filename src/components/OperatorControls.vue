@@ -147,7 +147,7 @@ watch(currentMastery3, value => {
 </script>
 
 <template>
-    <div class="col-2">
+    <div class="col-2 center-vert">
         <img :src="getImageLink(operator)" :alt="operator.name" class="img-thumbnail" />
     </div>
     <div class="col-10">
@@ -157,6 +157,7 @@ watch(currentMastery3, value => {
         <div class="row">
             <div class="col-6">
                 <label>Current</label>
+                <hr />
 
                 <div class="row">
                     <div class="col" v-if="operator.phases.length > 1">
@@ -175,14 +176,14 @@ watch(currentMastery3, value => {
 
                 <div class="row" v-if="operator.phases.length > 2">
                     <label>Skill Masteries</label>
-                    <div class="col" v-if="operator.skills.length > 0">
-                        <OperatorSkillMasteries v-model="currentMastery1" :skillNumber="1" />
+                    <div class="col">
+                        <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="currentMastery1" :skillNumber="1" />
                     </div>
-                    <div class="col" v-if="operator.skills.length > 1">
-                        <OperatorSkillMasteries v-model="currentMastery2" :skillNumber="2" />
+                    <div class="col">
+                        <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="currentMastery2" :skillNumber="2" />
                     </div>
-                    <div class="col" v-if="operator.skills.length > 2">
-                        <OperatorSkillMasteries v-model="currentMastery3" :skillNumber="3" />
+                    <div class="col">
+                        <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="currentMastery3" :skillNumber="3" />
                     </div>
                 </div>
                 <hr v-if="selectedOperator.modules.length > 0" />
@@ -203,6 +204,7 @@ watch(currentMastery3, value => {
             </div>
             <div class="col-6">
                 <label>Planned</label>
+                <hr />
 
                 <div class="row">
                     <div class="col" v-if="operator.phases.length > 1">
@@ -221,14 +223,14 @@ watch(currentMastery3, value => {
 
                 <div class="row" v-if="operator.phases.length > 2">
                     <label>Skill Masteries</label>
-                    <div class="col" v-if="operator.skills.length > 0">
-                        <OperatorSkillMasteries v-model="targetMastery1" :skillNumber="1" />
+                    <div class="col">
+                        <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="targetMastery1" :skillNumber="1" />
                     </div>
-                    <div class="col" v-if="operator.skills.length > 1">
-                        <OperatorSkillMasteries v-model="targetMastery2" :skillNumber="2" />
+                    <div class="col">
+                        <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="targetMastery2" :skillNumber="2" />
                     </div>
-                    <div class="col" v-if="operator.skills.length > 2">
-                        <OperatorSkillMasteries v-model="targetMastery3" :skillNumber="3" />
+                    <div class="col">
+                        <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="targetMastery3" :skillNumber="3" />
                     </div>
                 </div>
                 <hr v-if="selectedOperator.modules.length > 0" />
@@ -245,8 +247,14 @@ watch(currentMastery3, value => {
                         <OperatorModule v-if="hasZModule" v-model="targetModuleZ" module-letter="Z" />
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
-</template>../types/operator
+</template>
+
+<style scoped>
+.center-vert {
+    margin-top:auto;
+    margin-bottom:auto;
+}
+</style>
