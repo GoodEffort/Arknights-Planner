@@ -22,7 +22,7 @@ const elite0Costs: LevelingCost[] = [
     { level: 15, exp: 321, lmd: 138 },
     { level: 16, exp: 338, lmd: 149 },
     { level: 17, exp: 355, lmd: 160 },
-    { level: 18, exp: 371, lmd: 182 },
+    { level: 18, exp: 372, lmd: 182 },
     { level: 19, exp: 389, lmd: 206 },
     { level: 20, exp: 406, lmd: 231 },
     { level: 21, exp: 423, lmd: 258 },
