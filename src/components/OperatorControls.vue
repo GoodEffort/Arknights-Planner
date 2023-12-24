@@ -179,7 +179,7 @@ const levelingCosts = computed(() => {
     <div class="col-2 center-vert">
         <img :src="getImageLink(operator)" :alt="operator.name" class="img-thumbnail" />
     </div>
-    <div class="col-10">
+    <div class="col-10 left-border">
         <div class="row">
             <h4>{{ operator.name }}</h4>
         </div>
@@ -277,7 +277,9 @@ const levelingCosts = computed(() => {
                     </div>
                 </div>
             </div>
-            <hr />
+            <div class="col-12">
+                <hr />
+            </div>
         </div>
         <div class="row">
             <div class="col">
@@ -292,5 +294,9 @@ const levelingCosts = computed(() => {
 .center-vert {
     margin-top:auto;
     margin-bottom:auto;
+}
+
+.left-border {
+    border-left: 1px rgba(255, 255, 255, 0.25) solid;
 }
 </style>
