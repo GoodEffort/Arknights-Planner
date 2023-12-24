@@ -50,4 +50,4 @@ class OperatorPlans {
     }
 }
 
-export { OperatorPlans }
+export { OperatorPlans, SkillMasteries, ModuleLevels }
