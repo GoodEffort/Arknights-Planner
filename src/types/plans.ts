@@ -24,13 +24,13 @@ class ModuleLevels {
 
 class OperatorPlans {
     currentLevel: number;
-    currentElite: number;
+    currentElite: 0 | 1 | 2;
     currentSkillLevels: number;
     currentSkillMasteries: SkillMasteries;
     currentModules: ModuleLevels;
 
     targetLevel: number;
-    targetElite: number;
+    targetElite: 0 | 1 | 2;
     targetSkillLevels: number;
     targetSkillMasteries: SkillMasteries;
     targetModules: ModuleLevels;

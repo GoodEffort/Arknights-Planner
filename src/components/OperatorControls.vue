@@ -8,6 +8,9 @@ import OperatorSkillMasteries from './controls/OperatorMasteries.vue';
 import type { Operator } from '../types/operator';
 import { SelectedOperator } from '../types/operator';
 import OperatorModule from './controls/OperatorModule.vue';
+import { elite1Costs, elite2Costs, elite0Costs } from '../data/leveling-costs';
+
+const levelingCostsArray = [elite0Costs, elite1Costs, elite2Costs];
 
 const { selectedOperator } = defineProps({
     selectedOperator: {
@@ -22,12 +25,12 @@ const operator = computed<Operator>(() => selectedOperator.operator);
 
 const currentElite = computed({
     get: () => selectedOperator.plans.currentElite,
-    set: value => selectedOperator.plans.currentElite = +value
+    set: value => selectedOperator.plans.currentElite = (+value) as 0 | 1 | 2
 });
 
 const targetElite = computed({
     get: () => selectedOperator.plans.targetElite,
-    set: value => selectedOperator.plans.targetElite = +value
+    set: value => selectedOperator.plans.targetElite = (+value) as 0 | 1 | 2
 });
 
 const currentLevel = computed({
@@ -116,7 +119,7 @@ const targetModuleZ = computed({
 
 watch(currentElite, value => {
     if (value > selectedOperator.plans.targetElite)
-        targetElite.value = +value;
+        targetElite.value = (+value) as 0 | 1 | 2;
 });
 
 watch(currentLevel, value => {
@@ -142,6 +145,32 @@ watch(currentMastery2, value => {
 watch(currentMastery3, value => {
     if (value > selectedOperator.plans.targetSkillMasteries.skill3)
         targetMastery3.value = +value;
+});
+
+const levelingCosts = computed(() => {
+    const currentLevel = selectedOperator.plans.currentLevel;
+    const targetLevel = selectedOperator.plans.targetLevel;
+    let currentEliteIndex: number = selectedOperator.plans.currentElite;
+    const targetEliteIndex: number = selectedOperator.plans.targetElite;
+
+    let lmd = 0;
+    let exp = 0;
+
+    let currentLevelIndex = levelingCostsArray[currentEliteIndex].findIndex(c => c.level === currentLevel);
+
+    for (; currentEliteIndex <= targetEliteIndex; currentEliteIndex++) {
+        const { maxLevel } = operator.value.phases[currentEliteIndex];
+        const maxLevelIndex = levelingCostsArray[currentEliteIndex].findIndex(c => c.level === (currentEliteIndex < targetEliteIndex ? maxLevel: targetLevel));
+
+        for (; currentLevelIndex <= maxLevelIndex; currentLevelIndex++) {
+            lmd += levelingCostsArray[currentEliteIndex][currentLevelIndex].lmd;
+            exp += levelingCostsArray[currentEliteIndex][currentLevelIndex].exp;
+        }
+        
+        currentLevelIndex = 0;
+    }
+
+    return { lmd, exp };
 });
 
 </script>
@@ -202,7 +231,7 @@ watch(currentMastery3, value => {
                 </div>
 
             </div>
-            <div class="col-6">
+            <div class="col-6 mb-3">
                 <label>Planned</label>
                 <hr />
 
@@ -247,6 +276,13 @@ watch(currentMastery3, value => {
                         <OperatorModule v-if="hasZModule" v-model="targetModuleZ" module-letter="Z" />
                     </div>
                 </div>
+            </div>
+            <hr />
+        </div>
+        <div class="row">
+            <div class="col">
+                LMD {{ levelingCosts.lmd }}
+                EXP {{ levelingCosts.exp }}
             </div>
         </div>
     </div>
