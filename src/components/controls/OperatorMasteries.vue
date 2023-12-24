@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
-
 const emit = defineEmits<{
     (e: 'update:modelValue', value: number | undefined): number;
 }>();
@@ -16,8 +14,8 @@ const onChange = (e: Event) => {
         emit('update:modelValue', 3);
         return;
     }
-    else if (value < 1) {
-        emit('update:modelValue', 1);
+    else if (value < 0) {
+        emit('update:modelValue', 0);
         return;
     }
         
@@ -28,7 +26,7 @@ const onChange = (e: Event) => {
 
 <template>
     <div class="input-group">
-        <span class="input-group-text">Mastery {{ skillNumber }}</span>
-        <input type="number" class="form-control" :value="modelValue" @input="onChange" min="1" :max="3" />
+        <span class="input-group-text">{{ skillNumber }}</span>
+        <input type="number" class="form-control" :value="modelValue" @input="onChange" min="0" :max="3" />
     </div>
 </template>

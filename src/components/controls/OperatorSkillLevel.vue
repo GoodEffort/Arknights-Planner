@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
-
 const emit = defineEmits<{
     (e: 'update:modelValue', value: number | undefined): number;
 }>();

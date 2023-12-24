@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
-import { Phase } from '../../types/character';
+import { Phase } from '../../types/operator';
 import { ref } from 'vue';
 
 defineEmits<{
