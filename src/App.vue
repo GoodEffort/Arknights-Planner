@@ -11,9 +11,3 @@ import Navbar from "./components/Navbar.vue"
   <nav>Planner</nav>
   <Planner />
 </template>
-
-<style scoped>
-body {
-  background-color: #f5f5f5;
-}
-</style>
