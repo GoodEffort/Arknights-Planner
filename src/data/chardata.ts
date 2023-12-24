@@ -1,17 +1,12 @@
-import Character from "../types/character"
-type CharacterNoId = Omit<Character, "id">;
+import { Operator, Character_Table } from "../types/operator"
 
-const aceshipLink = "https://raw.githubusercontent.com/Aceship/AN-EN-Tags/master/json/gamedata/en_US/gamedata/excel/character_table.json";
-
-type CharData = {
-    [key: string]: CharacterNoId;
-}
+const aceshipLink = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/en_US/gamedata/excel/character_table.json";
 
 const getChardata = async () => {
     const response = await fetch(aceshipLink);
-    const data: CharData = await response.json();
+    const data: Character_Table = await response.json();
 
-    const chardata: Character[] = Object.entries(data)
+    const chardata: Operator[] = Object.entries(data)
         .map(([id, char]) => {
             return {
                 id,
