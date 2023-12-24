@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const emit = defineEmits<{
-    (e: 'update:modelValue', value: number | undefined): number;
+    (e: 'update:model-value', value: number | undefined): number;
 }>();
 
 const { modelValue } = defineProps({
@@ -10,15 +10,15 @@ const { modelValue } = defineProps({
 const onChange = (e: Event) => {
     const value = +((e.target as HTMLInputElement).value);
     if (value > 7) {
-        emit('update:modelValue', 7);
+        emit('update:model-value', 7);
         return;
     }
     else if (value < 1) {
-        emit('update:modelValue', 1);
+        emit('update:model-value', 1);
         return;
     }
         
-    emit('update:modelValue', value);
+    emit('update:model-value', value);
 };
 
 </script>

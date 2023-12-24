@@ -3,7 +3,7 @@ import { Phase } from '../../types/operator';
 import { ref } from 'vue';
 
 defineEmits<{
-    (e: 'update:modelValue', value: number): void;
+    (e: 'update:model-value', value: number): void;
 }>();
 
 const { modelValue, phases } = defineProps({
@@ -20,7 +20,7 @@ const showElite2 = ref(phases ? phases.length > 2 : false);
 <template>
     <div class="input-group">
         <span class="input-group-text">Promotion</span>
-        <select class="form-select" :value="modelValue" @input="$emit('update:modelValue', +($event.target as HTMLSelectElement).value)" :disabled="disabled">
+        <select class="form-select" :value="modelValue" @input="$emit('update:model-value', +($event.target as HTMLSelectElement).value)" :disabled="disabled">
             <option value="0">Elite 0</option>
             <option v-if="showElite1" value="1">Elite 1</option>
             <option v-if="showElite2" value="2">Elite 2</option>
