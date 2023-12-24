@@ -2,31 +2,31 @@
 import { PropType, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlannerStore } from '../store/planner-store';
-import Character from '../types/character';
+import { Operator } from '../types/operator';
 
-const { columnClass, character } = defineProps({
+const { columnClass, operator } = defineProps({
     columnClass: {
         type: String,
         default: 'col-2'
     },
-    character: {
-        type: Object as PropType<Character>,
+    operator: {
+        type: Object as PropType<Operator>,
         required: true
     }
 });
 
 const { getImageLink, selectCharacter } = usePlannerStore();
-const { selectedCharacters } = storeToRefs(usePlannerStore());
+const { selectedOperators } = storeToRefs(usePlannerStore());
 
-const isSelected = computed(() => selectedCharacters.value.indexOf(character) >= 0);
+const isSelected = computed(() => selectedOperators.value.find(c => c.operator.id === operator.id) !== undefined);
 </script>
 
 <template>
-    <div :class="`character-select ${ columnClass } ${ isSelected ? 'selected' : '' }`" @click="selectCharacter(character)">
+    <div :class="`character-select ${ columnClass } ${ isSelected ? 'selected' : '' }`" @click="selectCharacter(operator)">
         <div>
-            <img :src="getImageLink(character)" :alt="character.name" class="img-thumbnail" />
+            <img :src="getImageLink(operator)" :alt="operator.name" class="img-thumbnail" />
         </div>
-        {{ character.name }}
+        {{ operator.name }}
     </div>
 </template>
 
@@ -38,4 +38,4 @@ const isSelected = computed(() => selectedCharacters.value.indexOf(character) >=
 .character-select.selected {
     opacity: .05;
 }
-</style>
+</style>../types/operator

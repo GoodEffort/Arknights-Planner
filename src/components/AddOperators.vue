@@ -1,17 +1,16 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlannerStore } from '../store/planner-store';
 
-import type Character from '../types/character';
+import type { Operator } from '../types/operator';
 import PlannerSection from './PlannerSection.vue';
 import AddOperatorsCell from './AddOperatorsCell.vue';
 
-const { loadCharacters } = usePlannerStore();
-const { characters } = storeToRefs(usePlannerStore());
+const { operators } = storeToRefs(usePlannerStore());
 
-const pageCount = computed(() => Math.ceil(characters.value.length / pageSize.value));
-const pagedCharacters = computed(() => {
+const pageCount = computed(() => Math.ceil(operators.value.length / pageSize.value));
+const pagedOperators = computed(() => {
     const pages = Array.from({ length: pageCount.value }, (_, index) => {
         const start = index * pageSize.value;
         return sortedCharacters.value.slice(start, start + pageSize.value);
@@ -23,29 +22,29 @@ const selectedSort = ref<'Name' | 'Rarity' | 'Class'>('Name');
 const operatorFilter = ref('');
 const pageSize = ref(6); // make it divisible by 12 for bootstrap grids
 
-const filteredCharacters = computed(() => characters.value.filter(character => character.name.toLowerCase().includes(operatorFilter.value.toLowerCase())));
+const filteredCharacters = computed(() => operators.value.filter(character => character.name.toLowerCase().includes(operatorFilter.value.toLowerCase())));
 const sortedCharacters = computed(() => filteredCharacters.value.sort(characterSort));
 
 
-function sortByName(a: Character, b: Character) {
+function sortByName(a: Operator, b: Operator) {
     return a.name.localeCompare(b.name);
 }
 
-function sortByRarity(a: Character, b: Character) {
+function sortByRarity(a: Operator, b: Operator) {
     if (a.rarity === b.rarity)
         return a.name.localeCompare(b.name);
     else
-        return b.rarity - a.rarity;
+        return a.rarity.localeCompare(b.rarity);
 }
 
-function sortByClass(a: Character, b: Character) {
+function sortByClass(a: Operator, b: Operator) {
     if (a.profession === b.profession)
         return sortByRarity(a, b);
     else
         return a.profession.localeCompare(b.profession);
 }
 
-function characterSort(a: Character, b: Character) {
+function characterSort(a: Operator, b: Operator) {
     switch (selectedSort.value) {
         case 'Name':
             return sortByName(a, b);
@@ -55,20 +54,17 @@ function characterSort(a: Character, b: Character) {
             return sortByClass(a, b);
     }
 }
-
-onMounted(loadCharacters);
 </script>
 
 <template>
     <PlannerSection title="Add Operators">
 
-        <input type="text" v-model="operatorFilter" placeholder="Filter by operator name" />
-
+        <input class="form-control" type="text" v-model="operatorFilter" placeholder="Filter by operator name" />
         <hr />
 
         <div class="container">
-            <div class="row" v-for="(row, index) in pagedCharacters" :key="index">
-                <AddOperatorsCell v-for="character in row" :character="character" :key="character.id" />
+            <div class="row" v-for="(row, index) in pagedOperators" :key="index">
+                <AddOperatorsCell v-for="operator in row" :operator="operator" :key="operator.id" />
             </div>
         </div>
     </PlannerSection>
