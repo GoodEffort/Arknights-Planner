@@ -26,7 +26,9 @@ const isSelected = computed(() => selectedOperators.value.find(c => c.operator.i
         <div>
             <img :src="getImageLink(operator)" :alt="operator.name" class="img-thumbnail" />
         </div>
-        {{ operator.name }}
+        <div class="name">
+            {{ operator.name }}
+        </div>
     </div>
 </template>
 
@@ -38,4 +40,8 @@ const isSelected = computed(() => selectedOperators.value.find(c => c.operator.i
 .character-select.selected {
     opacity: .05;
 }
-</style>../types/operator
+
+.name {
+    min-height: 4em;
+}
+</style>
