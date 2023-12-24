@@ -189,7 +189,7 @@ const levelingCosts = computed(() => {
                 <hr />
 
                 <div class="row">
-                    <div class="col" v-if="operator.phases.length > 1">
+                    <div class="col-7" v-if="operator.phases.length > 1">
                         <OperatorPromotion :phases="operator.phases" v-model="currentElite" />
                     </div>
                     <div class="col">
@@ -231,12 +231,12 @@ const levelingCosts = computed(() => {
                 </div>
 
             </div>
-            <div class="col-6 mb-3">
+            <div class="col-6">
                 <label>Planned</label>
                 <hr />
 
                 <div class="row">
-                    <div class="col" v-if="operator.phases.length > 1">
+                    <div class="col-7" v-if="operator.phases.length > 1">
                         <OperatorPromotion :phases="operator.phases" v-model="targetElite" />
                     </div>
                     <div class="col">
