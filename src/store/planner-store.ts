@@ -1,54 +1,74 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import type Operator from '../types/character';
-import type { OperatorPlans } from '../types/plans';
+import type { Operator, CharEquip, EquipDict, Module } from '../types/operator';
+import { SelectedOperator, SaveRecord } from '../types/operator';
 import getChardata from '../data/chardata';
+import getModuledata from '../data/moduledata';
 
 export const usePlannerStore = defineStore('planner', () => {
-    const characters = ref<Operator[]>([]);
-    const selectedCharacters = ref<Operator[]>([]);
-    const plans = ref<{
-        [key: string]: OperatorPlans;
-    }>({});
+    const operators = ref<Operator[]>([]);
+    const modules = ref<EquipDict>({});
+    const charactersToModules = ref<CharEquip>({});
+    const selectedOperators = ref<SelectedOperator[]>([]);
 
     async function loadCharacters() {
         const data = await getChardata();
-        characters.value = data;
-
-        if (localStorage.getItem('selectedCharacters')) {
-            const selectedIds = JSON.parse(localStorage.getItem('selectedCharacters') || '[]');
-            selectedCharacters.value = characters.value.filter(c => selectedIds.indexOf(c.id) >= 0);
-        }
-
-        selectedCharacters.value.forEach(c => getPlans(c.id));
+        operators.value = data;
     }
 
-    function getPlans(characterId: string) {
-        const planString = `plans-${ characterId }`;
-        const planData = localStorage.getItem(planString);
+    async function loadModules() {
+        const { ModuleDict, CharacterModules } = await getModuledata();
+        modules.value = ModuleDict;
+        charactersToModules.value = CharacterModules;
+    }
 
-        if (planData) {
-            plans.value[characterId] = JSON.parse(planData);
+    function getModulesForCharacter(operatorId: string): Module[] {
+        const moduleIds = charactersToModules.value[operatorId] || [];
+        const modulesArray: Module[] = [];
+        for (const moduleId of moduleIds) {
+            const module = modules.value[moduleId];
+            if (module && module.type !== 'INITIAL') {
+                modulesArray.push(module);
+            }
+        }
+        return modulesArray;
+    }
+
+    function loadSavedRecords() {
+        const saveData: string | null = localStorage.getItem('selectedCharacters');
+        if (saveData) {
+            const operatorIds: string[] = JSON.parse(saveData);
+
+            for (const operatorId of operatorIds) {
+
+                const saveRecord = getSavedOperatorData(operatorId) || new SelectedOperator(operators.value.find(c => c.id === operatorId)!, getModulesForCharacter(operatorId));
+                selectedOperators.value.push(saveRecord);
+            }
+        }
+    }
+
+    function getSavedOperatorData(operatorId: string): SelectedOperator {
+        const saveString = `plans-${ operatorId }`;
+        const saveData: string | null = localStorage.getItem(saveString);
+        const operator = operators.value.find(c => c.id === operatorId);
+        const modulesarray = getModulesForCharacter(operatorId);
+
+        if (operator === undefined) {
+            throw new Error(`Operator with id ${ operatorId } not found.`);
+        }
+
+        let selectedOperator: SelectedOperator;
+
+        if (saveData) {
+            const SaveRecord: SaveRecord = JSON.parse(saveData);
+            selectedOperator = new SelectedOperator(operator, modulesarray, SaveRecord.plans);
         }
         else {
-            addNewPlan(characterId);
+            selectedOperator = new SelectedOperator(operator, modulesarray);
+            localStorage.setItem(saveString, JSON.stringify(new SaveRecord(selectedOperator)));
         }
-    }
 
-    function addNewPlan(characterId: string) {
-        plans.value[characterId] = {
-            operatorId: characterId,
-            currentLevel: 1,
-            currentElite: 0,
-            currentSkillLevels: 1,
-            currentSkillMasteries: { skill1: 0, skill2: 0, skill3: 0 },
-            currentModules: { x: 0, y: 0, z: 0 },
-            targetLevel: 1,
-            targetElite: 0,
-            targetSkillLevels: 1,
-            targetSkillMasteries: { skill1: 0, skill2: 0, skill3: 0 },
-            targetModules: { x: 0, y: 0, z: 0 }
-        };
+        return selectedOperator
     }
 
     function getImageLink(character: Operator) {
@@ -56,24 +76,27 @@ export const usePlannerStore = defineStore('planner', () => {
     }
 
     function selectCharacter(character: Operator) {
-        if (selectedCharacters.value.indexOf(character) < 0) {
-            selectedCharacters.value.push(character);
-            getPlans(character.id);
+        const existingSelection = selectedOperators.value.find(c => c.operator === character);
+        if (existingSelection === undefined) {
+            const newOperatorSelection = getSavedOperatorData(character.id);
+            selectedOperators.value.push(newOperatorSelection);
         }
         else if (confirm(`Are you sure you want to remove ${ character.name } from your selection?`)) {
-            selectedCharacters.value.splice(selectedCharacters.value.indexOf(character), 1);
+            selectedOperators.value.splice(selectedOperators.value.indexOf(existingSelection), 1);
         }
 
-        localStorage.setItem('selectedCharacters', JSON.stringify(selectedCharacters.value.map(c => c.id)));
+        localStorage.setItem('selectedCharacters', JSON.stringify(selectedOperators.value.map(c => c.operator.id)));
 
         console.log(character);
     }
 
     return {
-        characters,
-        selectedCharacters,
-        plans,
+        operators,
+        modules,
+        selectedOperators,
         loadCharacters,
+        loadModules,
+        loadSavedRecords,
         getImageLink,
         selectCharacter
     }
