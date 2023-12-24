@@ -4,7 +4,7 @@ type LevelingCost = {
     lmd: number;
 }
 
-const elite1Costs: LevelingCost[] = [
+const elite0Costs: LevelingCost[] = [
     { level: 1, exp: 0, lmd: 0 },
     { level: 2, exp: 100, lmd: 30 },
     { level: 3, exp: 117, lmd: 36 },
@@ -57,7 +57,7 @@ const elite1Costs: LevelingCost[] = [
     { level: 50, exp: 888, lmd: 1572 }
 ];
 
-const elite2Costs: LevelingCost[] = [
+const elite1Costs: LevelingCost[] = [
     { level: 1, exp: 0, lmd: 0 },
     { level: 2, exp: 120, lmd: 48 },
     { level: 3, exp: 172, lmd: 71 },
@@ -140,7 +140,7 @@ const elite2Costs: LevelingCost[] = [
     { level: 80, exp: 14549, lmd: 18303 }
 ];
 
-const elite3Costs: LevelingCost[] = [
+const elite2Costs: LevelingCost[] = [
     { level: 1, exp: 0, lmd: 0 },
     { level: 2, exp: 191, lmd: 76 },
     { level: 3, exp: 303, lmd: 124 },
@@ -233,4 +233,4 @@ const elite3Costs: LevelingCost[] = [
     { level: 90, exp: 31143, lmd: 37745 }
 ];
 
-export { elite1Costs, elite2Costs, elite3Costs };
+export { elite0Costs, elite1Costs, elite2Costs };
