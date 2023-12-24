@@ -1,154 +1,252 @@
 <script setup lang="ts">
 import { PropType, computed, watch } from 'vue';
-import Character from '../types/character';
-import { storeToRefs } from 'pinia';
 import { usePlannerStore } from '../store/planner-store';
-import { OperatorPlans } from '../types/plans';
 import OperatorPromotion from './controls/OperatorPromotion.vue';
 import OperatorLevel from './controls/OperatorLevel.vue';
 import OperatorSkillLevel from './controls/OperatorSkillLevel.vue';
 import OperatorSkillMasteries from './controls/OperatorMasteries.vue';
+import type { Operator } from '../types/operator';
+import { SelectedOperator } from '../types/operator';
+import OperatorModule from './controls/OperatorModule.vue';
 
-const { character } = defineProps({
-    character: {
-        type: Object as PropType<Character>,
+const { selectedOperator } = defineProps({
+    selectedOperator: {
+        type: Object as PropType<SelectedOperator>,
         required: true
     }
 });
 
 const { getImageLink } = usePlannerStore();
-const { plans } = storeToRefs(usePlannerStore());
 
-const plan = computed<OperatorPlans>(() => plans.value[character.id]);
+const operator = computed<Operator>(() => selectedOperator.operator);
 
 const currentElite = computed({
-    get: () => plan.value.currentElite,
-    set: value => plan.value.currentElite = +value
+    get: () => selectedOperator.plans.currentElite,
+    set: value => selectedOperator.plans.currentElite = +value
 });
 
 const targetElite = computed({
-    get: () => plan.value.targetElite,
-    set: value => plan.value.targetElite = +value
+    get: () => selectedOperator.plans.targetElite,
+    set: value => selectedOperator.plans.targetElite = +value
 });
 
 const currentLevel = computed({
-    get: () => plan.value.currentLevel,
-    set: value => plan.value.currentLevel = +value
+    get: () => selectedOperator.plans.currentLevel,
+    set: value => selectedOperator.plans.currentLevel = +value
 });
 
 const targetLevel = computed({
-    get: () => plan.value.targetLevel,
-    set: value => plan.value.targetLevel = +value
+    get: () => selectedOperator.plans.targetLevel,
+    set: value => selectedOperator.plans.targetLevel = +value
 });
 
 const currentSkill = computed({
-    get: () => plan.value.currentSkillLevels,
-    set: value => plan.value.currentSkillLevels = +value
+    get: () => selectedOperator.plans.currentSkillLevels,
+    set: value => selectedOperator.plans.currentSkillLevels = +value
 });
 
 const targetSkill = computed({
-    get: () => plan.value.targetSkillLevels,
-    set: value => plan.value.targetSkillLevels = +value
+    get: () => selectedOperator.plans.targetSkillLevels,
+    set: value => selectedOperator.plans.targetSkillLevels = +value
 });
 
 const currentMastery1 = computed({
-    get: () => plan.value.targetSkillMasteries.skill1,
-    set: value => plan.value.targetSkillMasteries.skill1 = +value
+    get: () => selectedOperator.plans.currentSkillMasteries.skill1,
+    set: value => selectedOperator.plans.currentSkillMasteries.skill1 = +value
 });
 
 const currentMastery2 = computed({
-    get: () => plan.value.targetSkillMasteries.skill1,
-    set: value => plan.value.targetSkillMasteries.skill1 = +value
+    get: () => selectedOperator.plans.currentSkillMasteries.skill2,
+    set: value => selectedOperator.plans.currentSkillMasteries.skill2 = +value
 });
 
 const currentMastery3 = computed({
-    get: () => plan.value.targetSkillMasteries.skill1,
-    set: value => plan.value.targetSkillMasteries.skill1 = +value
+    get: () => selectedOperator.plans.currentSkillMasteries.skill3,
+    set: value => selectedOperator.plans.currentSkillMasteries.skill3 = +value
 });
 
 const targetMastery1 = computed({
-    get: () => plan.value.targetSkillMasteries.skill1,
-    set: value => plan.value.targetSkillMasteries.skill1 = +value
+    get: () => selectedOperator.plans.targetSkillMasteries.skill1,
+    set: value => selectedOperator.plans.targetSkillMasteries.skill1 = +value
 });
 
 const targetMastery2 = computed({
-    get: () => plan.value.targetSkillMasteries.skill1,
-    set: value => plan.value.targetSkillMasteries.skill1 = +value
+    get: () => selectedOperator.plans.targetSkillMasteries.skill2,
+    set: value => selectedOperator.plans.targetSkillMasteries.skill2 = +value
 });
 
 const targetMastery3 = computed({
-    get: () => plan.value.targetSkillMasteries.skill1,
-    set: value => plan.value.targetSkillMasteries.skill1 = +value
+    get: () => selectedOperator.plans.targetSkillMasteries.skill3,
+    set: value => selectedOperator.plans.targetSkillMasteries.skill3 = +value
+});
+
+const hasXModule = computed(() => selectedOperator.modules.find(m => m.typeName2 === 'X') !== undefined);
+const hasYModule = computed(() => selectedOperator.modules.find(m => m.typeName2 === 'Y') !== undefined);
+const hasZModule = computed(() => selectedOperator.modules.find(m => m.typeName2 === 'Z') !== undefined);
+
+const currentModuleX = computed({
+    get: () => selectedOperator.plans.currentModules.x,
+    set: value => selectedOperator.plans.currentModules.x = +value
+});
+
+const currentModuleY = computed({
+    get: () => selectedOperator.plans.currentModules.y,
+    set: value => selectedOperator.plans.currentModules.y = +value
+});
+
+const currentModuleZ = computed({
+    get: () => selectedOperator.plans.currentModules.z,
+    set: value => selectedOperator.plans.currentModules.z = +value
+});
+
+const targetModuleX = computed({
+    get: () => selectedOperator.plans.targetModules.x,
+    set: value => selectedOperator.plans.targetModules.x = +value
+});
+
+const targetModuleY = computed({
+    get: () => selectedOperator.plans.targetModules.y,
+    set: value => selectedOperator.plans.targetModules.y = +value
+});
+
+const targetModuleZ = computed({
+    get: () => selectedOperator.plans.targetModules.z,
+    set: value => selectedOperator.plans.targetModules.z = +value
 });
 
 watch(currentElite, value => {
-    if (value > plan.value.targetElite)
+    if (value > selectedOperator.plans.targetElite)
         targetElite.value = +value;
 });
 
 watch(currentLevel, value => {
-    if (value > plan.value.targetLevel)
+    if (value > selectedOperator.plans.targetLevel)
         targetLevel.value = +value;
+});
+
+watch(currentSkill, value => {
+    if (value > selectedOperator.plans.targetSkillLevels)
+        targetSkill.value = +value;
+});
+
+watch(currentMastery1, value => {
+    if (value > selectedOperator.plans.targetSkillMasteries.skill1)
+        targetMastery1.value = +value;
+});
+
+watch(currentMastery2, value => {
+    if (value > selectedOperator.plans.targetSkillMasteries.skill2)
+        targetMastery2.value = +value;
+});
+
+watch(currentMastery3, value => {
+    if (value > selectedOperator.plans.targetSkillMasteries.skill3)
+        targetMastery3.value = +value;
 });
 
 </script>
 
 <template>
     <div class="col-2">
-        <img :src="getImageLink(character)" :alt="character.name" class="img-thumbnail" />
+        <img :src="getImageLink(operator)" :alt="operator.name" class="img-thumbnail" />
     </div>
     <div class="col-10">
         <div class="row">
-            <h4>{{ character.name }}</h4>
+            <h4>{{ operator.name }}</h4>
         </div>
         <div class="row">
             <div class="col-6">
                 <label>Current</label>
-                <div>
-                    <OperatorPromotion :phases="character.phases" v-model="currentElite" />
+
+                <div class="row">
+                    <div class="col" v-if="operator.phases.length > 1">
+                        <OperatorPromotion :phases="operator.phases" v-model="currentElite" />
+                    </div>
+                    <div class="col">
+                        <OperatorLevel :maxLevel="operator.phases[currentElite].maxLevel" v-model="currentLevel" />
+                    </div>
                 </div>
-                <div>
-                    <OperatorLevel :maxLevel="character.phases[currentElite].maxLevel" v-model="currentLevel" />
-                </div>
-                <div v-if="character.skills.length > 0" >
+                <hr v-if="operator.skills.length > 0" />
+
+                <div class="row" v-if="operator.skills.length > 0">
                     <OperatorSkillLevel v-model="currentSkill" />
                 </div>
-                <div v-if="character.phases.length > 2">
-                    <div v-if="character.skills.length > 0">
+                <hr v-if="operator.phases.length > 2" />
+
+                <div class="row" v-if="operator.phases.length > 2">
+                    <label>Skill Masteries</label>
+                    <div class="col" v-if="operator.skills.length > 0">
                         <OperatorSkillMasteries v-model="currentMastery1" :skillNumber="1" />
                     </div>
-                    <div v-if="character.skills.length > 1">
+                    <div class="col" v-if="operator.skills.length > 1">
                         <OperatorSkillMasteries v-model="currentMastery2" :skillNumber="2" />
                     </div>
-                    <div v-if="character.skills.length > 2">
+                    <div class="col" v-if="operator.skills.length > 2">
                         <OperatorSkillMasteries v-model="currentMastery3" :skillNumber="3" />
                     </div>
                 </div>
+                <hr v-if="selectedOperator.modules.length > 0" />
+
+                <div class="row" v-if="selectedOperator.modules.length > 0">
+                    <label>Modules</label>
+                    <div class="col">
+                        <OperatorModule v-if="hasXModule" v-model="currentModuleX" module-letter="X" />
+                    </div>
+                    <div class="col">
+                        <OperatorModule v-if="hasYModule" v-model="currentModuleY" module-letter="Y" />
+                    </div>
+                    <div class="col">
+                        <OperatorModule v-if="hasZModule" v-model="currentModuleZ" module-letter="Z" />
+                    </div>
+                </div>
+
             </div>
             <div class="col-6">
                 <label>Planned</label>
-                <div>
-                    <OperatorPromotion :phases="character.phases" v-model="targetElite" />
+
+                <div class="row">
+                    <div class="col" v-if="operator.phases.length > 1">
+                        <OperatorPromotion :phases="operator.phases" v-model="targetElite" />
+                    </div>
+                    <div class="col">
+                        <OperatorLevel :maxLevel="operator.phases[targetElite].maxLevel" v-model="targetLevel" />
+                    </div>
                 </div>
-                <div>
-                    <OperatorLevel :maxLevel="character.phases[targetElite].maxLevel" v-model="targetLevel" />
-                </div>
-                <div v-if="character.skills.length > 0" >
+                <hr v-if="operator.skills.length > 0" />
+
+                <div class="row" v-if="operator.skills.length > 0">
                     <OperatorSkillLevel v-model="targetSkill" />
                 </div>
-                <div v-if="character.phases.length > 2">
-                    <div v-if="character.skills.length > 0">
+                <hr v-if="operator.phases.length > 2" />
+
+                <div class="row" v-if="operator.phases.length > 2">
+                    <label>Skill Masteries</label>
+                    <div class="col" v-if="operator.skills.length > 0">
                         <OperatorSkillMasteries v-model="targetMastery1" :skillNumber="1" />
                     </div>
-                    <div v-if="character.skills.length > 1">
+                    <div class="col" v-if="operator.skills.length > 1">
                         <OperatorSkillMasteries v-model="targetMastery2" :skillNumber="2" />
                     </div>
-                    <div v-if="character.skills.length > 2">
+                    <div class="col" v-if="operator.skills.length > 2">
                         <OperatorSkillMasteries v-model="targetMastery3" :skillNumber="3" />
                     </div>
                 </div>
-                
+                <hr v-if="selectedOperator.modules.length > 0" />
+
+                <div class="row" v-if="selectedOperator.modules.length > 0">
+                    <label>Modules</label>
+                    <div class="col">
+                        <OperatorModule v-if="hasXModule" v-model="targetModuleX" module-letter="X" />
+                    </div>
+                    <div class="col">
+                        <OperatorModule v-if="hasYModule" v-model="targetModuleY" module-letter="Y" />
+                    </div>
+                    <div class="col">
+                        <OperatorModule v-if="hasZModule" v-model="targetModuleZ" module-letter="Z" />
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-</template>
+</template>../types/operator
