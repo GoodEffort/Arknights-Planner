@@ -2,13 +2,17 @@
 import AddOperators from './AddOperators.vue';
 import SelectedOperators from './SelectedOperators.vue';
 import { usePlannerStore } from '../store/planner-store';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
+import { DotLoader } from "vue3-spinner";
 
 const { loadCharacters, loadModules, loadSavedRecords } = usePlannerStore();
+
+const isLoading = ref(true);
 
 onMounted(async () => {
     await Promise.all([loadCharacters(), loadModules()]);
     loadSavedRecords();
+    isLoading.value = false;
 });
 
 </script>
@@ -16,8 +20,11 @@ onMounted(async () => {
 <template>
     <div style="height: 100%;">
         <h1>Planner</h1>
-        <SelectedOperators />
-        <AddOperators />
+        <div v-if="!isLoading">
+            <SelectedOperators />
+            <AddOperators />
+        </div>
+        <DotLoader v-else />
     </div>
 </template>
 
