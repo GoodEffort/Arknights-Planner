@@ -11,7 +11,7 @@ const { getItemImageLink } = usePlannerStore();
 </script>
 
 <template>
-    <div class="col">
+    <div class="col-2">
         <div>
             <img :src="getItemImageLink(item)" :alt="item.name" class="img-thumbnail item-image" />
         </div>
