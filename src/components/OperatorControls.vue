@@ -1,19 +1,29 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import OperatorPromotion from './controls/OperatorPromotion.vue';
 import OperatorLevel from './controls/OperatorLevel.vue';
 import OperatorSkillMasteries from './controls/OperatorMasteries.vue';
-import type { Operator } from '../types/operator';
+import type { Operator, SaveRecord } from '../types/operator';
 import { SelectedOperator } from '../types/operator';
 import OperatorModule from './controls/OperatorModule.vue';
 import OperatorCosts from './OperatorCosts.vue';
 
-const { selectedOperator } = defineProps<{
+const props = defineProps<{
     selectedOperator: SelectedOperator
 }>();
 
+const { selectedOperator } = props;
 const { getOperatorImageLink } = usePlannerStore();
+
+watch(props.selectedOperator, ({ operator, plans }) => {
+    const saveString = `plans-${ operator.id }`;
+    const saveRecord: SaveRecord = {
+        operatorId: operator.id,
+        plans
+    };
+    localStorage.setItem(saveString, JSON.stringify(saveRecord));
+}, { deep: true });
 
 const operator = computed<Operator>(() => selectedOperator.operator);
 
