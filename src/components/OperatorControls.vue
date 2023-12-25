@@ -13,7 +13,7 @@ const { selectedOperator } = defineProps<{
     selectedOperator: SelectedOperator
 }>();
 
-const { getImageLink } = usePlannerStore();
+const { getOperatorImageLink } = usePlannerStore();
 
 const operator = computed<Operator>(() => selectedOperator.operator);
 
@@ -213,7 +213,7 @@ const targetModuleZ = computed({
 
 <template>
     <div class="col-2 center-vert">
-        <img :src="getImageLink(operator)" :alt="operator.name" class="img-thumbnail" />
+        <img :src="getOperatorImageLink(operator)" :alt="operator.name" class="img-thumbnail" />
     </div>
     <div class="col-10 left-border">
         <div class="row">

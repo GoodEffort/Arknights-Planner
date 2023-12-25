@@ -81,8 +81,12 @@ export const usePlannerStore = defineStore('planner', () => {
         return selectedOperator
     }
 
-    function getImageLink(character: Operator) {
+    function getOperatorImageLink(character: Operator) {
         return `https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/${character.id}.png`;
+    }
+
+    function getItemImageLink(item: Item) {
+        return `https://raw.githubusercontent.com/Aceship/Arknight-Images/main/items/${item.iconId}.png`;
     }
 
     function selectCharacter(character: Operator) {
@@ -110,7 +114,8 @@ export const usePlannerStore = defineStore('planner', () => {
         loadModules,
         loadItems,
         loadSavedRecords,
-        getImageLink,
+        getOperatorImageLink,
+        getItemImageLink,
         selectCharacter
     }
 });

@@ -15,7 +15,7 @@ const { columnClass, operator } = defineProps({
     }
 });
 
-const { getImageLink, selectCharacter } = usePlannerStore();
+const { getOperatorImageLink, selectCharacter } = usePlannerStore();
 const { selectedOperators } = storeToRefs(usePlannerStore());
 
 const isSelected = computed(() => selectedOperators.value.find(c => c.operator.id === operator.id) !== undefined);
@@ -24,7 +24,7 @@ const isSelected = computed(() => selectedOperators.value.find(c => c.operator.i
 <template>
     <div :class="`character-select ${ columnClass } ${ isSelected ? 'selected' : '' }`" @click="selectCharacter(operator)">
         <div>
-            <img :src="getImageLink(operator)" :alt="operator.name" class="img-thumbnail" />
+            <img :src="getOperatorImageLink(operator)" :alt="operator.name" class="img-thumbnail" />
         </div>
         <div class="name">
             {{ operator.name }}
