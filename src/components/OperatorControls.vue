@@ -1,23 +1,17 @@
 <script setup lang="ts">
-import { PropType, computed, watch } from 'vue';
+import { computed } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import OperatorPromotion from './controls/OperatorPromotion.vue';
 import OperatorLevel from './controls/OperatorLevel.vue';
-import OperatorSkillLevel from './controls/OperatorSkillLevel.vue';
 import OperatorSkillMasteries from './controls/OperatorMasteries.vue';
 import type { Operator } from '../types/operator';
 import { SelectedOperator } from '../types/operator';
 import OperatorModule from './controls/OperatorModule.vue';
-import { elite1Costs, elite2Costs, elite0Costs } from '../data/leveling-costs';
+import { levelingCostsArray } from '../data/leveling-costs';
 
-const levelingCostsArray = [elite0Costs, elite1Costs, elite2Costs];
-
-const { selectedOperator } = defineProps({
-    selectedOperator: {
-        type: Object as PropType<SelectedOperator>,
-        required: true
-    }
-});
+const { selectedOperator } = defineProps<{
+    selectedOperator: SelectedOperator
+}>();
 
 const { getImageLink } = usePlannerStore();
 
@@ -25,62 +19,160 @@ const operator = computed<Operator>(() => selectedOperator.operator);
 
 const currentElite = computed({
     get: () => selectedOperator.plans.currentElite,
-    set: value => selectedOperator.plans.currentElite = (+value) as 0 | 1 | 2
+    set: value => {
+        const elite: 0 | 1 | 2 = (+value) as 0 | 1 | 2
+
+        if (elite > targetElite.value) {
+            targetElite.value = elite;
+        }
+
+        selectedOperator.plans.currentElite = elite;
+    }
 });
 
 const targetElite = computed({
     get: () => selectedOperator.plans.targetElite,
-    set: value => selectedOperator.plans.targetElite = (+value) as 0 | 1 | 2
+    set: value => {
+        const elite: 0 | 1 | 2 = (+value) as 0 | 1 | 2
+
+        if (elite < currentElite.value) {
+            currentElite.value = elite;
+        }
+
+        selectedOperator.plans.targetElite = elite;
+    }
+});
+
+const targetLevelMax = computed(() => {
+    const phases = operator.value.phases;
+    const te = targetElite.value;
+    
+    const maxLevel = phases[te].maxLevel;
+    return maxLevel;
+});
+
+const currentLevelMax = computed(() => {
+    const phases = operator.value.phases;
+    const ce = currentElite.value;
+
+    const maxLevel = phases[ce].maxLevel;
+    return maxLevel;
 });
 
 const currentLevel = computed({
     get: () => selectedOperator.plans.currentLevel,
-    set: value => selectedOperator.plans.currentLevel = +value
+    set: value => {
+        let newLevel = +value;
+
+        if (newLevel < 1) newLevel = 1;
+        if (newLevel > currentLevelMax.value) newLevel = currentLevelMax.value;
+
+        if (newLevel > targetLevel.value && targetElite.value === currentElite.value) {
+            targetLevel.value = newLevel;
+        }
+
+        selectedOperator.plans.currentLevel = newLevel;
+    }
 });
 
 const targetLevel = computed({
     get: () => selectedOperator.plans.targetLevel,
-    set: value => selectedOperator.plans.targetLevel = +value
+    set: value => {
+        let newLevel = +value;
+
+        if (newLevel < 1) newLevel = 1;
+        if (newLevel > targetLevelMax.value) newLevel = targetLevelMax.value;
+
+        if (newLevel < currentLevel.value && targetElite.value === currentElite.value) {
+            currentLevel.value = newLevel;
+        }
+
+        selectedOperator.plans.targetLevel = newLevel;
+    }
 });
 
 const currentSkill = computed({
     get: () => selectedOperator.plans.currentSkillLevels,
-    set: value => selectedOperator.plans.currentSkillLevels = +value
+    set: value => {
+        let newSkill = +value;
+        const maxSkill = currentElite.value === 0 ? 4 : 7;
+
+        if (newSkill < 1) newSkill = 1;
+        if (newSkill > maxSkill) newSkill = maxSkill;
+
+        if (newSkill > targetSkill.value) {
+            targetSkill.value = newSkill;
+        }
+
+        selectedOperator.plans.currentSkillLevels = newSkill;
+    }
 });
 
 const targetSkill = computed({
     get: () => selectedOperator.plans.targetSkillLevels,
-    set: value => selectedOperator.plans.targetSkillLevels = +value
+    set: value => {
+        let newSkill = +value;
+        const maxSkill = targetElite.value === 0 ? 4 : 7;
+
+        if (newSkill < currentSkill.value) newSkill = currentSkill.value;
+        if (newSkill > maxSkill) newSkill = maxSkill;
+
+        selectedOperator.plans.targetSkillLevels = newSkill;
+    }
 });
 
-const currentMastery1 = computed({
-    get: () => selectedOperator.plans.currentSkillMasteries.skill1,
-    set: value => selectedOperator.plans.currentSkillMasteries.skill1 = +value
-});
+const targetMasterySetFn = (skill: 1 | 2 | 3) => (value: number) => {
+    let newMastery = +value;
 
-const currentMastery2 = computed({
-    get: () => selectedOperator.plans.currentSkillMasteries.skill2,
-    set: value => selectedOperator.plans.currentSkillMasteries.skill2 = +value
-});
+    if (newMastery < 0) newMastery = 0;
+    if (newMastery > 3) newMastery = 3;
 
-const currentMastery3 = computed({
-    get: () => selectedOperator.plans.currentSkillMasteries.skill3,
-    set: value => selectedOperator.plans.currentSkillMasteries.skill3 = +value
-});
+    selectedOperator.plans.targetSkillMasteries[`skill${skill}`] = newMastery;
+};
 
 const targetMastery1 = computed({
     get: () => selectedOperator.plans.targetSkillMasteries.skill1,
-    set: value => selectedOperator.plans.targetSkillMasteries.skill1 = +value
+    set: targetMasterySetFn(1)
 });
 
 const targetMastery2 = computed({
     get: () => selectedOperator.plans.targetSkillMasteries.skill2,
-    set: value => selectedOperator.plans.targetSkillMasteries.skill2 = +value
+    set: targetMasterySetFn(2)
 });
 
 const targetMastery3 = computed({
     get: () => selectedOperator.plans.targetSkillMasteries.skill3,
-    set: value => selectedOperator.plans.targetSkillMasteries.skill3 = +value
+    set: targetMasterySetFn(3)
+});
+
+const currentMasterySetFn = (skill: 1 | 2 | 3) => (value: number) => {
+    let newMastery = +value;
+
+    if (newMastery < 0) newMastery = 0;
+    if (newMastery > 3) newMastery = 3;
+
+    const target = skill === 1 ? targetMastery1 : skill === 2 ? targetMastery2 : targetMastery3;
+
+    if (newMastery > target.value) {
+        target.value = newMastery;
+    }
+
+    selectedOperator.plans.currentSkillMasteries[`skill${skill}`] = newMastery;
+};
+
+const currentMastery1 = computed({
+    get: () => selectedOperator.plans.currentSkillMasteries.skill1,
+    set: currentMasterySetFn(1)
+});
+
+const currentMastery2 = computed({
+    get: () => selectedOperator.plans.currentSkillMasteries.skill2,
+    set: currentMasterySetFn(2)
+});
+
+const currentMastery3 = computed({
+    get: () => selectedOperator.plans.currentSkillMasteries.skill3,
+    set: currentMasterySetFn(3)
 });
 
 const hasXModule = computed(() => selectedOperator.modules.find(m => m.typeName2 === 'X') !== undefined);
@@ -117,57 +209,26 @@ const targetModuleZ = computed({
     set: value => selectedOperator.plans.targetModules.z = +value
 });
 
-watch(currentElite, value => {
-    if (value > selectedOperator.plans.targetElite)
-        targetElite.value = (+value) as 0 | 1 | 2;
-});
-
-watch(currentLevel, value => {
-    if (value > selectedOperator.plans.targetLevel)
-        targetLevel.value = +value;
-});
-
-watch(currentSkill, value => {
-    if (value > selectedOperator.plans.targetSkillLevels)
-        targetSkill.value = +value;
-});
-
-watch(currentMastery1, value => {
-    if (value > selectedOperator.plans.targetSkillMasteries.skill1)
-        targetMastery1.value = +value;
-});
-
-watch(currentMastery2, value => {
-    if (value > selectedOperator.plans.targetSkillMasteries.skill2)
-        targetMastery2.value = +value;
-});
-
-watch(currentMastery3, value => {
-    if (value > selectedOperator.plans.targetSkillMasteries.skill3)
-        targetMastery3.value = +value;
-});
-
 const levelingCosts = computed(() => {
-    const currentLevel = selectedOperator.plans.currentLevel;
-    const targetLevel = selectedOperator.plans.targetLevel;
+    let currentLevel = selectedOperator.plans.currentLevel;
+    const targetLevel = selectedOperator.plans.targetLevel - 1;
     let currentEliteIndex: number = selectedOperator.plans.currentElite;
     const targetEliteIndex: number = selectedOperator.plans.targetElite;
 
     let lmd = 0;
     let exp = 0;
 
-    let currentLevelIndex = levelingCostsArray[currentEliteIndex].findIndex(c => c.level === currentLevel);
-
     for (; currentEliteIndex <= targetEliteIndex; currentEliteIndex++) {
-        const { maxLevel } = operator.value.phases[currentEliteIndex];
-        const maxLevelIndex = levelingCostsArray[currentEliteIndex].findIndex(c => c.level === (currentEliteIndex < targetEliteIndex ? maxLevel: targetLevel));
+        const endLevel = currentEliteIndex < targetEliteIndex ? 
+            operator.value.phases[currentEliteIndex].maxLevel - 1 :
+            targetLevel;
 
-        for (; currentLevelIndex <= maxLevelIndex; currentLevelIndex++) {
-            lmd += levelingCostsArray[currentEliteIndex][currentLevelIndex].lmd;
-            exp += levelingCostsArray[currentEliteIndex][currentLevelIndex].exp;
+        for (; currentLevel <= endLevel; currentLevel++) {
+            lmd += levelingCostsArray[currentEliteIndex][currentLevel].lmd;
+            exp += levelingCostsArray[currentEliteIndex][currentLevel].exp;
         }
         
-        currentLevelIndex = 0;
+        currentLevel = 0;
     }
 
     return { lmd, exp };
@@ -193,13 +254,16 @@ const levelingCosts = computed(() => {
                         <OperatorPromotion :phases="operator.phases" v-model="currentElite" />
                     </div>
                     <div class="col">
-                        <OperatorLevel :maxLevel="operator.phases[currentElite].maxLevel" v-model="currentLevel" />
+                        <OperatorLevel :maxLevel="currentLevelMax" v-model="currentLevel" />
                     </div>
                 </div>
                 <hr v-if="operator.skills.length > 0" />
 
                 <div class="row" v-if="operator.skills.length > 0">
-                    <OperatorSkillLevel v-model="currentSkill" />
+                    <div class="input-group">
+                        <span class="input-group-text">Skills Level</span>
+                        <input type="number" class="form-control" v-model="currentSkill" min="1" :max="currentElite === 0 ? 4 : 7" />
+                    </div>
                 </div>
                 <hr v-if="operator.phases.length > 2" />
 
@@ -240,13 +304,16 @@ const levelingCosts = computed(() => {
                         <OperatorPromotion :phases="operator.phases" v-model="targetElite" />
                     </div>
                     <div class="col">
-                        <OperatorLevel :maxLevel="operator.phases[targetElite].maxLevel" v-model="targetLevel" />
+                        <OperatorLevel :maxLevel="targetLevelMax" v-model="targetLevel" />
                     </div>
                 </div>
                 <hr v-if="operator.skills.length > 0" />
 
                 <div class="row" v-if="operator.skills.length > 0">
-                    <OperatorSkillLevel v-model="targetSkill" />
+                    <div class="input-group">
+                        <span class="input-group-text">Skills Level</span>
+                        <input type="number" class="form-control" v-model="targetSkill" :min="currentSkill" :max="targetElite === 0 ? 4 : 7" />
+                    </div>
                 </div>
                 <hr v-if="operator.phases.length > 2" />
 

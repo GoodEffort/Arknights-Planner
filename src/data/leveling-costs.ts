@@ -1,3 +1,5 @@
+type LevelingCosts = LevelingCost[][];
+
 type LevelingCost = {
     level: number;
     exp: number;
@@ -233,4 +235,6 @@ const elite2Costs: LevelingCost[] = [
     { level: 90, exp: 31143, lmd: 37745 }
 ];
 
-export { elite0Costs, elite1Costs, elite2Costs };
+const levelingCostsArray: LevelingCosts = [elite0Costs, elite1Costs, elite2Costs];
+
+export { levelingCostsArray };
