@@ -7,7 +7,7 @@ import OperatorSkillMasteries from './controls/OperatorMasteries.vue';
 import type { Operator } from '../types/operator';
 import { SelectedOperator } from '../types/operator';
 import OperatorModule from './controls/OperatorModule.vue';
-import { levelingCostsArray } from '../data/leveling-costs';
+import OperatorCosts from './OperatorCosts.vue';
 
 const { selectedOperator } = defineProps<{
     selectedOperator: SelectedOperator
@@ -209,31 +209,6 @@ const targetModuleZ = computed({
     set: value => selectedOperator.plans.targetModules.z = +value
 });
 
-const levelingCosts = computed(() => {
-    let currentLevel = selectedOperator.plans.currentLevel;
-    const targetLevel = selectedOperator.plans.targetLevel - 1;
-    let currentEliteIndex: number = selectedOperator.plans.currentElite;
-    const targetEliteIndex: number = selectedOperator.plans.targetElite;
-
-    let lmd = 0;
-    let exp = 0;
-
-    for (; currentEliteIndex <= targetEliteIndex; currentEliteIndex++) {
-        const endLevel = currentEliteIndex < targetEliteIndex ? 
-            operator.value.phases[currentEliteIndex].maxLevel - 1 :
-            targetLevel;
-
-        for (; currentLevel <= endLevel; currentLevel++) {
-            lmd += levelingCostsArray[currentEliteIndex][currentLevel].lmd;
-            exp += levelingCostsArray[currentEliteIndex][currentLevel].exp;
-        }
-        
-        currentLevel = 0;
-    }
-
-    return { lmd, exp };
-});
-
 </script>
 
 <template>
@@ -349,10 +324,30 @@ const levelingCosts = computed(() => {
             </div>
         </div>
         <div class="row">
-            <div class="col">
-                LMD {{ levelingCosts.lmd }}
-                EXP {{ levelingCosts.exp }}
-            </div>
+            <OperatorCosts
+                :target-elite="targetElite"
+                :current-elite="currentElite"
+                :target-level="targetLevel"
+                :current-level="currentLevel"
+                :current-skill="currentSkill"
+                :target-skill="targetSkill"
+                :current-mastery1="currentMastery1"
+                :current-mastery2="currentMastery2"
+                :current-mastery3="currentMastery3"
+                :target-mastery1="targetMastery1"
+                :target-mastery2="targetMastery2"
+                :target-mastery3="targetMastery3"
+                :current-module-x="currentModuleX"
+                :current-module-y="currentModuleY"
+                :current-module-z="currentModuleZ"
+                :target-module-x="targetModuleX"
+                :target-module-y="targetModuleY"
+                :target-module-z="targetModuleZ"
+                :elite-level-up-costs="operator.phases"
+                :skill-level-up-costs="operator.allSkillLvlup"
+                :skill-mastery-costs="operator.skills"
+                :modules="selectedOperator.modules"
+            />
         </div>
     </div>
 </template>
