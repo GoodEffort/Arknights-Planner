@@ -1,9 +1,9 @@
 import { Operator, Character_Table } from "../types/operator"
 
-const aceshipLink = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/en_US/gamedata/excel/character_table.json";
+const jsonLink = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/en_US/gamedata/excel/character_table.json";
 
 const getChardata = async () => {
-    const response = await fetch(aceshipLink);
+    const response = await fetch(jsonLink);
     const data: Character_Table = await response.json();
 
     const chardata: Operator[] = Object.entries(data)
