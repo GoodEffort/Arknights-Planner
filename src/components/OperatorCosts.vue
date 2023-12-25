@@ -4,10 +4,18 @@ import { LevelUpCost, Module, Phase, Skill, UnlockCondition } from '../types/ope
 import { levelingCostsArray } from '../data/leveling-costs';
 import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
-import type { Item } from '../types/item';
+import type { ExpItem, Item } from '../types/item';
 import ItemCell from './ItemCell.vue';
 
 const { items, expItems } = storeToRefs(usePlannerStore());
+
+let battleRecords: ExpItem[] = [];
+
+for (let [_, expItem] of Object.entries(expItems.value)) {
+    battleRecords.push(expItem);
+}
+
+battleRecords = battleRecords.sort((a, b) => b.gainExp - a.gainExp);
 
 const props = defineProps<{
     targetElite: 0 | 1 | 2;
@@ -60,8 +68,30 @@ const levelingCosts = computed(() => {
         currentLevelIndex = 0;
     }
 
-    return { lmd, exp };
+    const neededItems: {
+        item: Item;
+        count: number;
+    }[] = [];
+
+    if (lmd > 0)
+        neededItems.push({ item: items.value["4001"], count: lmd });
+
+    for (const { gainExp, id } of battleRecords) {
+        const recordsNeeded = Math.floor(exp / gainExp);
+        exp = exp % gainExp;
+
+        if (recordsNeeded > 0)
+            neededItems.push({ item: items.value[id], count: recordsNeeded });
+    }
+
+    if (exp > 0) {
+        neededItems.push({ item: items.value["2001"], count: 1 });
+    }
+
+    return neededItems;
 });
+
+// const promotionCosts
 
 const skillCosts = computed(() => {
     const targetSkillIndex = props.targetSkill - 1;
@@ -88,18 +118,124 @@ const skillCosts = computed(() => {
         }
     }
 
+    return neededItems;
+});
+
+const getMasteryCost = (targetMasteryIndex: number, currentMastery: number, skillMasteryCosts: Skill) => {
+    const neededItems: {
+        item: Item;
+        count: number;
+    }[] = [];
+
+    for (
+        let currentMasteryIndex = currentMastery;
+        currentMasteryIndex < targetMasteryIndex + 1;
+        currentMasteryIndex++
+    ) {
+        const { levelUpCost } = skillMasteryCosts.levelUpCostCond[currentMasteryIndex];
+
+        for (const { count, id } of levelUpCost ?? []) {
+            const item: Item = items.value[id];
+            const existingItemCount = neededItems.find(i => i.item === item);
+            if (existingItemCount) {
+                existingItemCount.count += count;
+            } else {
+                neededItems.push({ item, count });
+            }
+        }
+    }
+
+    return neededItems.sort((a, b) => a.item.sortId - b.item.sortId);
+}
+
+const mastery1Costs = computed(() => {
+    const skillMasteryCosts = props.skillMasteryCosts[0];
+
+    if (!skillMasteryCosts) {
+        return [];
+    }
+    else {
+        return getMasteryCost(props.targetMastery1 - 1, props.currentMastery1, skillMasteryCosts);
+    }
+});
+
+const mastery2Costs = computed(() => {
+    const skillMasteryCosts = props.skillMasteryCosts[1];
+
+    if (!skillMasteryCosts) {
+        return [];
+    }
+    else {
+        return getMasteryCost(props.targetMastery2 - 1, props.currentMastery2, skillMasteryCosts);
+    }
+});
+
+const mastery3Costs = computed(() => {
+    const skillMasteryCosts = props.skillMasteryCosts[2];
+
+    if (!skillMasteryCosts) {
+        return [];
+    }
+    else {
+        return getMasteryCost(props.targetMastery3 - 1, props.currentMastery3, skillMasteryCosts);
+    }
+});
+
+// const moduleXCosts
+
+// const moduleYCosts
+
+// const moduleZCosts
+
+const totalCosts = computed(() => {
+
+    const neededItems: {
+        item: Item;
+        count: number;
+    }[] = skillCosts.value.slice();
+
+    for (const { item, count } of mastery1Costs.value) {
+        const existingItemCount = neededItems.find(i => i.item === item);
+        if (existingItemCount) {
+            existingItemCount.count += count;
+        } else {
+            neededItems.push({ item, count });
+        }
+    }
+
+    for (const { item, count } of mastery2Costs.value) {
+        const existingItemCount = neededItems.find(i => i.item === item);
+        if (existingItemCount) {
+            existingItemCount.count += count;
+        } else {
+            neededItems.push({ item, count });
+        }
+    }
+
+    for (const { item, count } of mastery3Costs.value) {
+        const existingItemCount = neededItems.find(i => i.item === item);
+        if (existingItemCount) {
+            existingItemCount.count += count;
+        } else {
+            neededItems.push({ item, count });
+        }
+    }
+
+    for (const { item, count } of levelingCosts.value) {
+        const existingItemCount = neededItems.find(i => i.item === item);
+        if (existingItemCount) {
+            existingItemCount.count += count;
+        } else {
+            neededItems.push({ item, count });
+        }
+    }
+
     return neededItems.sort((a, b) => a.item.sortId - b.item.sortId);
 });
 </script>
 
 <template>
     <div class="row">
-        <div class="col">
-            LMD {{ levelingCosts.lmd }}
-            EXP {{ levelingCosts.exp }}
-        </div>
-    </div>
-    <div class="row">
-        <ItemCell v-for="{ item, count } in skillCosts" :item="item" :count="count" />
+        <ItemCell v-for="{ item, count } in totalCosts" :item="item" :count="count" />
     </div>
 </template>
