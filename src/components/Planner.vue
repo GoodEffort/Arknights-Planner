@@ -5,12 +5,12 @@ import { usePlannerStore } from '../store/planner-store';
 import { onMounted, ref } from 'vue';
 import { DotLoader } from "vue3-spinner";
 
-const { loadCharacters, loadModules, loadSavedRecords } = usePlannerStore();
+const { loadCharacters, loadModules, loadSavedRecords, loadItems } = usePlannerStore();
 
 const isLoading = ref(true);
 
 onMounted(async () => {
-    await Promise.all([loadCharacters(), loadModules()]);
+    await Promise.all([loadCharacters(), loadModules(), loadItems()]);
     loadSavedRecords();
     isLoading.value = false;
 });
