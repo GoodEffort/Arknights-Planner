@@ -4,12 +4,16 @@ import type { Operator, CharEquip, EquipDict, Module } from '../types/operator';
 import { SelectedOperator, SaveRecord } from '../types/operator';
 import getChardata from '../data/chardata';
 import getModuledata from '../data/moduledata';
+import getItemdata from '../data/itemdata';
+import { ExpItem, Item } from '../types/item';
 
 export const usePlannerStore = defineStore('planner', () => {
     const operators = ref<Operator[]>([]);
     const modules = ref<EquipDict>({});
     const charactersToModules = ref<CharEquip>({});
     const selectedOperators = ref<SelectedOperator[]>([]);
+    const items = ref<{ [key: string]: Item }>({});
+    const expItems = ref<{ [key: string]: ExpItem }>({});
 
     async function loadCharacters() {
         const data = await getChardata();
@@ -20,6 +24,12 @@ export const usePlannerStore = defineStore('planner', () => {
         const { ModuleDict, CharacterModules } = await getModuledata();
         modules.value = ModuleDict;
         charactersToModules.value = CharacterModules;
+    }
+
+    async function loadItems() {
+        const data = await getItemdata();
+        items.value = data.items;
+        expItems.value = data.expItems;
     }
 
     function getModulesForCharacter(operatorId: string): Module[] {
@@ -93,9 +103,12 @@ export const usePlannerStore = defineStore('planner', () => {
     return {
         operators,
         modules,
+        items,
+        expItems,
         selectedOperators,
         loadCharacters,
         loadModules,
+        loadItems,
         loadSavedRecords,
         getImageLink,
         selectCharacter
