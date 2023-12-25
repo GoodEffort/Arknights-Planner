@@ -2,6 +2,12 @@
 import { computed } from 'vue';
 import { LevelUpCost, Module, Phase, Skill, UnlockCondition } from '../types/operator';
 import { levelingCostsArray } from '../data/leveling-costs';
+import { usePlannerStore } from '../store/planner-store';
+import { storeToRefs } from 'pinia';
+import type { Item } from '../types/item';
+import ItemCell from './ItemCell.vue';
+
+const { items, expItems } = storeToRefs(usePlannerStore());
 
 const props = defineProps<{
     targetElite: 0 | 1 | 2;
@@ -31,10 +37,6 @@ const props = defineProps<{
     modules: Module[];
 }>();
 
-const {
-    eliteLevelUpCosts
-} = props;
-
 
 const levelingCosts = computed(() => {
     let currentLevelIndex = props.currentLevel;
@@ -47,7 +49,7 @@ const levelingCosts = computed(() => {
 
     for (; currentEliteIndex <= targetEliteIndex; currentEliteIndex++) {
         const endLevel = currentEliteIndex < targetEliteIndex ? 
-            eliteLevelUpCosts[currentEliteIndex].maxLevel - 1 :
+            props.eliteLevelUpCosts[currentEliteIndex].maxLevel - 1 :
             targetLevelIndex;
 
         for (; currentLevelIndex <= endLevel; currentLevelIndex++) {
@@ -61,13 +63,43 @@ const levelingCosts = computed(() => {
     return { lmd, exp };
 });
 
+const skillCosts = computed(() => {
+    const targetSkillIndex = props.targetSkill - 1;
+    const neededItems: {
+        item: Item;
+        count: number;
+    }[] = [];
 
+    for (
+        let currentSkillIndex = props.currentSkill - 1;
+        currentSkillIndex < targetSkillIndex;
+        currentSkillIndex++
+    ) {
+        const { lvlUpCost } = props.skillLevelUpCosts[currentSkillIndex];
 
+        for (const { count, id } of lvlUpCost ?? []) {
+            const item: Item = items.value[id];
+            const existingItemCount = neededItems.find(i => i.item === item);
+            if (existingItemCount) {
+                existingItemCount.count += count;
+            } else {
+                neededItems.push({ item, count });
+            }
+        }
+    }
+
+    return neededItems.sort((a, b) => a.item.sortId - b.item.sortId);
+});
 </script>
 
 <template>
-    <div class="col">
-        LMD {{ levelingCosts.lmd }}
-        EXP {{ levelingCosts.exp }}
+    <div class="row">
+        <div class="col">
+            LMD {{ levelingCosts.lmd }}
+            EXP {{ levelingCosts.exp }}
+        </div>
+    </div>
+    <div class="row">
+        <ItemCell v-for="{ item, count } in skillCosts" :item="item" :count="count" />
     </div>
 </template>
