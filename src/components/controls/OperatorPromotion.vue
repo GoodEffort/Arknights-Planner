@@ -6,10 +6,10 @@ defineEmits<{
     (e: 'update:model-value', value: number): void;
 }>();
 
-const { modelValue, phases } = defineProps({
+const { modelValue, phases } = defineProps<{
     modelValue: Number,
     phases: Array<Phase>
-});
+}>();
 
 const disabled = ref(phases ? phases.length == 1 : false);
 const showElite1 = ref(phases ? phases.length > 1 : false);
