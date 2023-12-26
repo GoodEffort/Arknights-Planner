@@ -91,7 +91,32 @@ const levelingCosts = computed(() => {
     return neededItems;
 });
 
-// const promotionCosts
+const promotionCosts = computed(() => {
+    const neededItems: {
+        item: Item;
+        count: number;
+    }[] = [];
+
+    for (let currentEliteIndex = props.currentElite; currentEliteIndex <= props.targetElite; currentEliteIndex++) {
+        const { evolveCost } = props.eliteLevelUpCosts[currentEliteIndex];
+
+        if (!evolveCost) {
+            continue;
+        }
+
+        for (const { count, id } of evolveCost) {
+            const item: Item = items.value[id];
+            const existingItemCount = neededItems.find(i => i.item === item);
+            if (existingItemCount) {
+                existingItemCount.count += count;
+            } else {
+                neededItems.push({ item, count });
+            }
+        }
+    }
+
+    return neededItems;
+});
 
 const skillCosts = computed(() => {
     const targetSkillIndex = props.targetSkill - 1;
@@ -181,11 +206,66 @@ const mastery3Costs = computed(() => {
     }
 });
 
-// const moduleXCosts
+const getModuleCosts = (currentModule: number, targetModule: number, module: Module) => {
+    const neededItems: {
+        item: Item;
+        count: number;
+    }[] = [];
 
-// const moduleYCosts
+    for (
+        let currentModuleIndex = currentModule + 1;
+        currentModuleIndex <= targetModule;
+        currentModuleIndex++
+    ) {
+        const strIndex: '1' | '2' | '3' = currentModuleIndex.toString() as '1' | '2' | '3';
+        const itemCosts = module.itemCost[strIndex];
 
-// const moduleZCosts
+        for (const { count, id } of itemCosts) {
+            const item: Item = items.value[id];
+            const existingItemCount = neededItems.find(i => i.item === item);
+            if (existingItemCount) {
+                existingItemCount.count += count;
+            } else {
+                neededItems.push({ item, count });
+            }
+        }
+    }
+
+    return neededItems;
+}
+
+const moduleXCosts = computed(() => {
+    const module = props.modules.find(m => m.typeName2 === 'X')
+
+    if (!module) {
+        return [];
+    }
+    else {
+        return getModuleCosts(props.currentModuleX, props.targetModuleX, module);
+    }
+});
+
+const moduleYCosts = computed(() => {
+    const module = props.modules.find(m => m.typeName2 === 'Y')
+
+    if (!module) {
+        return [];
+    }
+    else {
+        return getModuleCosts(props.currentModuleY, props.targetModuleY, module);
+    }
+});
+
+const moduleZCosts = computed(() => {
+    const module = props.modules.find(m => m.typeName2 === 'Z')
+
+    if (!module) {
+        return [];
+    }
+    else {
+        return getModuleCosts(props.currentModuleZ, props.targetModuleZ, module);
+    }
+});
 
 const totalCosts = computed(() => {
 
@@ -230,12 +310,53 @@ const totalCosts = computed(() => {
         }
     }
 
+    for (const { item, count } of promotionCosts.value) {
+        const existingItemCount = neededItems.find(i => i.item === item);
+        if (existingItemCount) {
+            existingItemCount.count += count;
+        } else {
+            neededItems.push({ item, count });
+        }
+    }
+
+    for (const { item, count } of moduleXCosts.value) {
+        const existingItemCount = neededItems.find(i => i.item === item);
+        if (existingItemCount) {
+            existingItemCount.count += count;
+        } else {
+            neededItems.push({ item, count });
+        }
+    }
+
+    for (const { item, count } of moduleYCosts.value) {
+        const existingItemCount = neededItems.find(i => i.item === item);
+        if (existingItemCount) {
+            existingItemCount.count += count;
+        } else {
+            neededItems.push({ item, count });
+        }
+    }
+
+    for (const { item, count } of moduleZCosts.value) {
+        const existingItemCount = neededItems.find(i => i.item === item);
+        if (existingItemCount) {
+            existingItemCount.count += count;
+        } else {
+            neededItems.push({ item, count });
+        }
+    }
+
     return neededItems.sort((a, b) => a.item.sortId - b.item.sortId);
 });
 </script>
 
 <template>
-    <div class="row">
+    <div class="row" v-if="totalCosts.length > 0">
         <ItemCell v-for="{ item, count } in totalCosts" :item="item" :count="count" />
+    </div>
+    <div class="row" v-else>
+        <div class="col-12">
+            <p class="text-center">No Materials Required</p>
+        </div>
     </div>
 </template>
