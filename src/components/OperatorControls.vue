@@ -5,19 +5,21 @@ import OperatorPromotion from './controls/OperatorPromotion.vue';
 import OperatorLevel from './controls/OperatorLevel.vue';
 import OperatorSkillMasteries from './controls/OperatorMasteries.vue';
 import type { Operator, SaveRecord } from '../types/operator';
-import { SelectedOperator } from '../types/operator';
 import OperatorModule from './controls/OperatorModule.vue';
 import OperatorCosts from './OperatorCosts.vue';
 import { Collapse } from 'vue-collapsed';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
-    selectedOperator: SelectedOperator
+    operatorId: string;
 }>();
 
-const { selectedOperator } = props;
 const { getOperatorImageLink } = usePlannerStore();
+const { selectedOperators } = storeToRefs(usePlannerStore());
 
-watch(props.selectedOperator, ({ operator, plans }) => {
+const selectedOperator = computed(() => selectedOperators.value.find(o => o.operator.id === props.operatorId)!);
+
+watch(selectedOperator, ({ operator, plans }) => {
     const saveString = `plans-${ operator.id }`;
     const saveRecord: SaveRecord = {
         operatorId: operator.id,
@@ -28,10 +30,10 @@ watch(props.selectedOperator, ({ operator, plans }) => {
 
 const collapsed = ref(false);
 
-const operator = computed<Operator>(() => selectedOperator.operator);
+const operator = computed<Operator>(() => selectedOperator.value.operator);
 
 const currentElite = computed({
-    get: () => selectedOperator.plans.currentElite,
+    get: () => selectedOperator.value.plans.currentElite,
     set: value => {
         const elite: 0 | 1 | 2 = (+value) as 0 | 1 | 2
 
@@ -39,12 +41,12 @@ const currentElite = computed({
             targetElite.value = elite;
         }
 
-        selectedOperator.plans.currentElite = elite;
+        selectedOperator.value.plans.currentElite = elite;
     }
 });
 
 const targetElite = computed({
-    get: () => selectedOperator.plans.targetElite,
+    get: () => selectedOperator.value.plans.targetElite,
     set: value => {
         const elite: 0 | 1 | 2 = (+value) as 0 | 1 | 2
 
@@ -52,7 +54,7 @@ const targetElite = computed({
             currentElite.value = elite;
         }
 
-        selectedOperator.plans.targetElite = elite;
+        selectedOperator.value.plans.targetElite = elite;
     }
 });
 
@@ -73,7 +75,7 @@ const currentLevelMax = computed(() => {
 });
 
 const currentLevel = computed({
-    get: () => selectedOperator.plans.currentLevel,
+    get: () => selectedOperator.value.plans.currentLevel,
     set: value => {
         let newLevel = +value;
 
@@ -84,12 +86,12 @@ const currentLevel = computed({
             targetLevel.value = newLevel;
         }
 
-        selectedOperator.plans.currentLevel = newLevel;
+        selectedOperator.value.plans.currentLevel = newLevel;
     }
 });
 
 const targetLevel = computed({
-    get: () => selectedOperator.plans.targetLevel,
+    get: () => selectedOperator.value.plans.targetLevel,
     set: value => {
         let newLevel = +value;
 
@@ -100,12 +102,12 @@ const targetLevel = computed({
             currentLevel.value = newLevel;
         }
 
-        selectedOperator.plans.targetLevel = newLevel;
+        selectedOperator.value.plans.targetLevel = newLevel;
     }
 });
 
 const currentSkill = computed({
-    get: () => selectedOperator.plans.currentSkillLevels,
+    get: () => selectedOperator.value.plans.currentSkillLevels,
     set: value => {
         let newSkill = +value;
         const maxSkill = currentElite.value === 0 ? 4 : 7;
@@ -117,12 +119,12 @@ const currentSkill = computed({
             targetSkill.value = newSkill;
         }
 
-        selectedOperator.plans.currentSkillLevels = newSkill;
+        selectedOperator.value.plans.currentSkillLevels = newSkill;
     }
 });
 
 const targetSkill = computed({
-    get: () => selectedOperator.plans.targetSkillLevels,
+    get: () => selectedOperator.value.plans.targetSkillLevels,
     set: value => {
         let newSkill = +value;
         const maxSkill = targetElite.value === 0 ? 4 : 7;
@@ -130,7 +132,7 @@ const targetSkill = computed({
         if (newSkill < currentSkill.value) newSkill = currentSkill.value;
         if (newSkill > maxSkill) newSkill = maxSkill;
 
-        selectedOperator.plans.targetSkillLevels = newSkill;
+        selectedOperator.value.plans.targetSkillLevels = newSkill;
     }
 });
 
@@ -140,21 +142,21 @@ const targetMasterySetFn = (skill: 1 | 2 | 3) => (value: number) => {
     if (newMastery < 0) newMastery = 0;
     if (newMastery > 3) newMastery = 3;
 
-    selectedOperator.plans.targetSkillMasteries[`skill${skill}`] = newMastery;
+    selectedOperator.value.plans.targetSkillMasteries[`skill${skill}`] = newMastery;
 };
 
 const targetMastery1 = computed({
-    get: () => selectedOperator.plans.targetSkillMasteries.skill1,
+    get: () => selectedOperator.value.plans.targetSkillMasteries.skill1,
     set: targetMasterySetFn(1)
 });
 
 const targetMastery2 = computed({
-    get: () => selectedOperator.plans.targetSkillMasteries.skill2,
+    get: () => selectedOperator.value.plans.targetSkillMasteries.skill2,
     set: targetMasterySetFn(2)
 });
 
 const targetMastery3 = computed({
-    get: () => selectedOperator.plans.targetSkillMasteries.skill3,
+    get: () => selectedOperator.value.plans.targetSkillMasteries.skill3,
     set: targetMasterySetFn(3)
 });
 
@@ -170,56 +172,56 @@ const currentMasterySetFn = (skill: 1 | 2 | 3) => (value: number) => {
         target.value = newMastery;
     }
 
-    selectedOperator.plans.currentSkillMasteries[`skill${skill}`] = newMastery;
+    selectedOperator.value.plans.currentSkillMasteries[`skill${skill}`] = newMastery;
 };
 
 const currentMastery1 = computed({
-    get: () => selectedOperator.plans.currentSkillMasteries.skill1,
+    get: () => selectedOperator.value.plans.currentSkillMasteries.skill1,
     set: currentMasterySetFn(1)
 });
 
 const currentMastery2 = computed({
-    get: () => selectedOperator.plans.currentSkillMasteries.skill2,
+    get: () => selectedOperator.value.plans.currentSkillMasteries.skill2,
     set: currentMasterySetFn(2)
 });
 
 const currentMastery3 = computed({
-    get: () => selectedOperator.plans.currentSkillMasteries.skill3,
+    get: () => selectedOperator.value.plans.currentSkillMasteries.skill3,
     set: currentMasterySetFn(3)
 });
 
-const hasXModule = computed(() => selectedOperator.modules.find(m => m.typeName2 === 'X') !== undefined);
-const hasYModule = computed(() => selectedOperator.modules.find(m => m.typeName2 === 'Y') !== undefined);
-const hasZModule = computed(() => selectedOperator.modules.find(m => m.typeName2 === 'Z') !== undefined);
+const hasXModule = computed(() => selectedOperator.value.modules.find(m => m.typeName2 === 'X') !== undefined);
+const hasYModule = computed(() => selectedOperator.value.modules.find(m => m.typeName2 === 'Y') !== undefined);
+const hasZModule = computed(() => selectedOperator.value.modules.find(m => m.typeName2 === 'Z') !== undefined);
 
 const currentModuleX = computed({
-    get: () => selectedOperator.plans.currentModules.x,
-    set: value => selectedOperator.plans.currentModules.x = +value
+    get: () => selectedOperator.value.plans.currentModules.x,
+    set: value => selectedOperator.value.plans.currentModules.x = +value
 });
 
 const currentModuleY = computed({
-    get: () => selectedOperator.plans.currentModules.y,
-    set: value => selectedOperator.plans.currentModules.y = +value
+    get: () => selectedOperator.value.plans.currentModules.y,
+    set: value => selectedOperator.value.plans.currentModules.y = +value
 });
 
 const currentModuleZ = computed({
-    get: () => selectedOperator.plans.currentModules.z,
-    set: value => selectedOperator.plans.currentModules.z = +value
+    get: () => selectedOperator.value.plans.currentModules.z,
+    set: value => selectedOperator.value.plans.currentModules.z = +value
 });
 
 const targetModuleX = computed({
-    get: () => selectedOperator.plans.targetModules.x,
-    set: value => selectedOperator.plans.targetModules.x = +value
+    get: () => selectedOperator.value.plans.targetModules.x,
+    set: value => selectedOperator.value.plans.targetModules.x = +value
 });
 
 const targetModuleY = computed({
-    get: () => selectedOperator.plans.targetModules.y,
-    set: value => selectedOperator.plans.targetModules.y = +value
+    get: () => selectedOperator.value.plans.targetModules.y,
+    set: value => selectedOperator.value.plans.targetModules.y = +value
 });
 
 const targetModuleZ = computed({
-    get: () => selectedOperator.plans.targetModules.z,
-    set: value => selectedOperator.plans.targetModules.z = +value
+    get: () => selectedOperator.value.plans.targetModules.z,
+    set: value => selectedOperator.value.plans.targetModules.z = +value
 });
 
 </script>
@@ -341,28 +343,7 @@ const targetModuleZ = computed({
             </div>
             <div class="row">
                 <OperatorCosts
-                    :target-elite="targetElite"
-                    :current-elite="currentElite"
-                    :target-level="targetLevel"
-                    :current-level="currentLevel"
-                    :current-skill="currentSkill"
-                    :target-skill="targetSkill"
-                    :current-mastery1="currentMastery1"
-                    :current-mastery2="currentMastery2"
-                    :current-mastery3="currentMastery3"
-                    :target-mastery1="targetMastery1"
-                    :target-mastery2="targetMastery2"
-                    :target-mastery3="targetMastery3"
-                    :current-module-x="currentModuleX"
-                    :current-module-y="currentModuleY"
-                    :current-module-z="currentModuleZ"
-                    :target-module-x="targetModuleX"
-                    :target-module-y="targetModuleY"
-                    :target-module-z="targetModuleZ"
-                    :elite-level-up-costs="operator.phases"
-                    :skill-level-up-costs="operator.allSkillLvlup"
-                    :skill-mastery-costs="operator.skills"
-                    :modules="selectedOperator.modules"
+                    :operatorId="operator.id"
                 />
             </div>
         </Collapse>
