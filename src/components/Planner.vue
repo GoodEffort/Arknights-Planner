@@ -4,6 +4,7 @@ import SelectedOperators from './SelectedOperators.vue';
 import { usePlannerStore } from '../store/planner-store';
 import { onMounted, ref } from 'vue';
 import { DotLoader } from "vue3-spinner";
+import InventoryControls from './InventoryControls.vue';
 
 const { loadCharacters, loadModules, loadSavedRecords, loadItems } = usePlannerStore();
 
@@ -23,6 +24,7 @@ onMounted(async () => {
         <div v-if="!isLoading">
             <SelectedOperators />
             <AddOperators />
+            <InventoryControls />
         </div>
         <DotLoader v-else />
     </div>
