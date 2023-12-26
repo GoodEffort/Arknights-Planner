@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import type { Operator, CharEquip, EquipDict, Module } from '../types/operator';
 import { SelectedOperator, SaveRecord } from '../types/operator';
@@ -6,6 +6,8 @@ import getChardata from '../data/chardata';
 import getModuledata from '../data/moduledata';
 import getItemdata from '../data/itemdata';
 import { ExpItem, Item } from '../types/item';
+import inventoryItemIds from '../data/inventoryItemIds';
+import { debounce } from 'lodash';
 
 export const usePlannerStore = defineStore('planner', () => {
     const operators = ref<Operator[]>([]);
@@ -104,12 +106,36 @@ export const usePlannerStore = defineStore('planner', () => {
         console.log(character);
     }
 
+    const inventoryItems = computed(() => 
+        Object.values(items.value)
+            .filter(item => inventoryItemIds.includes(item.itemId))
+            .sort((a, b) => a.sortId - b.sortId)
+    );
+
+    const inventory = ref<{ [key: string]: number }>(
+        JSON.parse(localStorage.getItem('inventory') || 'null') || {}
+    );
+
+    watch(inventoryItems, value => {
+        if (value.length > 0 && Object.keys(inventory.value).length === 0) {
+            inventory.value = Object.assign({}, ...inventoryItems.value.map(item => ({ [item.itemId]: 0 })));
+        }
+    });
+
+    watch(inventory, debounce((value: {
+        [key: string]: number;
+    }) => {
+        localStorage.setItem('inventory', JSON.stringify(value));
+    }, 250), { deep: true });
+
     return {
         operators,
         modules,
         items,
         expItems,
         selectedOperators,
+        inventoryItems,
+        inventory,
         loadCharacters,
         loadModules,
         loadItems,
