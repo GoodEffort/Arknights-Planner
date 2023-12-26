@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed, watch, ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import OperatorPromotion from './controls/OperatorPromotion.vue';
 import OperatorLevel from './controls/OperatorLevel.vue';
@@ -8,6 +8,7 @@ import type { Operator, SaveRecord } from '../types/operator';
 import { SelectedOperator } from '../types/operator';
 import OperatorModule from './controls/OperatorModule.vue';
 import OperatorCosts from './OperatorCosts.vue';
+import { Collapse } from 'vue-collapsed';
 
 const props = defineProps<{
     selectedOperator: SelectedOperator
@@ -24,6 +25,8 @@ watch(props.selectedOperator, ({ operator, plans }) => {
     };
     localStorage.setItem(saveString, JSON.stringify(saveRecord));
 }, { deep: true });
+
+const collapsed = ref(false);
 
 const operator = computed<Operator>(() => selectedOperator.operator);
 
@@ -222,143 +225,155 @@ const targetModuleZ = computed({
 </script>
 
 <template>
-    <div class="col-2 center-vert">
-        <img :src="getOperatorImageLink(operator)" :alt="operator.name" class="img-thumbnail" />
+    <div class="col-1">
+        <img :src="getOperatorImageLink(operator)" :alt="operator.name" class="img-thumbnail cursor-pointer" @click="collapsed = !collapsed" :class="{ dimmed: !collapsed }" />
     </div>
-    <div class="col-10 left-border">
+    <div class="col left-border">
         <div class="row">
-            <h4>{{ operator.name }}</h4>
+            <h4 class="cursor-pointer operator-header" :class="{ open: collapsed }" @click="collapsed = !collapsed">
+                {{ operator.name }}
+            </h4>
         </div>
-        <div class="row">
-            <div class="col-6">
-                <label>Current</label>
-                <hr />
+        <Collapse :when="collapsed">
+            <div class="row">
+                <div class="col-6">
+                    <label>Current</label>
+                    <hr />
 
-                <div class="row">
-                    <div class="col-7" v-if="operator.phases.length > 1">
-                        <OperatorPromotion :phases="operator.phases" v-model="currentElite" />
+                    <div class="row">
+                        <div class="col-7" v-if="operator.phases.length > 1">
+                            <OperatorPromotion :phases="operator.phases" v-model="currentElite" />
+                        </div>
+                        <div class="col">
+                            <OperatorLevel :maxLevel="currentLevelMax" v-model="currentLevel" />
+                        </div>
                     </div>
-                    <div class="col">
-                        <OperatorLevel :maxLevel="currentLevelMax" v-model="currentLevel" />
+                    <hr v-if="operator.skills.length > 0" />
+
+                    <div class="row" v-if="operator.skills.length > 0">
+                        <div class="input-group">
+                            <span class="input-group-text">Skills Level</span>
+                            <input type="number" class="form-control" v-model="currentSkill" min="1" :max="currentElite === 0 ? 4 : 7" />
+                        </div>
+                    </div>
+                    <hr v-if="operator.phases.length > 2" />
+
+                    <div class="row" v-if="operator.phases.length > 2">
+                        <label>Skill Masteries</label>
+                        <div class="col">
+                            <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="currentMastery1" :skillNumber="1" />
+                        </div>
+                        <div class="col">
+                            <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="currentMastery2" :skillNumber="2" />
+                        </div>
+                        <div class="col">
+                            <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="currentMastery3" :skillNumber="3" />
+                        </div>
+                    </div>
+                    <hr v-if="selectedOperator.modules.length > 0" />
+
+                    <div class="row" v-if="selectedOperator.modules.length > 0">
+                        <label>Modules</label>
+                        <div class="col">
+                            <OperatorModule v-if="hasXModule" v-model="currentModuleX" module-letter="X" />
+                        </div>
+                        <div class="col">
+                            <OperatorModule v-if="hasYModule" v-model="currentModuleY" module-letter="Y" />
+                        </div>
+                        <div class="col">
+                            <OperatorModule v-if="hasZModule" v-model="currentModuleZ" module-letter="Z" />
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-6">
+                    <label>Planned</label>
+                    <hr />
+
+                    <div class="row">
+                        <div class="col-7" v-if="operator.phases.length > 1">
+                            <OperatorPromotion :phases="operator.phases" v-model="targetElite" />
+                        </div>
+                        <div class="col">
+                            <OperatorLevel :maxLevel="targetLevelMax" v-model="targetLevel" />
+                        </div>
+                    </div>
+                    <hr v-if="operator.skills.length > 0" />
+
+                    <div class="row" v-if="operator.skills.length > 0">
+                        <div class="input-group">
+                            <span class="input-group-text">Skills Level</span>
+                            <input type="number" class="form-control" v-model="targetSkill" :min="currentSkill" :max="targetElite === 0 ? 4 : 7" />
+                        </div>
+                    </div>
+                    <hr v-if="operator.phases.length > 2" />
+
+                    <div class="row" v-if="operator.phases.length > 2">
+                        <label>Skill Masteries</label>
+                        <div class="col">
+                            <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="targetMastery1" :skillNumber="1" />
+                        </div>
+                        <div class="col">
+                            <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="targetMastery2" :skillNumber="2" />
+                        </div>
+                        <div class="col">
+                            <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="targetMastery3" :skillNumber="3" />
+                        </div>
+                    </div>
+                    <hr v-if="selectedOperator.modules.length > 0" />
+
+                    <div class="row" v-if="selectedOperator.modules.length > 0">
+                        <label>Modules</label>
+                        <div class="col">
+                            <OperatorModule v-if="hasXModule" v-model="targetModuleX" module-letter="X" />
+                        </div>
+                        <div class="col">
+                            <OperatorModule v-if="hasYModule" v-model="targetModuleY" module-letter="Y" />
+                        </div>
+                        <div class="col">
+                            <OperatorModule v-if="hasZModule" v-model="targetModuleZ" module-letter="Z" />
+                        </div>
                     </div>
                 </div>
-                <hr v-if="operator.skills.length > 0" />
-
-                <div class="row" v-if="operator.skills.length > 0">
-                    <div class="input-group">
-                        <span class="input-group-text">Skills Level</span>
-                        <input type="number" class="form-control" v-model="currentSkill" min="1" :max="currentElite === 0 ? 4 : 7" />
-                    </div>
+                <div class="col-12">
+                    <hr />
                 </div>
-                <hr v-if="operator.phases.length > 2" />
-
-                <div class="row" v-if="operator.phases.length > 2">
-                    <label>Skill Masteries</label>
-                    <div class="col">
-                        <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="currentMastery1" :skillNumber="1" />
-                    </div>
-                    <div class="col">
-                        <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="currentMastery2" :skillNumber="2" />
-                    </div>
-                    <div class="col">
-                        <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="currentMastery3" :skillNumber="3" />
-                    </div>
-                </div>
-                <hr v-if="selectedOperator.modules.length > 0" />
-
-                <div class="row" v-if="selectedOperator.modules.length > 0">
-                    <label>Modules</label>
-                    <div class="col">
-                        <OperatorModule v-if="hasXModule" v-model="currentModuleX" module-letter="X" />
-                    </div>
-                    <div class="col">
-                        <OperatorModule v-if="hasYModule" v-model="currentModuleY" module-letter="Y" />
-                    </div>
-                    <div class="col">
-                        <OperatorModule v-if="hasZModule" v-model="currentModuleZ" module-letter="Z" />
-                    </div>
-                </div>
-
             </div>
-            <div class="col-6">
-                <label>Planned</label>
-                <hr />
-
-                <div class="row">
-                    <div class="col-7" v-if="operator.phases.length > 1">
-                        <OperatorPromotion :phases="operator.phases" v-model="targetElite" />
-                    </div>
-                    <div class="col">
-                        <OperatorLevel :maxLevel="targetLevelMax" v-model="targetLevel" />
-                    </div>
-                </div>
-                <hr v-if="operator.skills.length > 0" />
-
-                <div class="row" v-if="operator.skills.length > 0">
-                    <div class="input-group">
-                        <span class="input-group-text">Skills Level</span>
-                        <input type="number" class="form-control" v-model="targetSkill" :min="currentSkill" :max="targetElite === 0 ? 4 : 7" />
-                    </div>
-                </div>
-                <hr v-if="operator.phases.length > 2" />
-
-                <div class="row" v-if="operator.phases.length > 2">
-                    <label>Skill Masteries</label>
-                    <div class="col">
-                        <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="targetMastery1" :skillNumber="1" />
-                    </div>
-                    <div class="col">
-                        <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="targetMastery2" :skillNumber="2" />
-                    </div>
-                    <div class="col">
-                        <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="targetMastery3" :skillNumber="3" />
-                    </div>
-                </div>
-                <hr v-if="selectedOperator.modules.length > 0" />
-
-                <div class="row" v-if="selectedOperator.modules.length > 0">
-                    <label>Modules</label>
-                    <div class="col">
-                        <OperatorModule v-if="hasXModule" v-model="targetModuleX" module-letter="X" />
-                    </div>
-                    <div class="col">
-                        <OperatorModule v-if="hasYModule" v-model="targetModuleY" module-letter="Y" />
-                    </div>
-                    <div class="col">
-                        <OperatorModule v-if="hasZModule" v-model="targetModuleZ" module-letter="Z" />
-                    </div>
+            <div class="row">
+                <OperatorCosts
+                    :target-elite="targetElite"
+                    :current-elite="currentElite"
+                    :target-level="targetLevel"
+                    :current-level="currentLevel"
+                    :current-skill="currentSkill"
+                    :target-skill="targetSkill"
+                    :current-mastery1="currentMastery1"
+                    :current-mastery2="currentMastery2"
+                    :current-mastery3="currentMastery3"
+                    :target-mastery1="targetMastery1"
+                    :target-mastery2="targetMastery2"
+                    :target-mastery3="targetMastery3"
+                    :current-module-x="currentModuleX"
+                    :current-module-y="currentModuleY"
+                    :current-module-z="currentModuleZ"
+                    :target-module-x="targetModuleX"
+                    :target-module-y="targetModuleY"
+                    :target-module-z="targetModuleZ"
+                    :elite-level-up-costs="operator.phases"
+                    :skill-level-up-costs="operator.allSkillLvlup"
+                    :skill-mastery-costs="operator.skills"
+                    :modules="selectedOperator.modules"
+                />
+            </div>
+        </Collapse>
+        <Collapse :when="!collapsed">
+            <div class="row" @click="collapsed = !collapsed">
+                <div class="col-12">
+                    <hr />
+                    <div>...</div>
                 </div>
             </div>
-            <div class="col-12">
-                <hr />
-            </div>
-        </div>
-        <div class="row">
-            <OperatorCosts
-                :target-elite="targetElite"
-                :current-elite="currentElite"
-                :target-level="targetLevel"
-                :current-level="currentLevel"
-                :current-skill="currentSkill"
-                :target-skill="targetSkill"
-                :current-mastery1="currentMastery1"
-                :current-mastery2="currentMastery2"
-                :current-mastery3="currentMastery3"
-                :target-mastery1="targetMastery1"
-                :target-mastery2="targetMastery2"
-                :target-mastery3="targetMastery3"
-                :current-module-x="currentModuleX"
-                :current-module-y="currentModuleY"
-                :current-module-z="currentModuleZ"
-                :target-module-x="targetModuleX"
-                :target-module-y="targetModuleY"
-                :target-module-z="targetModuleZ"
-                :elite-level-up-costs="operator.phases"
-                :skill-level-up-costs="operator.allSkillLvlup"
-                :skill-mastery-costs="operator.skills"
-                :modules="selectedOperator.modules"
-            />
-        </div>
+        </Collapse>
     </div>
 </template>
 
@@ -370,5 +385,39 @@ const targetModuleZ = computed({
 
 .left-border {
     border-left: 1px rgba(255, 255, 255, 0.25) solid;
+}
+
+.img-thumbnail.dimmed {
+    opacity: 0.5;
+}
+
+.img-thumbnail.dimmed:hover {
+    opacity: 0.75;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.operator-header {
+    color: #b3ade9;
+    border: 1px solid #464646;
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 5px;
+    padding: 1px 10px 1px 10px;
+}
+
+.operator-header:hover {
+    background: #464646;
+}
+
+.operator-header::before {
+    content: "▸";
+}
+
+.operator-header.open::before {
+    content: "▾";
 }
 </style>
