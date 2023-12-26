@@ -3,6 +3,7 @@ import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import { Item } from '../types/item';
+import PlannerSection from './PlannerSection.vue';
 
 const { getItemImageLink } = usePlannerStore();
 
