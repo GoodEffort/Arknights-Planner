@@ -18,7 +18,7 @@ const neededItems = computed(() => {
             needed.push({ item, count });
         }
     }
-    return needed;
+    return needed.sort((a, b) => a.item.sortId - b.item.sortId);
 });
 </script>
 
