@@ -40,7 +40,7 @@ html.dark .planner-section {
 }
 
 .planner-section::before {
-    content: "►";
+    content: "▸";
     font-style: normal;
     font-weight: 400;
     text-decoration: inherit;
@@ -49,7 +49,7 @@ html.dark .planner-section {
 }
 
 .planner-section.open::before {
-    content: "▼";
+    content: "▾";
 }
 
 .planner-section span {
