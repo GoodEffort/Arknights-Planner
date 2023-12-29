@@ -361,6 +361,7 @@ export const usePlannerStore = defineStore('planner', () => {
         inventory,
         totalCosts,
         totalCostsByOperator,
+        battleRecords,
         loadCharacters,
         loadModules,
         loadItems,

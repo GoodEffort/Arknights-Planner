@@ -7,17 +7,53 @@ import PlannerSection from './PlannerSection.vue';
 
 const { getItemImageLink } = usePlannerStore();
 
-const { totalCosts, inventory, items } = storeToRefs(usePlannerStore());
+const { totalCosts, inventory, items, expItems, battleRecords } = storeToRefs(usePlannerStore());
 
 const neededItems = computed(() => {
     const needed: { item: Item, count: number }[] = [];
+    let totalExp = 0;
+
     for (const key in totalCosts.value) {
-        const count = totalCosts.value[key] - (inventory.value[key] ?? 0);
-        if (count > 0) {
-            const item = items.value[key];
-            needed.push({ item, count });
+        if (expItems.value[key] !== undefined) {
+            totalExp += expItems.value[key].gainExp * totalCosts.value[key];
+        }
+        else {
+            const count = totalCosts.value[key] - (inventory.value[key] ?? 0);
+            if (count > 0) {
+                const item = items.value[key];
+                needed.push({ item, count });
+            }
         }
     }
+
+    for (const key in inventory.value) {
+        if (expItems.value[key] !== undefined) {
+            totalExp -= expItems.value[key].gainExp * inventory.value[key];
+        }
+    }
+
+    const neededEXPItems: {
+        [key: string]: number;
+    } = {};
+
+    // calculate exp items needed
+    for (const { gainExp, id } of battleRecords.value) {
+        const recordsNeeded = Math.floor(totalExp / gainExp);
+        totalExp = totalExp % gainExp;
+
+        if (recordsNeeded > 0) {
+            if (neededEXPItems[id] === undefined) {
+                neededEXPItems[id] = 0;
+            }
+            neededEXPItems[id] += recordsNeeded;
+        }
+    }
+
+    for (const [key, count] of Object.entries(neededEXPItems)) {
+        const item = items.value[key];
+        needed.push({ item, count });
+    }
+
     return needed.sort((a, b) => a.item.sortId - b.item.sortId);
 });
 </script>
