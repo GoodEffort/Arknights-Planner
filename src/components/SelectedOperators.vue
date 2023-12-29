@@ -22,7 +22,7 @@ const totalCostsArray = computed(() => {
 </script>
 
 <template>
-    <PlannerSection title="Selected Operators" :initial-state="true">
+    <PlannerSection title="Selected Operators" :initial-state="true" local-storage-id="selected-operators-collapsed">
         <div class="container">
             <div class="row mb-3 py-3" v-for="character in selectedOperators" :key="character.operator.id">
                 <OperatorControls :operator-id="character.operator.id" />

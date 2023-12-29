@@ -2,18 +2,39 @@
 import { ref } from 'vue';
 import { Collapse } from 'vue-collapsed'
 
-const { title, initialState } = defineProps({
+const { title, initialState, localStorageId, fastCollapse } = defineProps({
     title: String,
+    fastCollapse: {
+        type: Boolean,
+        default: true
+    },
     initialState: {
         type: Boolean,
         default: false
+    },
+    localStorageId: {
+        type: String,
+        default: ''
     }
 });
 
-const collapsed = ref(initialState);
+let state = initialState;
+
+if (localStorageId !== '') {
+    const localStorageState = localStorage.getItem(localStorageId);
+    if (localStorageState !== null) {
+        state = localStorageState === 'true';
+    }
+}
+
+const collapsed = ref(state);
 
 function toggleCollapse() {
     collapsed.value = !collapsed.value;
+
+    if (localStorageId !== '') {
+        localStorage.setItem(localStorageId, collapsed.value.toString());
+    }
 }
 </script>
 
@@ -22,7 +43,7 @@ function toggleCollapse() {
         <span>{{ title }}</span>
     </div>
 
-    <Collapse :when="collapsed">
+    <Collapse :when="collapsed" :class="{ 'fast-collapse': fastCollapse }">
         <slot />
     </Collapse>
 </template>
@@ -54,5 +75,9 @@ html.dark .planner-section {
 
 .planner-section span {
     margin-left: -10px;
+}
+
+.fast-collapse {
+    transition: height 300ms ease-in-out;
 }
 </style>

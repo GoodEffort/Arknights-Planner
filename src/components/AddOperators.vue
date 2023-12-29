@@ -57,7 +57,7 @@ function characterSort(a: Operator, b: Operator) {
 </script>
 
 <template>
-    <PlannerSection title="Add Operators">
+    <PlannerSection title="Add Operators" local-storage-id="add-operators-collapsed">
 
         <input class="form-control" type="text" v-model="operatorFilter" placeholder="Filter by operator name" />
         <hr />

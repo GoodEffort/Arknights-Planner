@@ -6,11 +6,10 @@ import { storeToRefs } from 'pinia';
 const { getItemImageLink } = usePlannerStore();
 
 const { inventoryItems, inventory } = storeToRefs(usePlannerStore());
-
 </script>
 
 <template>
-    <PlannerSection title="Current Inventory">
+    <PlannerSection title="Current Inventory" local-storage-id="inventory-controls-collapsed">
         <div class="container">
             <div class="row">
                 <div class="col-2" v-for="item in inventoryItems">

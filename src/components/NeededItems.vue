@@ -59,7 +59,7 @@ const neededItems = computed(() => {
 </script>
 
 <template>
-    <PlannerSection title="Needed Items">
+    <PlannerSection title="Needed Items" local-storage-id="needed-items-collapsed">
         <div class="container">
             <div class="row">
                 <div class="col-2" v-for="{ item, count } in neededItems">
