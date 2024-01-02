@@ -56,6 +56,25 @@ const neededItems = computed(() => {
 
     return needed.sort((a, b) => a.item.sortId - b.item.sortId);
 });
+
+const lmdChangeAmount = computed(() => {
+    const neededLmd = neededItems.value.find(item => item.item.itemId === '4001')?.count ?? 0;
+    if (+neededLmd.toExponential().split('+')[1] > 3) {
+        return 10000;
+    }
+    else {
+        return 1000;
+    }
+});
+
+const lmdChangeAmountString = computed(() => {
+    const amount = lmdChangeAmount.value;
+    return amount === 1000 ? '1000' : '10k';
+});
+
+const changeItemAmount = (item: Item, amount: number) => {
+    inventory.value[item.itemId] += amount;
+};
 </script>
 
 <template>
@@ -71,7 +90,21 @@ const neededItems = computed(() => {
                             {{ item.name }}
                         </div>
                         <div class="count">
-                            {{  count }}
+                            {{ count }}
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <button
+                                    class="plus-minus-button"
+                                    @click="changeItemAmount(item, item.itemId === '4001' ? -lmdChangeAmount : -1)"
+                                >- {{ item.itemId === '4001' ? lmdChangeAmountString : '1' }}</button>
+                            </div>
+                            <div class="col">
+                                <button
+                                    class="plus-minus-button"
+                                    @click="changeItemAmount(item, item.itemId === '4001' ? lmdChangeAmount : 1)"
+                                >+ {{ item.itemId === '4001' ? lmdChangeAmountString : '1' }}</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -103,5 +136,21 @@ const neededItems = computed(() => {
     height: 4em;
     text-align: center;
     vertical-align: middle;
+}
+
+.plus-minus-button {
+    width: 100%;
+    border-radius: 30%;
+    border: 1px solid rgb(172, 172, 172);
+    background-color: rgb(31, 31, 31);
+    color: rgb(172, 172, 172);
+    font-size: 0.8em;
+    padding: 0;
+    margin: 0;
+}
+
+.plus-minus-button:hover {
+    background-color: rgb(172, 172, 172);
+    color: rgb(31, 31, 31);
 }
 </style>
