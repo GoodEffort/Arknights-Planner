@@ -1,6 +1,7 @@
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import type { Operator, CharEquip, EquipDict, Module, Skill } from '../types/operator';
+import type { WorkshopCost } from '../data/buildingdata';
 import { SelectedOperator, SaveRecord } from '../types/operator';
 import getChardata from '../data/chardata';
 import getModuledata from '../data/moduledata';
@@ -10,6 +11,7 @@ import inventoryItemIds from '../data/inventoryItemIds';
 import { debounce } from 'lodash';
 import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
+import getBuildingdata from '../data/buildingdata';
 
 export const usePlannerStore = defineStore('planner', () => {
     const operators = ref<Operator[]>([]);
@@ -18,6 +20,7 @@ export const usePlannerStore = defineStore('planner', () => {
     const selectedOperators = ref<SelectedOperator[]>([]);
     const items = ref<{ [key: string]: Item }>({});
     const expItems = ref<{ [key: string]: ExpItem }>({});
+    const workShopFormulas = ref<{ [key: string]: WorkshopCost[] }>({}); 
 
     // Operators
 
@@ -42,6 +45,11 @@ export const usePlannerStore = defineStore('planner', () => {
 
         items.value = data.items;
         expItems.value = data.expItems;
+    }
+
+    async function loadWorkshopFormulas() {
+        const data = await getBuildingdata();
+        workShopFormulas.value = data;
     }
 
     function getModulesForCharacter(operatorId: string): Module[] {
@@ -345,6 +353,32 @@ export const usePlannerStore = defineStore('planner', () => {
         JSON.parse(localStorage.getItem('inventory') || 'null') || {}
     );
 
+    const craftItem = (item: Item) => {
+        const { itemId, buildingProductList } = item;
+        
+        // verify if we have enough items
+        for (const product of buildingProductList) {
+            const costs = workShopFormulas.value[product.formulaId];
+            for (const { id, count } of costs) {
+                if (inventory.value[id] < count) {
+                    alert(`You don't have enough ${ items.value[id].name } to craft ${ item.name }.`);
+                    return;
+                }
+            }
+        }
+
+        // remove items from inventory
+        for (const product of buildingProductList) {
+            const costs = workShopFormulas.value[product.formulaId];
+            for (const { id, count } of costs) {
+                inventory.value[id] -= count;
+            }
+        }
+
+        // add crafted item to inventory
+        inventory.value[itemId] += 1;
+    }
+
     watch(inventoryItems, value => {
         if (value.length > 0 && Object.keys(inventory.value).length === 0) {
             inventory.value = Object.assign({}, ...inventoryItems.value.map(item => ({ [item.itemId]: 0 })));
@@ -374,6 +408,8 @@ export const usePlannerStore = defineStore('planner', () => {
         loadSavedRecords,
         getOperatorImageLink,
         getItemImageLink,
-        selectCharacter
+        selectCharacter,
+        craftItem,
+        loadWorkshopFormulas
     }
 });
