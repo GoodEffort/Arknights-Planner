@@ -5,7 +5,7 @@ https://goodeffort.github.io/Arknights-Planner/
 
 things I want to add
 
- - crafting calculation / recommendation
+ - crafting recommendation
  - recommended farming levels
  - reordering operators
  - share link to move it to another device/browser
@@ -13,7 +13,7 @@ things I want to add
  - a useful links / data sources page using the sources listed below
 
  Data Sources
- 
+
   (Currently using)
   - https://github.com/Kengxxiao/ArknightsGameData_YoStar
   - https://github.com/Aceship/Arknight-Images
