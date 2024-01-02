@@ -8,11 +8,11 @@ import "bootstrap"
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons'
+import icons from './font-awesome-icons'
 
 import './css/night-mode.css';
 
-library.add(faMoon, faSun)
+library.add(...icons);
 
 const app = createApp(App);
 
