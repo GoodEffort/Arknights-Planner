@@ -31,17 +31,3 @@ onMounted(async () => {
         <DotLoader v-else />
     </div>
 </template>
-
-<style>
-html.dark {
-    input.form-control, select.form-select, span.input-group-text {
-        background-color: #151515;
-        color: #fff;
-        border: #6e6e6e solid 1px;
-    }
-
-    input.form-control::placeholder, input.form-control::-ms-input-placeholder  {
-        color: #ffffff;
-    }
-}
-</style>

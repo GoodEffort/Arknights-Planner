@@ -24,7 +24,7 @@ const totalCostsArray = computed(() => {
 <template>
     <PlannerSection title="Selected Operators" :initial-state="true" local-storage-id="selected-operators-collapsed">
         <div class="container">
-            <div class="row mb-3 py-3" v-for="character in selectedOperators" :key="character.operator.id">
+            <div class="row mb-3 py-3 selected-operator" v-for="character in selectedOperators" :key="character.operator.id">
                 <OperatorControls :operator-id="character.operator.id" />
             </div>
             <div class="row" v-if="selectedOperators.length === 0">
@@ -45,13 +45,9 @@ const totalCostsArray = computed(() => {
 </template>
 
 <style scoped>
-html.dark .row {
-    background-color: #050505;
-}
-
-.row {
-    background-color: #F0F0F0;
-    border-radius: 5px;
-    border: 1px solid #1a1a1a;
+.selected-operator {
+    border-radius: 3px;
+    background: #e6e6e6;
+    color: rgb(0, 0, 0);
 }
 </style>

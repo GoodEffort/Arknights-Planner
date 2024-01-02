@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import Modal from './Modal.vue';
 import NightModeToggle from './NightModeToggle.vue';
+import { ref } from 'vue';
+
+const showModal = ref(false);
 </script>
 
 <template>
@@ -7,7 +11,25 @@ import NightModeToggle from './NightModeToggle.vue';
     <div>
       <night-mode-toggle />
     </div>
+    <div>
+      <font-awesome-icon icon="info-circle" @click="showModal = !showModal" />
+    </div>
   </nav>
+  <modal v-if="showModal" @close="showModal = false">
+    <template #header>
+      Data Source Credits
+    </template>
+    <template #body>
+      <div>
+        <div>(Currently using)</div>
+        <div>- https://github.com/Kengxxiao/ArknightsGameData_YoStar</div>
+        <div>- https://github.com/Aceship/Arknight-Images</div>
+        <div>(Planned)</div>
+        <div>- https://github.com/Kengxxiao/ArknightsGameData</div>
+        <div>- https://docs.google.com/spreadsheets/d/12X0uBQaN7MuuMWWDTiUjIni_MOP015GnulggmBJgBaQ/</div>
+      </div>
+    </template>
+  </modal>
 </template>
 
 <style scoped>
@@ -52,7 +74,7 @@ nav.navbar li.nav-item:not(:last-child)::after {
   transition: width .3s;
 }
 
-nav.navbar li.nav-item.active > a > span {
+nav.navbar li.nav-item.active>a>span {
   color: hsl(25, 70%, 45%);
   border-bottom: hsl(25, 70%, 45%) 2px solid;
 }
@@ -72,10 +94,5 @@ nav.navbar a.navbar-brand {
 nav.navbar {
   background-color: white;
   border-bottom: 1px solid black;
-}
-
-html.dark nav.navbar {
-  background-color: #000000;
-  border-bottom: 1px solid #5f5f5f;
 }
 </style>

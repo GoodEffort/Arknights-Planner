@@ -48,16 +48,14 @@ function toggleCollapse() {
     </Collapse>
 </template>
 
-<style scoped>
-html.dark .planner-section {
-    background: #151515;
-}
 
+<style scoped>
 .planner-section {
     border-radius: 3px;
     font-size: x-large;
     cursor: pointer;
-    background: #e0e0e0;
+    background: #cccccc;
+    color: black;
 }
 
 .planner-section::before {

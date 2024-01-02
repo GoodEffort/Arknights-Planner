@@ -69,7 +69,7 @@ const lmdChangeAmount = computed(() => {
 
 const lmdChangeAmountString = computed(() => {
     const amount = lmdChangeAmount.value;
-    return amount === 1000 ? '1000' : '10k';
+    return amount === 1000 ? '1k' : '10k';
 });
 
 const changeItemAmount = (item: Item, amount: number) => {
@@ -93,17 +93,17 @@ const changeItemAmount = (item: Item, amount: number) => {
                             {{ count }}
                         </div>
                         <div class="row">
-                            <div class="col">
+                            <div class="col px-0">
                                 <button
-                                    class="plus-minus-button"
+                                    class="btn btn-primary"
                                     @click="changeItemAmount(item, item.itemId === '4001' ? -lmdChangeAmount : -1)"
-                                >- {{ item.itemId === '4001' ? lmdChangeAmountString : '1' }}</button>
+                                >-{{ item.itemId === '4001' ? lmdChangeAmountString : '1' }}</button>
                             </div>
-                            <div class="col">
+                            <div class="col px-0">
                                 <button
-                                    class="plus-minus-button"
+                                    class="btn btn-primary"
                                     @click="changeItemAmount(item, item.itemId === '4001' ? lmdChangeAmount : 1)"
-                                >+ {{ item.itemId === '4001' ? lmdChangeAmountString : '1' }}</button>
+                                >+{{ item.itemId === '4001' ? lmdChangeAmountString : '1' }}</button>
                             </div>
                         </div>
                     </div>
