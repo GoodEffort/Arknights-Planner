@@ -3,13 +3,9 @@ import PlannerSection from './PlannerSection.vue';
 import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
 
-const { getItemImageLink } = usePlannerStore();
+const { getItemImageLink, craftItem } = usePlannerStore();
 
 const { inventoryItems, inventory } = storeToRefs(usePlannerStore());
-
-const craft = () => {
-    console.log('craft');
-};
 </script>
 
 <template>
@@ -21,7 +17,7 @@ const craft = () => {
                         <div class="text-align-end">
                             <img :src="getItemImageLink(item)" :alt="item.name" class="img-thumbnail item-image" :style="{ opacity: inventory[item.itemId] > 0 ? '100%' : '30%' }" />
                             <div class="craft-button" v-if="item.buildingProductList.length > 0">
-                                <button class="btn btn-primary" @click="craft">Craft</button>
+                                <button class="btn btn-primary" @click="craftItem(item)">Craft</button>
                             </div>
                         </div>
                         <div class="name">
@@ -46,10 +42,9 @@ const craft = () => {
 
 .item-col {
     width: 100%;
-    background-color: rgb(31, 31, 31);
+    background-color: rgb(197, 197, 197);
     padding: 1em 0.5em;
     margin-bottom: 1em;
-    border: 1px solid rgb(172, 172, 172);
     border-radius: 5px;
 }
 

@@ -5,7 +5,7 @@ import { computed } from 'vue';
 import { Item } from '../types/item';
 import PlannerSection from './PlannerSection.vue';
 
-const { getItemImageLink } = usePlannerStore();
+const { getItemImageLink, craftItem } = usePlannerStore();
 
 const { totalCosts, inventory, items, expItems, battleRecords } = storeToRefs(usePlannerStore());
 
@@ -83,8 +83,11 @@ const changeItemAmount = (item: Item, amount: number) => {
             <div class="row">
                 <div class="col-2" v-for="{ item, count } in neededItems">
                     <div class="item-col">
-                        <div>
+                        <div class="text-align-end">
                             <img :src="getItemImageLink(item)" :alt="item.name" class="img-thumbnail item-image" />
+                            <div class="craft-button" v-if="item.buildingProductList.length > 0">
+                                <button class="btn btn-primary" @click="craftItem(item)">Craft</button>
+                            </div>
                         </div>
                         <div class="name">
                             {{ item.name }}
@@ -122,11 +125,10 @@ const changeItemAmount = (item: Item, amount: number) => {
 
 .item-col {
     width: 100%;
-    background-color: rgb(31, 31, 31);
     padding: 1em 0.5em;
     margin-bottom: 1em;
-    border: 1px solid rgb(172, 172, 172);
     border-radius: 5px;
+    background-color: rgb(197, 197, 197);
 }
 
 .name {
@@ -138,19 +140,14 @@ const changeItemAmount = (item: Item, amount: number) => {
     vertical-align: middle;
 }
 
-.plus-minus-button {
-    width: 100%;
-    border-radius: 30%;
-    border: 1px solid rgb(172, 172, 172);
-    background-color: rgb(31, 31, 31);
-    color: rgb(172, 172, 172);
-    font-size: 0.8em;
-    padding: 0;
-    margin: 0;
+.craft-button {
+    position: relative;
+    top: -2.5em;
+    right: 2px;
+    height: 0px;
 }
 
-.plus-minus-button:hover {
-    background-color: rgb(172, 172, 172);
-    color: rgb(31, 31, 31);
+.text-align-end {
+    text-align: end;
 }
 </style>

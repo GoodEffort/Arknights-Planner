@@ -130,3 +130,8 @@ html.dark > body .modal-content {
     background-color: #0c0c0c;
     color: #eee;
 }
+
+html.dark > body .item-col {
+    background-color: rgb(31, 31, 31);
+    border: 1px solid rgb(172, 172, 172);
+}
