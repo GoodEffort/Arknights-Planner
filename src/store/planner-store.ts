@@ -34,6 +34,12 @@ export const usePlannerStore = defineStore('planner', () => {
 
     async function loadItems() {
         const data = await getItemdata();
+
+        for (const key in data.items) {
+            const item = data.items[key];
+            item.buildingProductList = item.buildingProductList.filter(b => b.roomType === 'WORKSHOP');
+        }
+
         items.value = data.items;
         expItems.value = data.expItems;
     }
