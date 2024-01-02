@@ -18,14 +18,14 @@ const craft = () => {
             <div class="row">
                 <div class="col-2" v-for="item in inventoryItems">
                     <div class="item-col">
-                        <div :style="{ opacity: inventory[item.itemId] > 0 ? '100%' : '30%' }">
-                            <img :src="getItemImageLink(item)" :alt="item.name" class="img-thumbnail item-image" />
+                        <div class="text-align-end">
+                            <img :src="getItemImageLink(item)" :alt="item.name" class="img-thumbnail item-image" :style="{ opacity: inventory[item.itemId] > 0 ? '100%' : '30%' }" />
+                            <div class="craft-button" v-if="item.buildingProductList.length > 0">
+                                <button class="btn btn-primary" @click="craft">Craft</button>
+                            </div>
                         </div>
                         <div class="name">
                             {{ item.name }}
-                        </div>
-                        <div>
-                            <button class="btn btn-primary" @click="craft">Craft</button>
                         </div>
                         <div class="count">
                             <input type="number" class="form-control" min="0" v-model="inventory[item.itemId]" />
@@ -60,5 +60,16 @@ const craft = () => {
     height: 4em;
     text-align: center;
     vertical-align: middle;
+}
+
+.craft-button {
+    position: relative;
+    top: -2.5em;
+    right: 2px;
+    height: 0px;
+}
+
+.text-align-end {
+    text-align: end;
 }
 </style>
