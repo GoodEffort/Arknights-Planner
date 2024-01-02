@@ -4,9 +4,7 @@ import Navbar from "./components/Navbar.vue"
 </script>
 
 <template>
-  <div>
-    <Navbar />
-  </div>
+  <Navbar />
   <!-- yeah, this is supposed to be hidden, was being lazy -->
   <nav>Planner</nav>
   <Planner />
