@@ -6,6 +6,10 @@ import { storeToRefs } from 'pinia';
 const { getItemImageLink } = usePlannerStore();
 
 const { inventoryItems, inventory } = storeToRefs(usePlannerStore());
+
+const craft = () => {
+    console.log('craft');
+};
 </script>
 
 <template>
@@ -19,6 +23,9 @@ const { inventoryItems, inventory } = storeToRefs(usePlannerStore());
                         </div>
                         <div class="name">
                             {{ item.name }}
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" @click="craft">Craft</button>
                         </div>
                         <div class="count">
                             <input type="number" class="form-control" min="0" v-model="inventory[item.itemId]" />
