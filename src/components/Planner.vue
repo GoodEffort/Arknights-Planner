@@ -7,12 +7,12 @@ import { DotLoader } from "vue3-spinner";
 import InventoryControls from './InventoryControls.vue';
 import NeededItems from './NeededItems.vue';
 
-const { loadCharacters, loadModules, loadSavedRecords, loadItems } = usePlannerStore();
+const { loadCharacters, loadModules, loadSavedRecords, loadItems, loadWorkshopFormulas } = usePlannerStore();
 
 const isLoading = ref(true);
 
 onMounted(async () => {
-    await Promise.all([loadCharacters(), loadModules(), loadItems()]);
+    await Promise.all([loadCharacters(), loadModules(), loadItems(), loadWorkshopFormulas()]);
     loadSavedRecords();
     isLoading.value = false;
 });
