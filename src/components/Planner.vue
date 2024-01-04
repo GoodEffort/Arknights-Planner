@@ -6,6 +6,7 @@ import { onMounted, ref } from 'vue';
 import { DotLoader } from "vue3-spinner";
 import InventoryControls from './InventoryControls.vue';
 import NeededItems from './NeededItems.vue';
+import RecommendedFarm from './RecommendedFarm.vue';
 
 const { loadCharacters, loadModules, loadSavedRecords, loadItems, loadWorkshopFormulas } = usePlannerStore();
 
@@ -27,6 +28,7 @@ onMounted(async () => {
             <AddOperators />
             <InventoryControls />
             <NeededItems />
+            <RecommendedFarm />
         </div>
         <DotLoader v-else />
     </div>
