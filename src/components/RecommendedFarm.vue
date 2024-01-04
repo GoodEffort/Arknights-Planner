@@ -39,7 +39,7 @@ const lmdChangeAmountString = computed(() => {
 </script>
 
 <template>
-    <PlannerSection title="Items to Farm" local-storage-id="needed-items-collapsed">
+    <PlannerSection title="Items to Farm" local-storage-id="items-to-farm-collapsed">
         <div class="container">
             <div class="row">
                 <div class="col-2" v-for="{ item, count } in itemsToFarm">
