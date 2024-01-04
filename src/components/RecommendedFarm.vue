@@ -15,7 +15,7 @@ const itemsToFarm = computed(() => {
         const item = items.value[key];
         itemsToFarm.push({ item, count });
     }
-    return itemsToFarm;
+    return itemsToFarm.sort((a, b) => a.item.sortId - b.item.sortId);
 });
 
 const changeItemAmount = (item: Item, amount: number) => {
