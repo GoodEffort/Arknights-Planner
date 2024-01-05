@@ -90,7 +90,7 @@ const changeItemAmount = (item: Item, amount: number) => {
                                 <b>{{ count }}</b>
                             </span>
                         </div>
-                        <div v-if="!editInventory && controls" class="row">
+                        <div v-if="!editInventory && controls" class="row mb-2">
                             <div class="col px-0">
                                 <button
                                     class="btn btn-primary"
