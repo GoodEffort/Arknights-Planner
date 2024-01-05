@@ -4,7 +4,7 @@ import ItemsDisplay from './ItemsDisplay.vue';
 
 <template>
     <ItemsDisplay
-        title="Inventory"
+        title="Current Inventory"
         local-storage-id="inventory-collapsed"
     />
 </template>
