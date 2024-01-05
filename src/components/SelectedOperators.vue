@@ -10,11 +10,12 @@ const { selectedOperators, totalCosts, items } = storeToRefs(usePlannerStore());
 
 const totalCostsArray = computed(() => {
     const costsDict = totalCosts.value ?? [];
-    const costs = Object.keys(costsDict).map(key => {
+
+    const costs = Object.entries(costsDict).map(([key, count]) => {
         const item = items.value[key];
-        const count = costsDict[key];
         return { item, count };
     });
+    
     return costs
         .filter(cost => cost.count > 0)
         .sort((a, b) => a.item.sortId - b.item.sortId);
