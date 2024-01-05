@@ -5,21 +5,43 @@ import { Item } from '../types/item';
 import PlannerSection from './PlannerSection.vue';
 import { storeToRefs } from 'pinia';
 import CraftButton from './CraftButton.vue';
+import inventoryItemIds from '../data/inventoryItemIds';
 
 const { getItemImageLink } = usePlannerStore();
-const { inventory } = storeToRefs(usePlannerStore());
+const { inventory, items } = storeToRefs(usePlannerStore());
 
-const props = defineProps<{
-    displayItems: {
+export interface Props {
+    displayItems?: {
         item: Item;
         count: number;
     }[];
     title: string;
     localStorageId: string;
-}>();
+}
+
+const props = defineProps<Props>();
+
+const displayItems = computed(() => {
+    if (props.displayItems) {
+        return props.displayItems;
+    }
+    else {
+        return inventoryItemIds.map(itemId => {
+            const item = items.value[itemId];
+            return {
+                item,
+                count: inventory.value[itemId] || 0
+            };
+        }).sort((a, b) => a.item.sortId - b.item.sortId);
+    }
+});
+
+const editInventory = computed(() => {
+    return props.displayItems === undefined;
+});
 
 const lmdChangeAmount = computed(() => {
-    const neededLmd = props.displayItems.find(item => item.item.itemId === '4001')?.count ?? 0;
+    const neededLmd = displayItems.value.find(item => item.item.itemId === '4001')?.count ?? 0;
     if (+neededLmd.toExponential().split('+')[1] > 3) {
         return 10000;
     }
@@ -52,9 +74,18 @@ const changeItemAmount = (item: Item, amount: number) => {
                             {{ item.name }}
                         </div>
                         <div class="count">
-                            {{ count }}
+                            <input
+                                v-if="editInventory"
+                                type="number"
+                                class="form-control"
+                                min="0"
+                                v-model="inventory[item.itemId]"
+                            />
+                            <span v-else>
+                                {{ count }}
+                            </span>
                         </div>
-                        <div class="row">
+                        <div v-if="!editInventory" class="row">
                             <div class="col px-0">
                                 <button
                                     class="btn btn-primary"
@@ -97,13 +128,6 @@ const changeItemAmount = (item: Item, amount: number) => {
     height: 4em;
     text-align: center;
     vertical-align: middle;
-}
-
-.craft-button {
-    position: relative;
-    top: -2.5em;
-    right: 2px;
-    height: 0px;
 }
 
 .text-align-end {
