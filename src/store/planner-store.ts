@@ -12,7 +12,6 @@ import { debounce } from 'lodash';
 import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
 import getBuildingdata from '../data/buildingdata';
-import getEfficientToFarmMats from '../data/farmingdata';
 
 export const usePlannerStore = defineStore('planner', () => {
     const operators = ref<Operator[]>([]);
@@ -429,60 +428,6 @@ export const usePlannerStore = defineStore('planner', () => {
         return needed.sort((a, b) => a.item.sortId - b.item.sortId);
     });
 
-    // Farming
-
-    const recommendedFarmingItems = computed(() => {
-        const availableItems: { [key: string]: number } = {};
-
-        for (const [key, count] of Object.entries(inventory.value)) {
-            if (count > 0) {
-                availableItems[key] = count;
-
-                const neededItem = neededItems.value.find(i => i.item.itemId === key);
-                if (neededItem) {
-                    availableItems[key] -= neededItem.count;
-                    if (availableItems[key] < 0) {
-                        availableItems[key] = 0;
-                    }
-                }
-            }
-        }
-
-        const farmingList: { [key: string]: number } = {}
-
-        for (const { item, count } of neededItems.value) {
-            const efficientItems: { item: Item, count: number }[] = [];
-
-            getEfficientToFarmMats(item, count, workShopFormulas.value, items.value, efficientItems);
-
-            if (efficientItems.length > 0) {
-                for (const { item, count } of efficientItems) {
-                    if (farmingList[item.itemId] === undefined) {
-                        farmingList[item.itemId] = 0;
-                    }
-                    farmingList[item.itemId] += count;
-                }
-            }
-            else {
-                if (farmingList[item.itemId] === undefined) {
-                    farmingList[item.itemId] = 0;
-                }
-                farmingList[item.itemId] += count;
-            }
-        }
-
-        for (const [key] of Object.entries(farmingList)) {
-            if (availableItems[key] !== undefined) {
-                farmingList[key] -= availableItems[key];
-                if (farmingList[key] < 0) {
-                    delete farmingList[key];
-                }
-            }
-        }
-
-        return farmingList;
-    });
-
     return {
         operators,
         modules,
@@ -494,7 +439,6 @@ export const usePlannerStore = defineStore('planner', () => {
         totalCostsByOperator,
         battleRecords,
         neededItems,
-        recommendedFarmingItems,
         workShopFormulas,
         loadCharacters,
         loadModules,
