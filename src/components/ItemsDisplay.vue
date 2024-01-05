@@ -69,9 +69,14 @@ const changeItemAmount = (item: Item, amount: number) => {
             <div class="row">
                 <div class="col-2" v-for="{ item, count } in displayItems">
                     <div class="item-col">
+                        <div class="name">
+                            <span>
+                            {{ item.name }}
+                            </span>
+                        </div>
                         <div class="text-align-end">
                             <img :src="getItemImageLink(item)" :alt="item.name" class="img-thumbnail item-image" />
-                            <CraftButton :item="item" />
+                            <CraftButton v-if="controls" :item="item" />
                         </div>
                         <div class="count">
                             <input
@@ -84,9 +89,6 @@ const changeItemAmount = (item: Item, amount: number) => {
                             <span v-else>
                                 <b>{{ count }}</b>
                             </span>
-                        </div>
-                        <div class="name">
-                            {{ item.name }}
                         </div>
                         <div v-if="!editInventory && controls" class="row">
                             <div class="col px-0">
@@ -118,21 +120,23 @@ const changeItemAmount = (item: Item, amount: number) => {
 
 .item-col {
     width: 100%;
-    padding: 0.5em;
+    padding: 0px .5em 0px .5em;
     margin-bottom: 1em;
     border-radius: 5px;
     background-color: rgb(197, 197, 197);
 }
 
 .name {
-    font-weight: bold;
     font-size: 0.8em;
-    height: 4em;
+    height: 3.3em;
+    margin-bottom: .5em;
+    margin-top: 0px;
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
     vertical-align: middle;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .text-align-end {
