@@ -9,11 +9,13 @@ const { inventory, workShopFormulas } = storeToRefs(usePlannerStore());
 
 export interface Props {
     item: Item;
-    class: string;
+    class?: string;
+    buttonClass?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    class: 'craft-button'
+    class: 'craft-button-parent',
+    buttonClass: 'btn btn-primary craft-button'
 });
 
 const enableCraftButton = computed(() => {
@@ -35,9 +37,22 @@ const enableCraftButton = computed(() => {
 <template>
     <div :class="class" v-if="item.buildingProductList.length > 0">
         <button
-            class="btn btn-primary"
+            :class="buttonClass"
             :disabled="!enableCraftButton"
             @click="craftItem(item)"
         >Craft</button>
     </div>
 </template>
+
+<style scoped>
+.craft-button-parent {
+    position: relative;
+    top: -2.5em;
+    right: 2px;
+    height: 0px;
+}
+
+.craft-button:disabled {
+    opacity: 0.25;
+}
+</style>
