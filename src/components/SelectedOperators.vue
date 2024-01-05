@@ -3,23 +3,8 @@ import PlannerSection from './PlannerSection.vue';
 import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
 import OperatorControls from './OperatorControls.vue';
-import { computed } from 'vue';
-import ItemCell from './ItemCell.vue';
 
-const { selectedOperators, totalCosts, items } = storeToRefs(usePlannerStore());
-
-const totalCostsArray = computed(() => {
-    const costsDict = totalCosts.value ?? [];
-
-    const costs = Object.entries(costsDict).map(([key, count]) => {
-        const item = items.value[key];
-        return { item, count };
-    });
-    
-    return costs
-        .filter(cost => cost.count > 0)
-        .sort((a, b) => a.item.sortId - b.item.sortId);
-});
+const { selectedOperators } = storeToRefs(usePlannerStore());
 </script>
 
 <template>
@@ -31,14 +16,6 @@ const totalCostsArray = computed(() => {
             <div class="row" v-if="selectedOperators.length === 0">
                 <div class="col-12">
                     <p class="text-center">No Operators Selected</p>
-                </div>
-            </div>
-            <div class="row py-3" v-if="totalCostsArray.length > 0">
-                <ItemCell v-for="{ item, count } in totalCostsArray" :item="item" :count="count" />
-            </div>
-            <div class="row py-3" v-else>
-                <div class="col-12">
-                    <p class="text-center">No Materials Required</p>
                 </div>
             </div>
         </div>
