@@ -343,13 +343,6 @@ export const usePlannerStore = defineStore('planner', () => {
     });
 
     // Inventory
-
-    const inventoryItems = computed(() => 
-        Object.values(items.value)
-            .filter(item => inventoryItemIds.includes(item.itemId))
-            .sort((a, b) => a.sortId - b.sortId)
-    );
-
     const inventory = ref<{ [key: string]: number }>(
         JSON.parse(localStorage.getItem('inventory') || 'null') || {}
     );
@@ -379,12 +372,6 @@ export const usePlannerStore = defineStore('planner', () => {
         // add crafted item to inventory
         inventory.value[itemId] += 1;
     }
-
-    watch(inventoryItems, value => {
-        if (value.length > 0 && Object.keys(inventory.value).length === 0) {
-            inventory.value = Object.assign({}, ...inventoryItems.value.map(item => ({ [item.itemId]: 0 })));
-        }
-    });
 
     watch(inventory, debounce((value: {
         [key: string]: number;
@@ -502,7 +489,6 @@ export const usePlannerStore = defineStore('planner', () => {
         items,
         expItems,
         selectedOperators,
-        inventoryItems,
         inventory,
         totalCosts,
         totalCostsByOperator,
