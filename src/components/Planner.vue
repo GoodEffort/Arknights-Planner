@@ -25,10 +25,10 @@ onMounted(async () => {
         <h1>Planner</h1>
         <div v-if="!isLoading">
             <SelectedOperators />
-            <AddOperators />
             <InventoryControls />
             <NeededItems />
             <RecommendedFarm />
+            <AddOperators />
         </div>
         <DotLoader v-else />
     </div>
