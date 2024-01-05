@@ -17,9 +17,12 @@ export interface Props {
     }[];
     title: string;
     localStorageId: string;
+    controls?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    controls: true
+});
 
 const displayItems = computed(() => {
     if (props.displayItems) {
@@ -70,9 +73,6 @@ const changeItemAmount = (item: Item, amount: number) => {
                             <img :src="getItemImageLink(item)" :alt="item.name" class="img-thumbnail item-image" />
                             <CraftButton :item="item" />
                         </div>
-                        <div class="name">
-                            {{ item.name }}
-                        </div>
                         <div class="count">
                             <input
                                 v-if="editInventory"
@@ -82,10 +82,13 @@ const changeItemAmount = (item: Item, amount: number) => {
                                 v-model="inventory[item.itemId]"
                             />
                             <span v-else>
-                                {{ count }}
+                                <b>{{ count }}</b>
                             </span>
                         </div>
-                        <div v-if="!editInventory" class="row">
+                        <div class="name">
+                            {{ item.name }}
+                        </div>
+                        <div v-if="!editInventory && controls" class="row">
                             <div class="col px-0">
                                 <button
                                     class="btn btn-primary"
@@ -115,22 +118,29 @@ const changeItemAmount = (item: Item, amount: number) => {
 
 .item-col {
     width: 100%;
-    padding: 1em 0.5em;
+    padding: 0.5em;
     margin-bottom: 1em;
     border-radius: 5px;
     background-color: rgb(197, 197, 197);
 }
 
 .name {
+    font-weight: bold;
     font-size: 0.8em;
-    text-align: center;
-    margin-top: 0.5em;
     height: 4em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
     vertical-align: middle;
 }
 
 .text-align-end {
     text-align: end;
+}
+
+.count {
+    margin-top: .25em;
+    margin-bottom: .25em;
 }
 </style>
