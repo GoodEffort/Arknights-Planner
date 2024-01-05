@@ -9,7 +9,7 @@ const { neededItems } = storeToRefs(usePlannerStore());
 <template>
     <ItemsDisplay
         :display-items="neededItems"
-        title="Needed Items"
+        title="Missing Items"
         local-storage-id="needed-items-collapsed"
     />
 </template>
