@@ -8,7 +8,7 @@ import CraftButton from './CraftButton.vue';
 import inventoryItemIds from '../data/inventoryItemIds';
 
 const { getItemImageLink } = usePlannerStore();
-const { inventory, items } = storeToRefs(usePlannerStore());
+const { inventory, items, lmdId } = storeToRefs(usePlannerStore());
 
 export interface Props {
     displayItems?: {
@@ -44,7 +44,7 @@ const editInventory = computed(() => {
 });
 
 const lmdChangeAmount = computed(() => {
-    const neededLmd = displayItems.value.find(item => item.item.itemId === '4001')?.count ?? 0;
+    const neededLmd = displayItems.value.find(item => item.item.itemId === lmdId.value)?.count ?? 0;
     if (+neededLmd.toExponential().split('+')[1] > 3) {
         return 10000;
     }
@@ -94,14 +94,14 @@ const changeItemAmount = (item: Item, amount: number) => {
                             <div class="col px-0">
                                 <button
                                     class="btn btn-primary"
-                                    @click="changeItemAmount(item, item.itemId === '4001' ? -lmdChangeAmount : -1)"
-                                >-{{ item.itemId === '4001' ? lmdChangeAmountString : '1' }}</button>
+                                    @click="changeItemAmount(item, item.itemId === lmdId ? -lmdChangeAmount : -1)"
+                                >-{{ item.itemId === lmdId ? lmdChangeAmountString : '1' }}</button>
                             </div>
                             <div class="col px-0">
                                 <button
                                     class="btn btn-primary"
-                                    @click="changeItemAmount(item, item.itemId === '4001' ? lmdChangeAmount : 1)"
-                                >+{{ item.itemId === '4001' ? lmdChangeAmountString : '1' }}</button>
+                                    @click="changeItemAmount(item, item.itemId === lmdId ? lmdChangeAmount : 1)"
+                                >+{{ item.itemId === lmdId ? lmdChangeAmountString : '1' }}</button>
                             </div>
                         </div>
                     </div>

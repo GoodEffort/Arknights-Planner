@@ -21,6 +21,7 @@ export const usePlannerStore = defineStore('planner', () => {
     const items = ref<{ [key: string]: Item }>({});
     const expItems = ref<{ [key: string]: ExpItem }>({});
     const workShopFormulas = ref<{ [key: string]: WorkshopCost[] }>({}); 
+    const lmdId = ref<string>('4001');
 
     // Operators
 
@@ -45,6 +46,8 @@ export const usePlannerStore = defineStore('planner', () => {
 
         items.value = data.items;
         expItems.value = data.expItems;
+        // incase the lmd id changes somehow
+        lmdId.value = Object.values(data.items).find(i => i.name === 'LMD')!.itemId;
     }
 
     async function loadWorkshopFormulas() {
@@ -433,6 +436,7 @@ export const usePlannerStore = defineStore('planner', () => {
         modules,
         items,
         expItems,
+        lmdId,
         selectedOperators,
         inventory,
         totalCosts,
