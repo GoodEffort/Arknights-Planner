@@ -1,7 +1,6 @@
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import type { Operator, CharEquip, EquipDict, Module, Skill } from '../types/operator';
-import type { WorkshopCost } from '../data/buildingdata';
 import { SelectedOperator, SaveRecord } from '../types/operator';
 import getChardata from '../data/chardata';
 import getModuledata from '../data/moduledata';
@@ -20,8 +19,14 @@ export const usePlannerStore = defineStore('planner', () => {
     const selectedOperators = ref<SelectedOperator[]>([]);
     const items = ref<{ [key: string]: Item }>({});
     const expItems = ref<{ [key: string]: ExpItem }>({});
-    const workShopFormulas = ref<{ [key: string]: WorkshopCost[] }>({}); 
-    const lmdId = ref<string>('4001');
+    const workShopFormulas = ref<{
+        [key: string]: {
+            id: string;
+            count: number;
+            type: string;
+        }[]
+    }>({});
+    const lmdId = ref<string>('4001'); // this should be constant
 
     // Operators
 
@@ -81,13 +86,13 @@ export const usePlannerStore = defineStore('planner', () => {
     }
 
     function getSavedOperatorData(operatorId: string): SelectedOperator {
-        const saveString = `plans-${ operatorId }`;
+        const saveString = `plans-${operatorId}`;
         const saveData: string | null = localStorage.getItem(saveString);
         const operator = operators.value.find(c => c.id === operatorId);
         const modulesarray = getModulesForCharacter(operatorId);
 
         if (operator === undefined) {
-            throw new Error(`Operator with id ${ operatorId } not found.`);
+            throw new Error(`Operator with id ${operatorId} not found.`);
         }
 
         let selectedOperator: SelectedOperator;
@@ -118,7 +123,7 @@ export const usePlannerStore = defineStore('planner', () => {
             const newOperatorSelection = getSavedOperatorData(character.id);
             selectedOperators.value.push(newOperatorSelection);
         }
-        else if (confirm(`Are you sure you want to remove ${ character.name } from your selection?`)) {
+        else if (confirm(`Are you sure you want to remove ${character.name} from your selection?`)) {
             selectedOperators.value.splice(selectedOperators.value.indexOf(existingSelection), 1);
         }
 
@@ -143,7 +148,7 @@ export const usePlannerStore = defineStore('planner', () => {
             currentMasteryIndex++
         ) {
             const lucc = skillMasteryCosts.levelUpCostCond[currentMasteryIndex];
-    
+
             if (lucc) {
                 const { levelUpCost } = lucc;
 
@@ -162,12 +167,12 @@ export const usePlannerStore = defineStore('planner', () => {
         ) {
             const strIndex: '1' | '2' | '3' = currentModuleIndex.toString() as '1' | '2' | '3';
             const itemCosts = module.itemCost[strIndex];
-    
+
             for (const { count, id } of itemCosts) {
                 neededItems[id] += count;
             }
         }
-    
+
         return neededItems;
     }
 
@@ -227,7 +232,7 @@ export const usePlannerStore = defineStore('planner', () => {
                 const endLevel = currentEliteIndex < targetElite ?
                     eliteLevelUpCosts[currentEliteIndex].maxLevel :
                     Math.min(maxLevel, targetLevel);
-                
+
                 for (; currentLevelIndex < endLevel; currentLevelIndex++) {
                     const cost = levelingCostsArray[currentEliteIndex][currentLevelIndex]
                     if (!cost) {
@@ -248,12 +253,12 @@ export const usePlannerStore = defineStore('planner', () => {
             for (const { gainExp, id } of battleRecords.value) {
                 const recordsNeeded = Math.floor(exp / gainExp);
                 exp = exp % gainExp;
-        
+
                 if (recordsNeeded > 0) {
                     neededItems[id] += recordsNeeded;
                 }
             }
-        
+
             if (exp > 0) {
                 const lastExpItemId = battleRecords.value[battleRecords.value.length - 1].id;
                 neededItems[lastExpItemId] += 1;
@@ -351,13 +356,13 @@ export const usePlannerStore = defineStore('planner', () => {
 
     const craftItem = (item: Item) => {
         const { itemId, buildingProductList } = item;
-        
+
         // verify if we have enough items
         for (const product of buildingProductList) {
             const costs = workShopFormulas.value[product.formulaId];
             for (const { id, count } of costs) {
                 if (inventory.value[id] < count) {
-                    alert(`You don't have enough ${ items.value[id].name } to craft ${ item.name }.`);
+                    alert(`You don't have enough ${items.value[id].name} to craft ${item.name}.`);
                     return;
                 }
             }
@@ -386,7 +391,7 @@ export const usePlannerStore = defineStore('planner', () => {
     const neededItems = computed(() => {
         const needed: { item: Item, count: number }[] = [];
         let totalExp = 0;
-    
+
         for (const key in totalCosts.value) {
             if (expItems.value[key] !== undefined) {
                 totalExp += expItems.value[key].gainExp * totalCosts.value[key];
@@ -399,22 +404,22 @@ export const usePlannerStore = defineStore('planner', () => {
                 }
             }
         }
-    
+
         for (const key in inventory.value) {
             if (expItems.value[key] !== undefined) {
                 totalExp -= expItems.value[key].gainExp * inventory.value[key];
             }
         }
-    
+
         const neededEXPItems: {
             [key: string]: number;
         } = {};
-    
+
         // calculate exp items needed
         for (const { gainExp, id } of battleRecords.value) {
             const recordsNeeded = Math.floor(totalExp / gainExp);
             totalExp = totalExp % gainExp;
-    
+
             if (recordsNeeded > 0) {
                 if (neededEXPItems[id] === undefined) {
                     neededEXPItems[id] = 0;
@@ -422,12 +427,12 @@ export const usePlannerStore = defineStore('planner', () => {
                 neededEXPItems[id] += recordsNeeded;
             }
         }
-    
+
         for (const [key, count] of Object.entries(neededEXPItems)) {
             const item = items.value[key];
             needed.push({ item, count });
         }
-    
+
         return needed.sort((a, b) => a.item.sortId - b.item.sortId);
     });
 
