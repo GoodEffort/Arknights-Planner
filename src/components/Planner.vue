@@ -7,6 +7,7 @@ import { DotLoader } from "vue3-spinner";
 import InventoryControls from './InventoryControls.vue';
 import NeededItems from './NeededItems.vue';
 import RecommendedFarm from './RecommendedFarm.vue';
+import TotalCostOfPlan from './TotalCostOfPlan.vue';
 
 const { loadCharacters, loadModules, loadSavedRecords, loadItems, loadWorkshopFormulas } = usePlannerStore();
 
@@ -25,9 +26,10 @@ onMounted(async () => {
         <h1>Planner</h1>
         <div v-if="!isLoading">
             <SelectedOperators />
-            <InventoryControls />
+            <TotalCostOfPlan />
             <NeededItems />
             <RecommendedFarm />
+            <InventoryControls />
             <AddOperators />
         </div>
         <DotLoader v-else />
