@@ -1,8 +1,5 @@
 // https://docs.google.com/spreadsheets/d/12X0uBQaN7MuuMWWDTiUjIni_MOP015GnulggmBJgBaQ/
 
-import { Item } from "../types/item";
-import { WorkshopCost } from "./buildingdata";
-
 // this was going to be a super cool api call using a library but then I realized I had to use a secret key and this is only front end so fuck that
 
 // aim to use these mats to craft if possible
@@ -25,7 +22,7 @@ const efficientToFarmItemIds = [
     "31063", // Transmuted Salt
 ];
 
-const ignoreItems = [
+const chipIds = [ // ignore these because they'll cause an infinite loop as they craft into each other
     "3211", // Vanguard Chip
     "3213", // Vanguard Dualchip
     "3221", // Guard Chip
@@ -42,29 +39,6 @@ const ignoreItems = [
     "3273", // Supporter Dualchip
     "3281", // Specialist Chip
     "3283", // Specialist Dualchip
-]
+];
 
-const getEfficientToFarmMats = (
-    item: Item,
-    count: number,
-    workShopFormulas: { [key: string]: WorkshopCost[] },
-    items: { [key: string]: Item },
-    efficientItems: { item: Item, count: number }[]
-) => {
-    if (efficientToFarmItemIds.indexOf(item.itemId) >= 0 || ignoreItems.indexOf(item.itemId) >= 0) {
-        efficientItems.push({ item, count });
-        return;
-    }
-    else if (item.buildingProductList.length > 0) {
-        const formula = workShopFormulas[item.buildingProductList[0].formulaId];
-
-        for (const cost of formula) {
-            const childItem = items[cost.id];
-            const childCount = cost.count * count;
-
-            getEfficientToFarmMats(childItem, childCount, workShopFormulas, items, efficientItems);
-        }
-    }
-}
-
-export default getEfficientToFarmMats;
+export { efficientToFarmItemIds, chipIds };

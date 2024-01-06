@@ -27,6 +27,12 @@ export const usePlannerStore = defineStore('planner', () => {
         }[]
     }>({});
     const lmdId = ref<string>('4001'); // this should be constant
+    const reserveTier1 = ref<number>(0);
+    const reserveTier2 = ref<number>(0);
+    const reserveTier3 = ref<number>(0);
+    const reserveTier4 = ref<number>(0);
+    const reserveTier5 = ref<number>(0);
+    const reserveTier6 = ref<number>(0);
 
     // Operators
 
@@ -449,6 +455,12 @@ export const usePlannerStore = defineStore('planner', () => {
         battleRecords,
         neededItems,
         workShopFormulas,
+        reserveTier1,
+        reserveTier2,
+        reserveTier3,
+        reserveTier4,
+        reserveTier5,
+        reserveTier6,
         loadCharacters,
         loadModules,
         loadItems,
