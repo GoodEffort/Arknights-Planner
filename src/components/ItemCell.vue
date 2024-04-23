@@ -1,19 +1,18 @@
 <script setup lang="ts">
-import { usePlannerStore } from '../store/planner-store';
 import { Item } from '../types/item';
+import ImageFinder from './ImageFinder.vue';
 
 defineProps<{
     item: Item;
     count: number;
 }>();
 
-const { getItemImageLink } = usePlannerStore();
 </script>
 
 <template>
     <div class="col-2">
         <div>
-            <img :src="getItemImageLink(item)" :alt="item.name" class="img-thumbnail item-image" />
+            <ImageFinder :subject="item" class="item-image" />
         </div>
         <div class="name">
             {{ item.name }}

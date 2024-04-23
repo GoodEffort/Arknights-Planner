@@ -5,10 +5,9 @@ import { Item } from '../types/item';
 import PlannerSection from './PlannerSection.vue';
 import { storeToRefs } from 'pinia';
 import CraftButton from './CraftButton.vue';
-import inventoryItemIds from '../data/inventoryItemIds';
+import ImageFinder from './ImageFinder.vue';
 
-const { getItemImageLink } = usePlannerStore();
-const { inventory, items, lmdId } = storeToRefs(usePlannerStore());
+const { inventory, lmdId, inventoryItems } = storeToRefs(usePlannerStore());
 
 export interface Props {
     displayItems?: {
@@ -29,11 +28,10 @@ const displayItems = computed(() => {
         return props.displayItems;
     }
     else {
-        return inventoryItemIds.map(itemId => {
-            const item = items.value[itemId];
+        return inventoryItems.value.map(item => {
             return {
                 item,
-                count: inventory.value[itemId] || 0
+                count: inventory.value[item.itemId] || 0
             };
         }).sort((a, b) => a.item.sortId - b.item.sortId);
     }
@@ -75,7 +73,7 @@ const changeItemAmount = (item: Item, amount: number) => {
                             </span>
                         </div>
                         <div class="text-align-end">
-                            <img :src="getItemImageLink(item)" :alt="item.name" class="img-thumbnail item-image" />
+                            <ImageFinder :subject="item" class="item-image" />
                             <CraftButton v-if="controls" :item="item" />
                         </div>
                         <div class="count">

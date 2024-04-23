@@ -9,12 +9,12 @@ import OperatorModule from './controls/OperatorModule.vue';
 import OperatorCosts from './OperatorCosts.vue';
 import { Collapse } from 'vue-collapsed';
 import { storeToRefs } from 'pinia';
+import ImageFinder from './ImageFinder.vue';
 
 const props = defineProps<{
     operatorId: string;
 }>();
 
-const { getOperatorImageLink } = usePlannerStore();
 const { selectedOperators } = storeToRefs(usePlannerStore());
 
 const selectedOperator = computed(() => selectedOperators.value.find(o => o.operator.id === props.operatorId)!);
@@ -228,7 +228,7 @@ const targetModuleZ = computed({
 
 <template>
     <div class="col-1">
-        <img :src="getOperatorImageLink(operator)" :alt="operator.name" class="img-thumbnail cursor-pointer" @click="collapsed = !collapsed" :class="{ dimmed: !collapsed }" />
+        <ImageFinder :subject="operator" class="cursor-pointer" @click="collapsed = !collapsed" :class="{ dimmed: !collapsed }" />
     </div>
     <div class="col left-border">
         <div class="row">
