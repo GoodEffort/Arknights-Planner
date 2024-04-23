@@ -11,6 +11,12 @@ const getChardata = async () => {
 
     const [data, cn_data]: Character_Table[] = await Promise.all([response.json(), cn_response.json()]);
 
+    // get English name from the appellation field
+    for (const key in cn_data) {
+        let character = cn_data[key];
+        character.name = character.appellation;
+    }
+
     // this should combine the new Chinese data with the existing English data allowing to see characters only available in China   
     const chardata: Operator[] = Object.entries({ ...cn_data, ...data })
         .map(([id, char]) => {
