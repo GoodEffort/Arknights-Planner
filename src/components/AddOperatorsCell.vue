@@ -3,6 +3,7 @@ import { PropType, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlannerStore } from '../store/planner-store';
 import { Operator } from '../types/operator';
+import ImageFinder from './ImageFinder.vue';
 
 const { columnClass, operator } = defineProps({
     columnClass: {
@@ -15,7 +16,7 @@ const { columnClass, operator } = defineProps({
     }
 });
 
-const { getOperatorImageLink, selectCharacter } = usePlannerStore();
+const { selectCharacter } = usePlannerStore();
 const { selectedOperators } = storeToRefs(usePlannerStore());
 
 const isSelected = computed(() => selectedOperators.value.find(c => c.operator.id === operator.id) !== undefined);
@@ -24,7 +25,7 @@ const isSelected = computed(() => selectedOperators.value.find(c => c.operator.i
 <template>
     <div :class="`character-select ${ columnClass } ${ isSelected ? 'selected' : '' }`" @click="selectCharacter(operator)">
         <div>
-            <img :src="getOperatorImageLink(operator)" :alt="operator.name" class="img-thumbnail" />
+            <ImageFinder :subject="operator" class="img-thumbnail" />
         </div>
         <div class="name">
             {{ operator.name }}

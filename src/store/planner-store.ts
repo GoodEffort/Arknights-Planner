@@ -6,7 +6,6 @@ import getChardata from '../data/chardata';
 import getModuledata from '../data/moduledata';
 import getItemdata from '../data/itemdata';
 import { ExpItem, Item } from '../types/item';
-import inventoryItemIds from '../data/inventoryItemIds';
 import { debounce } from 'lodash';
 import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
@@ -33,7 +32,6 @@ export const usePlannerStore = defineStore('planner', () => {
     const reserveTier4 = ref<number>(0);
     const reserveTier5 = ref<number>(0);
     const reserveTier6 = ref<number>(0);
-
     // Operators
 
     async function loadCharacters() {
@@ -115,12 +113,24 @@ export const usePlannerStore = defineStore('planner', () => {
         return selectedOperator
     }
 
-    function getOperatorImageLink(character: Operator) {
-        return `https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/${character.id}.png`;
+    async function getOperatorImageLink(character: Operator) {
+        // one of these should work... hopefully
+        const primarySource = "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/";
+        const secondarySource = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/charavatars/";
+
+        const primary = (await fetch(`${primarySource}${character.id}.png`)).ok;
+
+        return `${ primary ? primarySource : secondarySource }${character.id}.png`;
     }
 
-    function getItemImageLink(item: Item) {
-        return `https://raw.githubusercontent.com/Aceship/Arknight-Images/main/items/${item.iconId}.png`;
+    async function getItemImageLink(item: Item) {
+        // one of these should work... hopefully
+        const primarySource = "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/items/";
+        const secondarySource = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/items/icons/";
+
+        const primary = (await fetch(`${primarySource}${item.iconId}.png`)).ok;
+
+        return `${primary ? primarySource: secondarySource}${item.iconId}.png`;
     }
 
     function selectCharacter(character: Operator) {
@@ -185,15 +195,14 @@ export const usePlannerStore = defineStore('planner', () => {
     const getBlankInventory = () => {
         const neededItems: { [key: string]: number } = {};
 
-        for (const id of inventoryItemIds) {
-            neededItems[id] = 0;
+        for (const { itemId } of inventoryItems.value) {
+            neededItems[itemId] = 0;
         }
 
         return neededItems;
     }
 
     const totalCostsByOperator = computed(() => {
-        const lmdId = '4001';
         const neededItemsByOperator: { [key: string]: { [key: string]: number } } = {};
 
         for (const { modules, plans, operator } of selectedOperators.value) {
@@ -252,7 +261,7 @@ export const usePlannerStore = defineStore('planner', () => {
             }
 
             if (lmd > 0) {
-                neededItems[lmdId] += lmd;
+                neededItems[lmdId.value] += lmd;
             }
 
             // calculate exp items needed
@@ -285,9 +294,9 @@ export const usePlannerStore = defineStore('planner', () => {
                     }
 
                     if (currentEliteIndex === 1)
-                        neededItems[lmdId] += promotionLMD.ELITE_1;
+                        neededItems[lmdId.value] += promotionLMD.ELITE_1;
                     else if (currentEliteIndex === 2)
-                        neededItems[lmdId] += promotionLMD.ELITE_2;
+                        neededItems[lmdId.value] += promotionLMD.ELITE_2;
                 }
             }
 
@@ -356,6 +365,19 @@ export const usePlannerStore = defineStore('planner', () => {
     });
 
     // Inventory
+    const inventoryItems = computed(() => {
+        const itemsArray = Object.values(items.value);
+        return itemsArray.filter(i =>
+            i.itemType === "GOLD" ||
+            (
+                i.itemType === "MATERIAL" ||
+                i.itemType === "CARD_EXP"
+            ) &&
+            i.classifyType === "MATERIAL" &&
+            !i.name.match(/.+\sToken/)
+        ).sort((a, b) => a.sortId - b.sortId);
+    });
+
     const inventory = ref<{ [key: string]: number }>(
         JSON.parse(localStorage.getItem('inventory') || 'null') || {}
     );
@@ -446,6 +468,7 @@ export const usePlannerStore = defineStore('planner', () => {
         operators,
         modules,
         items,
+        inventoryItems,
         expItems,
         lmdId,
         selectedOperators,
