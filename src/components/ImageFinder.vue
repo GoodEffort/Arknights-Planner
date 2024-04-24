@@ -1,30 +1,65 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { usePlannerStore } from '../store/planner-store';
+import { ref, watch } from 'vue';
 import { Item } from '../types/item';
 import { Operator } from '../types/operator';
-const { getItemImageLink, getOperatorImageLink } = usePlannerStore();
+
+async function getOperatorImageLink(character: Operator) {
+    // one of these should work... hopefully
+    const primarySource = "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/";
+    const secondarySource = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/charavatars/";
+
+    let primary = true;
+
+    try {
+        primary = (await fetch(`${primarySource}${character.id}.png`)).ok;
+    }
+    catch (e) {
+        primary = false;
+    }
+
+    return `${primary ? primarySource : secondarySource}${character.id}.png`;
+}
+
+async function getItemImageLink(item: Item) {
+    // one of these should work... hopefully
+    const primarySource = "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/items/";
+    const secondarySource = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/items/icons/";
+
+    let primary = true;
+
+    try {
+        primary = (await fetch(`${primarySource}${item.iconId}.png`)).ok;
+    }
+    catch (e) {
+        primary = false;
+    }
+
+    return `${primary ? primarySource : secondarySource}${item.iconId}.png`;
+}
 
 export interface Props {
     subject: Item | Operator;
+    class?: string;
 }
 
 const props = defineProps<Props>();
 
-const getLink = async () => {
+const setLink = async () => {
     if ('itemId' in props.subject) {
-        return await getItemImageLink(props.subject);
+        link.value = await getItemImageLink(props.subject);
     }
     else {
-        return await getOperatorImageLink(props.subject);
+        link.value = await getOperatorImageLink(props.subject);
     }
 };
 
-const link = ref<string>("https://github.com/ArknightsAssets/ArknightsAssets/blob/cn/assets/torappu/dynamicassets/arts/%5Bpack%5Dcmgachapool/pack2/spine_bk.png");
+const link = ref<string>("");
 
-getLink().then(result => {
-    link.value = result;
+watch(() => props.subject, async () => {
+    await setLink();
 });
+
+setLink();
 </script>
 
 <template>

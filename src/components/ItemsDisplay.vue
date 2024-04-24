@@ -7,7 +7,7 @@ import { storeToRefs } from 'pinia';
 import CraftButton from './CraftButton.vue';
 import ImageFinder from './ImageFinder.vue';
 
-const { inventory, lmdId, inventoryItems } = storeToRefs(usePlannerStore());
+const { inventory, lmdId, items } = storeToRefs(usePlannerStore());
 
 export interface Props {
     displayItems?: {
@@ -28,7 +28,7 @@ const displayItems = computed(() => {
         return props.displayItems;
     }
     else {
-        return inventoryItems.value.map(item => {
+        return Object.values(items.value).map(item => {
             return {
                 item,
                 count: inventory.value[item.itemId] || 0
