@@ -1,25 +1,19 @@
 <script setup lang="ts">
 import { computed, watch, ref } from 'vue';
-import { usePlannerStore } from '../store/planner-store';
 import OperatorPromotion from './controls/OperatorPromotion.vue';
 import OperatorLevel from './controls/OperatorLevel.vue';
 import OperatorSkillMasteries from './controls/OperatorMasteries.vue';
-import type { Operator, SaveRecord } from '../types/operator';
+import type { SaveRecord, SelectedOperator } from '../types/operator';
 import OperatorModule from './controls/OperatorModule.vue';
 import OperatorCosts from './OperatorCosts.vue';
 import { Collapse } from 'vue-collapsed';
-import { storeToRefs } from 'pinia';
 import ImageFinder from './ImageFinder.vue';
 
 const props = defineProps<{
-    operatorId: string;
+    selectedOperator: SelectedOperator;
 }>();
 
-const { selectedOperators } = storeToRefs(usePlannerStore());
-
-const selectedOperator = computed(() => selectedOperators.value.find(o => o.operator.id === props.operatorId)!);
-
-watch(selectedOperator, ({ operator, plans }) => {
+watch(props.selectedOperator, ({ operator, plans }) => {
     const saveString = `plans-${ operator.id }`;
     const saveRecord: SaveRecord = {
         operatorId: operator.id,
@@ -28,12 +22,12 @@ watch(selectedOperator, ({ operator, plans }) => {
     localStorage.setItem(saveString, JSON.stringify(saveRecord));
 }, { deep: true });
 
+const operator = computed(() => props.selectedOperator.operator);
+
 const collapsed = ref(false);
 
-const operator = computed<Operator>(() => selectedOperator.value.operator);
-
 const currentElite = computed({
-    get: () => selectedOperator.value.plans.currentElite,
+    get: () => props.selectedOperator.plans.currentElite,
     set: value => {
         const elite: 0 | 1 | 2 = (+value) as 0 | 1 | 2
 
@@ -41,12 +35,12 @@ const currentElite = computed({
             targetElite.value = elite;
         }
 
-        selectedOperator.value.plans.currentElite = elite;
+        props.selectedOperator.plans.currentElite = elite;
     }
 });
 
 const targetElite = computed({
-    get: () => selectedOperator.value.plans.targetElite,
+    get: () => props.selectedOperator.plans.targetElite,
     set: value => {
         const elite: 0 | 1 | 2 = (+value) as 0 | 1 | 2
 
@@ -54,12 +48,12 @@ const targetElite = computed({
             currentElite.value = elite;
         }
 
-        selectedOperator.value.plans.targetElite = elite;
+        props.selectedOperator.plans.targetElite = elite;
     }
 });
 
 const targetLevelMax = computed(() => {
-    const phases = operator.value.phases;
+    const phases = props.selectedOperator.operator.phases;
     const te = targetElite.value;
     
     const maxLevel = phases[te].maxLevel;
@@ -75,7 +69,7 @@ const currentLevelMax = computed(() => {
 });
 
 const currentLevel = computed({
-    get: () => selectedOperator.value.plans.currentLevel,
+    get: () => props.selectedOperator.plans.currentLevel,
     set: value => {
         let newLevel = +value;
 
@@ -86,12 +80,12 @@ const currentLevel = computed({
             targetLevel.value = newLevel;
         }
 
-        selectedOperator.value.plans.currentLevel = newLevel;
+        props.selectedOperator.plans.currentLevel = newLevel;
     }
 });
 
 const targetLevel = computed({
-    get: () => selectedOperator.value.plans.targetLevel,
+    get: () => props.selectedOperator.plans.targetLevel,
     set: value => {
         let newLevel = +value;
 
@@ -102,12 +96,12 @@ const targetLevel = computed({
             currentLevel.value = newLevel;
         }
 
-        selectedOperator.value.plans.targetLevel = newLevel;
+        props.selectedOperator.plans.targetLevel = newLevel;
     }
 });
 
 const currentSkill = computed({
-    get: () => selectedOperator.value.plans.currentSkillLevels,
+    get: () => props.selectedOperator.plans.currentSkillLevels,
     set: value => {
         let newSkill = +value;
         const maxSkill = currentElite.value === 0 ? 4 : 7;
@@ -119,12 +113,12 @@ const currentSkill = computed({
             targetSkill.value = newSkill;
         }
 
-        selectedOperator.value.plans.currentSkillLevels = newSkill;
+        props.selectedOperator.plans.currentSkillLevels = newSkill;
     }
 });
 
 const targetSkill = computed({
-    get: () => selectedOperator.value.plans.targetSkillLevels,
+    get: () => props.selectedOperator.plans.targetSkillLevels,
     set: value => {
         let newSkill = +value;
         const maxSkill = targetElite.value === 0 ? 4 : 7;
@@ -132,7 +126,7 @@ const targetSkill = computed({
         if (newSkill < currentSkill.value) newSkill = currentSkill.value;
         if (newSkill > maxSkill) newSkill = maxSkill;
 
-        selectedOperator.value.plans.targetSkillLevels = newSkill;
+        props.selectedOperator.plans.targetSkillLevels = newSkill;
     }
 });
 
@@ -142,21 +136,21 @@ const targetMasterySetFn = (skill: 1 | 2 | 3) => (value: number) => {
     if (newMastery < 0) newMastery = 0;
     if (newMastery > 3) newMastery = 3;
 
-    selectedOperator.value.plans.targetSkillMasteries[`skill${skill}`] = newMastery;
+    props.selectedOperator.plans.targetSkillMasteries[`skill${skill}`] = newMastery;
 };
 
 const targetMastery1 = computed({
-    get: () => selectedOperator.value.plans.targetSkillMasteries.skill1,
+    get: () => props.selectedOperator.plans.targetSkillMasteries.skill1,
     set: targetMasterySetFn(1)
 });
 
 const targetMastery2 = computed({
-    get: () => selectedOperator.value.plans.targetSkillMasteries.skill2,
+    get: () => props.selectedOperator.plans.targetSkillMasteries.skill2,
     set: targetMasterySetFn(2)
 });
 
 const targetMastery3 = computed({
-    get: () => selectedOperator.value.plans.targetSkillMasteries.skill3,
+    get: () => props.selectedOperator.plans.targetSkillMasteries.skill3,
     set: targetMasterySetFn(3)
 });
 
@@ -172,56 +166,56 @@ const currentMasterySetFn = (skill: 1 | 2 | 3) => (value: number) => {
         target.value = newMastery;
     }
 
-    selectedOperator.value.plans.currentSkillMasteries[`skill${skill}`] = newMastery;
+    props.selectedOperator.plans.currentSkillMasteries[`skill${skill}`] = newMastery;
 };
 
 const currentMastery1 = computed({
-    get: () => selectedOperator.value.plans.currentSkillMasteries.skill1,
+    get: () => props.selectedOperator.plans.currentSkillMasteries.skill1,
     set: currentMasterySetFn(1)
 });
 
 const currentMastery2 = computed({
-    get: () => selectedOperator.value.plans.currentSkillMasteries.skill2,
+    get: () => props.selectedOperator.plans.currentSkillMasteries.skill2,
     set: currentMasterySetFn(2)
 });
 
 const currentMastery3 = computed({
-    get: () => selectedOperator.value.plans.currentSkillMasteries.skill3,
+    get: () => props.selectedOperator.plans.currentSkillMasteries.skill3,
     set: currentMasterySetFn(3)
 });
 
-const hasXModule = computed(() => selectedOperator.value.modules.find(m => m.typeName2 === 'X') !== undefined);
-const hasYModule = computed(() => selectedOperator.value.modules.find(m => m.typeName2 === 'Y') !== undefined);
-const hasZModule = computed(() => selectedOperator.value.modules.find(m => m.typeName2 === 'Z') !== undefined);
+const hasXModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'X') !== undefined);
+const hasYModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'Y') !== undefined);
+const hasZModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'Z') !== undefined);
 
 const currentModuleX = computed({
-    get: () => selectedOperator.value.plans.currentModules.x,
-    set: value => selectedOperator.value.plans.currentModules.x = +value
+    get: () => props.selectedOperator.plans.currentModules.x,
+    set: value => props.selectedOperator.plans.currentModules.x = +value
 });
 
 const currentModuleY = computed({
-    get: () => selectedOperator.value.plans.currentModules.y,
-    set: value => selectedOperator.value.plans.currentModules.y = +value
+    get: () => props.selectedOperator.plans.currentModules.y,
+    set: value => props.selectedOperator.plans.currentModules.y = +value
 });
 
 const currentModuleZ = computed({
-    get: () => selectedOperator.value.plans.currentModules.z,
-    set: value => selectedOperator.value.plans.currentModules.z = +value
+    get: () => props.selectedOperator.plans.currentModules.z,
+    set: value => props.selectedOperator.plans.currentModules.z = +value
 });
 
 const targetModuleX = computed({
-    get: () => selectedOperator.value.plans.targetModules.x,
-    set: value => selectedOperator.value.plans.targetModules.x = +value
+    get: () => props.selectedOperator.plans.targetModules.x,
+    set: value => props.selectedOperator.plans.targetModules.x = +value
 });
 
 const targetModuleY = computed({
-    get: () => selectedOperator.value.plans.targetModules.y,
-    set: value => selectedOperator.value.plans.targetModules.y = +value
+    get: () => props.selectedOperator.plans.targetModules.y,
+    set: value => props.selectedOperator.plans.targetModules.y = +value
 });
 
 const targetModuleZ = computed({
-    get: () => selectedOperator.value.plans.targetModules.z,
-    set: value => selectedOperator.value.plans.targetModules.z = +value
+    get: () => props.selectedOperator.plans.targetModules.z,
+    set: value => props.selectedOperator.plans.targetModules.z = +value
 });
 
 </script>
@@ -244,10 +238,10 @@ const targetModuleZ = computed({
 
                     <div class="row">
                         <div class="col-7" v-if="operator.phases.length > 1">
-                            <OperatorPromotion :phases="operator.phases" v-model="currentElite" />
+                            <OperatorPromotion :phases="operator.phases" v-model="currentElite" :key="`1${operator.id}-elite`" />
                         </div>
                         <div class="col">
-                            <OperatorLevel :maxLevel="currentLevelMax" v-model="currentLevel" />
+                            <OperatorLevel :maxLevel="currentLevelMax" v-model="currentLevel" :key="`1${operator.id}-level`" />
                         </div>
                     </div>
                     <hr v-if="operator.skills.length > 0" />
@@ -263,13 +257,13 @@ const targetModuleZ = computed({
                     <div class="row" v-if="operator.phases.length > 2">
                         <label>Skill Masteries</label>
                         <div class="col">
-                            <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="currentMastery1" :skillNumber="1" />
+                            <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="currentMastery1" :skillNumber="1" :key="`1${operator.id}-skill1`" />
                         </div>
                         <div class="col">
-                            <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="currentMastery2" :skillNumber="2" />
+                            <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="currentMastery2" :skillNumber="2"  :key="`1${operator.id}-skill2`" />
                         </div>
                         <div class="col">
-                            <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="currentMastery3" :skillNumber="3" />
+                            <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="currentMastery3" :skillNumber="3"  :key="`1${operator.id}-skill3`" />
                         </div>
                     </div>
                     <hr v-if="selectedOperator.modules.length > 0" />
@@ -277,13 +271,13 @@ const targetModuleZ = computed({
                     <div class="row" v-if="selectedOperator.modules.length > 0">
                         <label>Modules</label>
                         <div class="col">
-                            <OperatorModule v-if="hasXModule" v-model="currentModuleX" module-letter="X" />
+                            <OperatorModule v-if="hasXModule" v-model="currentModuleX" module-letter="X"  :key="`1${operator.id}-mx`" />
                         </div>
                         <div class="col">
-                            <OperatorModule v-if="hasYModule" v-model="currentModuleY" module-letter="Y" />
+                            <OperatorModule v-if="hasYModule" v-model="currentModuleY" module-letter="Y"  :key="`1${operator.id}-my`" />
                         </div>
                         <div class="col">
-                            <OperatorModule v-if="hasZModule" v-model="currentModuleZ" module-letter="Z" />
+                            <OperatorModule v-if="hasZModule" v-model="currentModuleZ" module-letter="Z" :key="`1${operator.id}-mz`" />
                         </div>
                     </div>
 
@@ -294,10 +288,10 @@ const targetModuleZ = computed({
 
                     <div class="row">
                         <div class="col-7" v-if="operator.phases.length > 1">
-                            <OperatorPromotion :phases="operator.phases" v-model="targetElite" />
+                            <OperatorPromotion :phases="operator.phases" v-model="targetElite" :key="`2${operator.id}-elite`" />
                         </div>
                         <div class="col">
-                            <OperatorLevel :maxLevel="targetLevelMax" v-model="targetLevel" />
+                            <OperatorLevel :maxLevel="targetLevelMax" v-model="targetLevel" :key="`2${operator.id}-level`" />
                         </div>
                     </div>
                     <hr v-if="operator.skills.length > 0" />
@@ -313,13 +307,13 @@ const targetModuleZ = computed({
                     <div class="row" v-if="operator.phases.length > 2">
                         <label>Skill Masteries</label>
                         <div class="col">
-                            <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="targetMastery1" :skillNumber="1" />
+                            <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="targetMastery1" :skillNumber="1" :key="`2${operator.id}-skill1`" />
                         </div>
                         <div class="col">
-                            <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="targetMastery2" :skillNumber="2" />
+                            <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="targetMastery2" :skillNumber="2" :key="`2${operator.id}-skill2`" />
                         </div>
                         <div class="col">
-                            <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="targetMastery3" :skillNumber="3" />
+                            <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="targetMastery3" :skillNumber="3" :key="`2${operator.id}-skill3`" />
                         </div>
                     </div>
                     <hr v-if="selectedOperator.modules.length > 0" />
@@ -327,13 +321,13 @@ const targetModuleZ = computed({
                     <div class="row" v-if="selectedOperator.modules.length > 0">
                         <label>Modules</label>
                         <div class="col">
-                            <OperatorModule v-if="hasXModule" v-model="targetModuleX" module-letter="X" />
+                            <OperatorModule v-if="hasXModule" v-model="targetModuleX" module-letter="X" :key="`2${operator.id}-mx`" />
                         </div>
                         <div class="col">
-                            <OperatorModule v-if="hasYModule" v-model="targetModuleY" module-letter="Y" />
+                            <OperatorModule v-if="hasYModule" v-model="targetModuleY" module-letter="Y" :key="`2${operator.id}-my`" />
                         </div>
                         <div class="col">
-                            <OperatorModule v-if="hasZModule" v-model="targetModuleZ" module-letter="Z" />
+                            <OperatorModule v-if="hasZModule" v-model="targetModuleZ" module-letter="Z" :key="`2${operator.id}-mz`" />
                         </div>
                     </div>
                 </div>
@@ -344,6 +338,7 @@ const targetModuleZ = computed({
             <div class="row">
                 <OperatorCosts
                     :operatorId="operator.id"
+                    :key="`${operator.id}-costs`"
                 />
             </div>
         </Collapse>
