@@ -16,8 +16,8 @@ export const usePlannerStore = defineStore('planner', () => {
     const modules = ref<EquipDict>({});
     const charactersToModules = ref<CharEquip>({});
     const selectedOperators = ref<SelectedOperator[]>([]);
-    const items = ref<{ [key: string]: Item }>({});
     const expItems = ref<{ [key: string]: ExpItem }>({});
+    const items = ref<{ [key: string]: Item }>({});
     const workShopFormulas = ref<{
         [key: string]: {
             id: string;
@@ -46,17 +46,15 @@ export const usePlannerStore = defineStore('planner', () => {
     }
 
     async function loadItems() {
-        const data = await getItemdata();
+        const { itemsObj, expItemsObj } = await getItemdata();
 
-        for (const key in data.items) {
-            const item = data.items[key];
+        for (const key in itemsObj) {
+            const item = itemsObj[key];
             item.buildingProductList = item.buildingProductList.filter(b => b.roomType === 'WORKSHOP');
         }
 
-        items.value = data.items;
-        expItems.value = data.expItems;
-        // incase the lmd id changes somehow
-        lmdId.value = Object.values(data.items).find(i => i.name === 'LMD')!.itemId;
+        items.value = itemsObj;
+        expItems.value = expItemsObj;
     }
 
     async function loadWorkshopFormulas() {
@@ -111,26 +109,6 @@ export const usePlannerStore = defineStore('planner', () => {
         }
 
         return selectedOperator
-    }
-
-    async function getOperatorImageLink(character: Operator) {
-        // one of these should work... hopefully
-        const primarySource = "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/";
-        const secondarySource = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/charavatars/";
-
-        const primary = (await fetch(`${primarySource}${character.id}.png`)).ok;
-
-        return `${ primary ? primarySource : secondarySource }${character.id}.png`;
-    }
-
-    async function getItemImageLink(item: Item) {
-        // one of these should work... hopefully
-        const primarySource = "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/items/";
-        const secondarySource = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/items/icons/";
-
-        const primary = (await fetch(`${primarySource}${item.iconId}.png`)).ok;
-
-        return `${primary ? primarySource: secondarySource}${item.iconId}.png`;
     }
 
     function selectCharacter(character: Operator) {
@@ -195,7 +173,7 @@ export const usePlannerStore = defineStore('planner', () => {
     const getBlankInventory = () => {
         const neededItems: { [key: string]: number } = {};
 
-        for (const { itemId } of inventoryItems.value) {
+        for (const itemId in items.value) {
             neededItems[itemId] = 0;
         }
 
@@ -365,19 +343,6 @@ export const usePlannerStore = defineStore('planner', () => {
     });
 
     // Inventory
-    const inventoryItems = computed(() => {
-        const itemsArray = Object.values(items.value);
-        return itemsArray.filter(i =>
-            i.itemType === "GOLD" ||
-            (
-                i.itemType === "MATERIAL" ||
-                i.itemType === "CARD_EXP"
-            ) &&
-            i.classifyType === "MATERIAL" &&
-            !i.name.match(/.+\sToken/)
-        ).sort((a, b) => a.sortId - b.sortId);
-    });
-
     const inventory = ref<{ [key: string]: number }>(
         JSON.parse(localStorage.getItem('inventory') || 'null') || {}
     );
@@ -465,10 +430,9 @@ export const usePlannerStore = defineStore('planner', () => {
     });
 
     return {
+        items,
         operators,
         modules,
-        items,
-        inventoryItems,
         expItems,
         lmdId,
         selectedOperators,
@@ -488,8 +452,6 @@ export const usePlannerStore = defineStore('planner', () => {
         loadModules,
         loadItems,
         loadSavedRecords,
-        getOperatorImageLink,
-        getItemImageLink,
         selectCharacter,
         craftItem,
         loadWorkshopFormulas

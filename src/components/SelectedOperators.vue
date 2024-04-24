@@ -11,7 +11,7 @@ const { selectedOperators } = storeToRefs(usePlannerStore());
     <PlannerSection title="Selected Operators" :initial-state="true" local-storage-id="selected-operators-collapsed">
         <div class="container">
             <div class="row mb-3 py-3 selected-operator" v-for="character in selectedOperators" :key="character.operator.id">
-                <OperatorControls :operator-id="character.operator.id" />
+                <OperatorControls :selected-operator="character" />
             </div>
             <div class="row" v-if="selectedOperators.length === 0">
                 <div class="col-12">
