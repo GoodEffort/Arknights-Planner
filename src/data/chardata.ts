@@ -17,8 +17,10 @@ const getChardata = async () => {
         character.name = character.appellation;
     }
 
+    const combinedData = Object.assign(data, cn_data);
+
     // this should combine the new Chinese data with the existing English data allowing to see characters only available in China   
-    const chardata: Operator[] = Object.entries({ ...cn_data, ...data })
+    const chardata: Operator[] = Object.entries({ ...combinedData })
         .map(([id, char]) => {
             return {
                 id,

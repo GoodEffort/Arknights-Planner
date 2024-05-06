@@ -11,12 +11,19 @@ type Building_Table = {
 };
 
 const jsonLink = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/en_US/gamedata/excel/building_data.json";
+const cn_jsonLink = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/building_data.json";
 
 const getBuildingdata = async () => {
-    const response = await fetch(jsonLink);
-    const data: Building_Table & { [key: string]: any } = await response.json();
+    const [response, cn_response] = await Promise.all([
+        fetch(jsonLink),
+        fetch(cn_jsonLink)
+    ]);
 
-    const { workshopFormulas } = data;
+    const [data, cn_data]: Building_Table[] = await Promise.all([response.json(), cn_response.json()]);
+
+    const combinedData = Object.assign(data, cn_data);
+
+    const { workshopFormulas } = combinedData;
 
     const WorkshopCosts: {
         [key: string]: {
