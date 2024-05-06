@@ -7,7 +7,7 @@ const getModuledata = async () => {
     const [response, cn_response] = await Promise.all([fetch(jsonLink), fetch(cn_jsonLink)]);
     const [data, cn_data]: UniEquip_Table[] = await Promise.all([response.json(), cn_response.json()]);
 
-    const combinedData = Object.assign(data, cn_data);
+    const combinedData = Object.assign(cn_data, data);
 
     return { ModuleDict: combinedData.equipDict, CharacterModules: combinedData.charEquip };
 };

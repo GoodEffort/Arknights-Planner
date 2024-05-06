@@ -11,7 +11,7 @@ const getItemdata = async () => {
 
     const [data, cn_data]: Item_Table[] = await Promise.all([response.json(), cn_response.json()]);
 
-    const combinedData = Object.assign(data, cn_data);
+    const combinedData = Object.assign(cn_data, data);
 
     const itemsArray = Object.values(combinedData.items).filter(i =>
         i.itemType === "GOLD" ||
