@@ -3,6 +3,7 @@ import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
 import ItemsDisplay from './ItemsDisplay.vue';
 import { ref } from 'vue';
+import PlannerSection from './PlannerSection.vue';
 
 const { neededItems, neededItemsBreakdown } = storeToRefs(usePlannerStore());
 

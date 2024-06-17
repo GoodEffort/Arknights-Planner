@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
 import ItemsDisplay from './ItemsDisplay.vue';
+import PlannerSection from './PlannerSection.vue';
 
 const { items, totalCosts } = storeToRefs(usePlannerStore());
 
