@@ -5,7 +5,7 @@ import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 const { craftItem } = usePlannerStore();
-const { inventory, workShopFormulas } = storeToRefs(usePlannerStore());
+const { inventory, recipes } = storeToRefs(usePlannerStore());
 
 export interface Props {
     item: Item;
@@ -19,18 +19,11 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const enableCraftButton = computed(() => {
-    const formulaList = props.item.buildingProductList;
-    if (formulaList.length === 0) {
-        return false;
-    }
-    else {
-        const { formulaId } = formulaList[0];
-        const formula = workShopFormulas.value[formulaId];
-        return formula.every(cost => {
-            const { id: itemId, count } = cost;
-            return inventory.value[itemId] >= count;
-        });
-    }
+    const formula = recipes.value[props.item.itemId];
+    return formula.every(cost => {
+        const { id: itemId, count } = cost;
+        return inventory.value[itemId] >= count;
+    });
 });
 </script>
 

@@ -10,7 +10,7 @@ import { debounce } from 'lodash';
 import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
 import getBuildingdata from '../data/buildingdata';
-import { chipIds, efficientToFarmItemIds } from '../data/farmingdata';
+import { dualchips, efficientToFarmItemIds } from '../data/farmingdata';
 
 export const usePlannerStore = defineStore('planner', () => {
     const operators = ref<Operator[]>([]);
@@ -19,7 +19,7 @@ export const usePlannerStore = defineStore('planner', () => {
     const selectedOperators = ref<SelectedOperator[]>([]);
     const expItems = ref<{ [key: string]: ExpItem }>({});
     const items = ref<{ [key: string]: Item }>({});
-    const workShopFormulas = ref<{
+    const recipes = ref<{
         [key: string]: {
             id: string;
             count: number;
@@ -51,7 +51,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
         for (const key in itemsObj) {
             const item = itemsObj[key];
-            item.buildingProductList = item.buildingProductList.filter(b => b.roomType === 'WORKSHOP');
+            item.buildingProductList = item.buildingProductList.filter(b => dualchips.indexOf(item.itemId) >= 0 || b.roomType === 'WORKSHOP');
         }
 
         items.value = itemsObj;
@@ -60,7 +60,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
     async function loadWorkshopFormulas() {
         const data = await getBuildingdata();
-        workShopFormulas.value = data;
+        recipes.value = data;
     }
 
     function getModulesForCharacter(operatorId: string): Module[] {
@@ -349,25 +349,20 @@ export const usePlannerStore = defineStore('planner', () => {
     );
 
     const craftItem = (item: Item) => {
-        const { itemId, buildingProductList } = item;
+        const { itemId } = item;
+        const costs = recipes.value[itemId];
 
         // verify if we have enough items
-        for (const product of buildingProductList) {
-            const costs = workShopFormulas.value[product.formulaId];
-            for (const { id, count } of costs) {
-                if (inventory.value[id] < count) {
-                    alert(`You don't have enough ${items.value[id].name} to craft ${item.name}.`);
-                    return;
-                }
+        for (const { id, count } of costs) {
+            if (inventory.value[id] < count) {
+                alert(`You don't have enough ${items.value[id].name} to craft ${item.name}.`);
+                return;
             }
         }
 
         // remove items from inventory
-        for (const product of buildingProductList) {
-            const costs = workShopFormulas.value[product.formulaId];
-            for (const { id, count } of costs) {
-                inventory.value[id] -= count;
-            }
+        for (const { id, count } of costs) {
+            inventory.value[id] -= count;
         }
 
         // add crafted item to inventory
@@ -419,26 +414,31 @@ export const usePlannerStore = defineStore('planner', () => {
             return neededCount < 0 ? 0 : neededCount;
         }
 
-        const breakdownItem = (neededCount: number, id: string) => {
-            neededCount = subtractFromInventory(neededCount, id);
+        const breakdownItem = (neededCount: number, itemId: string) => {
+            neededCount = subtractFromInventory(neededCount, itemId);
 
             if (neededCount > 0) {
                 // and we should not breakdown the item
-                const { rarity, buildingProductList } = items.value[id];
-                const formulaId = buildingProductList?.[0]?.formulaId;
-                const recipe = formulaId ? workShopFormulas.value[formulaId] : undefined;
+                const { rarity } = items.value[itemId];
+                const recipe = itemId === "32001" ? [{
+                    id: "4006",
+                    count: 90,
+                    type: ""
+                }] : recipes.value[itemId];
 
                 if (
-                    stopItems.includes(id) ||
+                    !dualchips.includes(itemId) && (
+                    stopItems.includes(itemId) ||
                     rarity === "TIER_1" ||
                     rarity === "TIER_2" ||
-                    recipe === undefined
+                    recipe === undefined ||
+                    recipe.length === 0)
                 ) {
-                    if (breakdownCosts[id] === undefined) {
-                        breakdownCosts[id] = 0;
+                    if (breakdownCosts[itemId] === undefined) {
+                        breakdownCosts[itemId] = 0;
                     }
                     // add it to the breakdown
-                    breakdownCosts[id] += neededCount;
+                    breakdownCosts[itemId] += neededCount;
                 }
                 // otherwise we need to break it down
                 else {
@@ -475,7 +475,7 @@ export const usePlannerStore = defineStore('planner', () => {
         battleRecords,
         neededItems,
         neededItemsBreakdown,
-        workShopFormulas,
+        recipes,
         reserveTier1,
         reserveTier2,
         reserveTier3,
