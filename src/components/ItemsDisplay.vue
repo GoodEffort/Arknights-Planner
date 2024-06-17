@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import { Item } from '../types/item';
-import PlannerSection from './PlannerSection.vue';
 import { storeToRefs } from 'pinia';
 import CraftButton from './CraftButton.vue';
 import ImageFinder from './ImageFinder.vue';
+import Modal from './Modal.vue';
 
 const { inventory, lmdId, items } = storeToRefs(usePlannerStore());
 
@@ -14,8 +14,6 @@ export interface Props {
         item: Item;
         count: number;
     }[];
-    title: string;
-    localStorageId: string;
     controls?: boolean;
 }
 
@@ -59,54 +57,55 @@ const lmdChangeAmountString = computed(() => {
 const changeItemAmount = (item: Item, amount: number) => {
     inventory.value[item.itemId] += amount;
 };
+
+const showModal = ref(false);
 </script>
 
 <template>
-    <PlannerSection :title="title" :local-storage-id="localStorageId">
-        <div class="container">
-            <div class="row">
-                <div class="col-2" v-for="{ item, count } in displayItems">
-                    <div class="item-col">
-                        <div class="name">
-                            <span>
+    <div class="container">
+        <div class="row">
+            <div class="col-2" v-for="{ item, count } in displayItems">
+                <div class="item-col">
+                    <div class="name">
+                        <span>
                             {{ item.name }}
-                            </span>
+                        </span>
+                    </div>
+                    <div class="text-align-end">
+                        <ImageFinder :subject="item" class="item-image" @click="showModal = !showModal" />
+                        <CraftButton v-if="controls" :item="item" />
+                    </div>
+                    <div class="count">
+                        <input v-if="editInventory" type="number" class="form-control" min="0"
+                            v-model="inventory[item.itemId]" />
+                        <span v-else>
+                            <b>{{ count }}</b>
+                        </span>
+                    </div>
+                    <div v-if="!editInventory && controls" class="row mb-2">
+                        <div class="col px-0">
+                            <button class="btn btn-primary"
+                                @click="changeItemAmount(item, item.itemId === lmdId ? -lmdChangeAmount : -1)">-{{
+                                    item.itemId === lmdId ? lmdChangeAmountString : '1' }}</button>
                         </div>
-                        <div class="text-align-end">
-                            <ImageFinder :subject="item" class="item-image" />
-                            <CraftButton v-if="controls" :item="item" />
-                        </div>
-                        <div class="count">
-                            <input
-                                v-if="editInventory"
-                                type="number"
-                                class="form-control"
-                                min="0"
-                                v-model="inventory[item.itemId]"
-                            />
-                            <span v-else>
-                                <b>{{ count }}</b>
-                            </span>
-                        </div>
-                        <div v-if="!editInventory && controls" class="row mb-2">
-                            <div class="col px-0">
-                                <button
-                                    class="btn btn-primary"
-                                    @click="changeItemAmount(item, item.itemId === lmdId ? -lmdChangeAmount : -1)"
-                                >-{{ item.itemId === lmdId ? lmdChangeAmountString : '1' }}</button>
-                            </div>
-                            <div class="col px-0">
-                                <button
-                                    class="btn btn-primary"
-                                    @click="changeItemAmount(item, item.itemId === lmdId ? lmdChangeAmount : 1)"
-                                >+{{ item.itemId === lmdId ? lmdChangeAmountString : '1' }}</button>
-                            </div>
+                        <div class="col px-0">
+                            <button class="btn btn-primary"
+                                @click="changeItemAmount(item, item.itemId === lmdId ? lmdChangeAmount : 1)">+{{
+                                    item.itemId === lmdId ? lmdChangeAmountString : '1' }}</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </PlannerSection>
+    </div>
+    <Modal v-if="showModal" @close="showModal = false">
+        <template #header>
+            Workshop Recipe
+        </template>
+        <template #body>
+
+        </template>
+    </Modal>
 </template>
 
 <style scoped>

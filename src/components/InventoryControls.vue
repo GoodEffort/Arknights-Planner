@@ -3,8 +3,7 @@ import ItemsDisplay from './ItemsDisplay.vue';
 </script>
 
 <template>
-    <ItemsDisplay
-        title="Current Inventory"
-        local-storage-id="inventory-collapsed"
-    />
+    <PlannerSection title="Current Inventory" local-storage-id="inventory-collapsed">
+        <ItemsDisplay />
+    </PlannerSection>
 </template>

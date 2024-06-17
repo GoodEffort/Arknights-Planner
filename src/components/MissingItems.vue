@@ -2,14 +2,19 @@
 import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
 import ItemsDisplay from './ItemsDisplay.vue';
+import { ref } from 'vue';
 
-const { neededItems } = storeToRefs(usePlannerStore());
+const { neededItems, neededItemsBreakdown } = storeToRefs(usePlannerStore());
+
+const showBreakdown = ref(false);
 </script>
 
 <template>
-    <ItemsDisplay
-        :display-items="neededItems"
-        title="Missing Items"
-        local-storage-id="needed-items-collapsed"
-    />
+    <PlannerSection title="Missing Items" local-storage-id="needed-items-collapsed">
+        <button @click="showBreakdown = !showBreakdown">
+            {{ showBreakdown ? "Hide" : "Show" }} Breakdown
+        </button>
+        <hr />
+        <ItemsDisplay :display-items="showBreakdown ? neededItemsBreakdown : neededItems" />
+    </PlannerSection>
 </template>

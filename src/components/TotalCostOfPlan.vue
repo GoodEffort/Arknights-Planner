@@ -13,7 +13,7 @@ const totalCostsArray = computed(() => {
         const item = items.value[key];
         return { item, count };
     });
-    
+
     return costs
         .filter(cost => cost.count > 0)
         .sort((a, b) => a.item.sortId - b.item.sortId);
@@ -21,10 +21,7 @@ const totalCostsArray = computed(() => {
 </script>
 
 <template>
-    <ItemsDisplay
-        :display-items="totalCostsArray"
-        title="Total Cost"
-        local-storage-id="total-needed-items-collapsed"
-        :controls="false"
-    />
+    <PlannerSection title="Total Cost" local-storage-id="total-needed-items-collapsed">
+        <ItemsDisplay :display-items="totalCostsArray" :controls="false" />
+    </PlannerSection>
 </template>
