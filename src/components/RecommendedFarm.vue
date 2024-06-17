@@ -39,7 +39,7 @@ const neededItemDictionary = computed(() => {
 
 const getSubItems = (item: Item, count: number = 1): { item: Item, count: number }[] => {
     const subItems: { item: Item, count: number }[] = [];
-    
+
     if (ignoreItems.value.includes(item.itemId) || item.buildingProductList.length === 0) {
         return subItems;
     }
@@ -59,8 +59,8 @@ const getSubItems = (item: Item, count: number = 1): { item: Item, count: number
 };
 
 const findNeededCraftingItemsRecursively = (
-    farmingList: { [key: string]: number }, 
-    availableItems: { [key: string]: number }, 
+    farmingList: { [key: string]: number },
+    availableItems: { [key: string]: number },
     itemId: string,
     count: number,
     parentIsEfficientToFarm: boolean = false
@@ -175,25 +175,30 @@ const recommendedFarmingItems = computed(() => {
             // get the reserved amount for the item's tier
             let reserved = 0;
 
-            switch (item.rarity) {
-                case 'TIER_1':
-                    reserved = reserveTier1.value;
-                    break;
-                case 'TIER_2':
-                    reserved = reserveTier2.value;
-                    break;
-                case 'TIER_3':
-                    reserved = reserveTier3.value;
-                    break;
-                case 'TIER_4':
-                    reserved = reserveTier4.value;
-                    break;
-                case 'TIER_5':
-                    reserved = reserveTier5.value;
-                    break;
-                case 'TIER_6':
-                    reserved = reserveTier6.value;
-                    break;
+            if (item?.rarity) {
+                switch (item.rarity) {
+                    case 'TIER_1':
+                        reserved = reserveTier1.value;
+                        break;
+                    case 'TIER_2':
+                        reserved = reserveTier2.value;
+                        break;
+                    case 'TIER_3':
+                        reserved = reserveTier3.value;
+                        break;
+                    case 'TIER_4':
+                        reserved = reserveTier4.value;
+                        break;
+                    case 'TIER_5':
+                        reserved = reserveTier5.value;
+                        break;
+                    case 'TIER_6':
+                        reserved = reserveTier6.value;
+                        break;
+                }
+            }
+            else {
+                reserved = 0;
             }
 
             // subtract the reserved amount from the initially available count
