@@ -10,7 +10,7 @@ import { debounce } from 'lodash';
 import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
 import getBuildingdata from '../data/buildingdata';
-import { dualchips, efficientToFarmItemIds } from '../data/farmingdata';
+import { dualchips, efficientToFarmItemIds, stages } from '../data/farmingdata';
 
 export const usePlannerStore = defineStore('planner', () => {
     const operators = ref<Operator[]>([]);
@@ -428,11 +428,11 @@ export const usePlannerStore = defineStore('planner', () => {
 
                 if (
                     !dualchips.includes(itemId) && (
-                    stopItems.includes(itemId) ||
-                    rarity === "TIER_1" ||
-                    rarity === "TIER_2" ||
-                    recipe === undefined ||
-                    recipe.length === 0)
+                        stopItems.includes(itemId) ||
+                        rarity === "TIER_1" ||
+                        rarity === "TIER_2" ||
+                        recipe === undefined ||
+                        recipe.length === 0)
                 ) {
                     if (breakdownCosts[itemId] === undefined) {
                         breakdownCosts[itemId] = 0;
@@ -442,7 +442,7 @@ export const usePlannerStore = defineStore('planner', () => {
                 }
                 // otherwise we need to break it down
                 else {
-                    for (const {id: recipeItemId, count: recipeCount} of recipe) {
+                    for (const { id: recipeItemId, count: recipeCount } of recipe) {
                         breakdownItem(recipeCount * neededCount, recipeItemId);
                     }
                 }
@@ -461,6 +461,15 @@ export const usePlannerStore = defineStore('planner', () => {
 
         return costs.sort((a, b) => a.item.sortId - b.item.sortId);
     });
+
+    const recomendedStages = computed(() =>
+        neededItemsBreakdown.value
+            .filter(({ item: { itemId } }) => stages[itemId])
+            .sort((a, b) =>
+                ((efficientToFarmItemIds.indexOf(a.item.itemId) >= 0) === (efficientToFarmItemIds.indexOf(b.item.itemId) >= 0)) ? 
+                    b.item.sortId - a.item.sortId :
+                    efficientToFarmItemIds.indexOf(b.item.itemId) - efficientToFarmItemIds.indexOf(a.item.itemId))
+            .map(({ item }) => ({ stage: stages[item.itemId], item })));
 
     return {
         items,
@@ -482,6 +491,7 @@ export const usePlannerStore = defineStore('planner', () => {
         reserveTier4,
         reserveTier5,
         reserveTier6,
+        recomendedStages,
         loadCharacters,
         loadModules,
         loadItems,
