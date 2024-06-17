@@ -28,6 +28,9 @@ async function getItemImageLink(item: Item) {
     let primary = true;
 
     try {
+        // ignore 404 errors from this fetch in the console
+        // it is just checking if the primary image source is valid
+        // if not, it will use the secondary source
         primary = (await fetch(`${primarySource}${item.iconId}.png`)).ok;
     }
     catch (e) {
