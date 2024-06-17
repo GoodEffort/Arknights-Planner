@@ -10,6 +10,7 @@ import { debounce } from 'lodash';
 import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
 import getBuildingdata from '../data/buildingdata';
+import { chipIds, efficientToFarmItemIds } from '../data/farmingdata';
 
 export const usePlannerStore = defineStore('planner', () => {
     const operators = ref<Operator[]>([]);
@@ -383,50 +384,82 @@ export const usePlannerStore = defineStore('planner', () => {
 
     const neededItems = computed(() => {
         const needed: { item: Item, count: number }[] = [];
-        let totalExp = 0;
 
         for (const key in totalCosts.value) {
-            if (expItems.value[key] !== undefined) {
-                totalExp += expItems.value[key].gainExp * totalCosts.value[key];
+            const count = totalCosts.value[key] - (inventory.value[key] ?? 0);
+            if (count > 0) {
+                const item = items.value[key];
+                needed.push({ item, count });
             }
-            else {
-                const count = totalCosts.value[key] - (inventory.value[key] ?? 0);
-                if (count > 0) {
-                    const item = items.value[key];
-                    needed.push({ item, count });
-                }
-            }
-        }
-
-        for (const key in inventory.value) {
-            if (expItems.value[key] !== undefined) {
-                totalExp -= expItems.value[key].gainExp * inventory.value[key];
-            }
-        }
-
-        const neededEXPItems: {
-            [key: string]: number;
-        } = {};
-
-        // calculate exp items needed
-        for (const { gainExp, id } of battleRecords.value) {
-            const recordsNeeded = Math.floor(totalExp / gainExp);
-            totalExp = totalExp % gainExp;
-
-            if (recordsNeeded > 0) {
-                if (neededEXPItems[id] === undefined) {
-                    neededEXPItems[id] = 0;
-                }
-                neededEXPItems[id] += recordsNeeded;
-            }
-        }
-
-        for (const [key, count] of Object.entries(neededEXPItems)) {
-            const item = items.value[key];
-            needed.push({ item, count });
         }
 
         return needed.sort((a, b) => a.item.sortId - b.item.sortId);
+    });
+
+    const neededItemsBreakdown = computed(() => {
+        const totalCostDict = totalCosts.value;
+        const currentInventory = JSON.parse(JSON.stringify(inventory.value)); // don't modify the original inventory
+        const breakdownCosts: { [key: string]: number } = {};
+
+        const stopItems = efficientToFarmItemIds;
+        stopItems.push(...Object.keys(expItems.value));
+
+        const subtractFromInventory = (neededCount: number, id: string) => {
+            let currentCount = currentInventory[id] || 0;
+
+            // if we have some of the item, we don't need to farm it
+            if (currentCount > 0) {
+                // keep track of how much we have left for other items
+                neededCount -= currentCount;
+                // less than 0 in the current inventory doesn't matter as it is treated as 0 for this function
+                currentInventory[id] = -1 * neededCount;
+            }
+
+            // return the amount we still need to farm, or 0 if we have enough
+            return neededCount < 0 ? 0 : neededCount;
+        }
+
+        const breakdownItem = (neededCount: number, id: string) => {
+            neededCount = subtractFromInventory(neededCount, id);
+
+            if (neededCount > 0) {
+                // and we should not breakdown the item
+                const { rarity, buildingProductList } = items.value[id];
+                const formulaId = buildingProductList?.[0]?.formulaId;
+                const recipe = formulaId ? workShopFormulas.value[formulaId] : undefined;
+
+                if (
+                    stopItems.includes(id) ||
+                    rarity === "TIER_1" ||
+                    rarity === "TIER_2" ||
+                    recipe === undefined
+                ) {
+                    if (breakdownCosts[id] === undefined) {
+                        breakdownCosts[id] = 0;
+                    }
+                    // add it to the breakdown
+                    breakdownCosts[id] += neededCount;
+                }
+                // otherwise we need to break it down
+                else {
+                    for (const {id: recipeItemId, count: recipeCount} of recipe) {
+                        breakdownItem(recipeCount * neededCount, recipeItemId);
+                    }
+                }
+            }
+        };
+
+        for (const key in totalCostDict) {
+            breakdownItem(totalCostDict[key], key);
+        }
+
+        const costs: { item: Item, count: number }[] = [];
+
+        for (const [key, value] of Object.entries(breakdownCosts)) {
+            costs.push({ item: items.value[key], count: value });
+        }
+
+        return costs.sort((a, b) => a.item.sortId - b.item.sortId);
     });
 
     return {
@@ -441,6 +474,7 @@ export const usePlannerStore = defineStore('planner', () => {
         totalCostsByOperator,
         battleRecords,
         neededItems,
+        neededItemsBreakdown,
         workShopFormulas,
         reserveTier1,
         reserveTier2,

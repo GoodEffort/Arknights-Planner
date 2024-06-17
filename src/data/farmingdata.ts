@@ -20,9 +20,14 @@ const efficientToFarmItemIds = [
     "31043", // Semi-Synthetic Solvent
     "31053", // Compound Cutting Fluid
     "31063", // Transmuted Salt
+    "3301",  // Skill Summarry - 1
+    "3302",  // Skill Summarry - 2
+    "3303",  // Skill Summarry - 3
+    "4001",  // LMD
+    "4006",  // Purchase Certificates
 ];
 
-// ignore these because they'll cause an infinite loop as they craft into each other
+// ignore these crafting recipes in efficiency calc because they'll cause an infinite loop as they craft into each other
 const farmingChips = [
     "3211", // Vanguard Chip
     "3221", // Guard Chip
