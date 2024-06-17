@@ -5,7 +5,6 @@ import { usePlannerStore } from '../store/planner-store';
 import { onMounted, ref } from 'vue';
 import { DotLoader } from "vue3-spinner";
 import InventoryControls from './InventoryControls.vue';
-import RecommendedFarm from './RecommendedFarm.vue';
 import TotalCostOfPlan from './TotalCostOfPlan.vue';
 import MissingItems from './MissingItems.vue';
 
@@ -28,7 +27,6 @@ onMounted(async () => {
             <SelectedOperators />
             <TotalCostOfPlan />
             <MissingItems />
-            <RecommendedFarm />
             <InventoryControls />
             <AddOperators />
         </div>
