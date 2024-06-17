@@ -22,23 +22,30 @@ const efficientToFarmItemIds = [
     "31063", // Transmuted Salt
 ];
 
-const chipIds = [ // ignore these because they'll cause an infinite loop as they craft into each other
+// ignore these because they'll cause an infinite loop as they craft into each other
+const farmingChips = [
     "3211", // Vanguard Chip
-    "3213", // Vanguard Dualchip
     "3221", // Guard Chip
-    "3223", // Guard Dualchip
     "3231", // Defender Chip
-    "3233", // Defender Dualchip
     "3241", // Sniper Chip
-    "3243", // Sniper Dualchip
     "3251", // Caster Chip
-    "3253", // Caster Dualchip
     "3261", // Medic Chip
-    "3263", // Medic Dualchip
     "3271", // Supporter Chip
-    "3273", // Supporter Dualchip
-    "3281", // Specialist Chip
-    "3283", // Specialist Dualchip
+    "3281"  // Specialist Chip
 ];
+
+const dualchips = [ 
+    "3213", // Vanguard Dualchip
+    "3223", // Guard Dualchip
+    "3233", // Defender Dualchip
+    "3243", // Sniper Dualchip
+    "3253", // Caster Dualchip
+    "3263", // Medic Dualchip
+    "3273", // Supporter Dualchip
+    "3283"  // Specialist Dualchip
+];
+
+const chipIds = farmingChips.concat(dualchips);
+efficientToFarmItemIds.push(...chipIds);
 
 export { efficientToFarmItemIds, chipIds };
