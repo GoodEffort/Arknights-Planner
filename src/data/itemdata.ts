@@ -14,7 +14,8 @@ const getItemdata = async () => {
     const combinedData = Object.assign(cn_data, data);
 
     const itemsArray = Object.values(combinedData.items).filter(i =>
-        i.itemType === "GOLD" ||
+        i.itemId === "4001" || // LMD
+        i.itemId === "4006" || // purchase certificate
         (
             i.itemType === "MATERIAL" ||
             i.itemType === "CARD_EXP"
