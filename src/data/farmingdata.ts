@@ -30,13 +30,21 @@ const efficientToFarmItemIds = [
 // ignore these crafting recipes in efficiency calc because they'll cause an infinite loop as they craft into each other
 const farmingChips = [
     "3211", // Vanguard Chip
+    "3212", // Vanguard Chip Pack
     "3221", // Guard Chip
+    "3222", // Guard Chip Pack
     "3231", // Defender Chip
+    "3232", // Defender Chip Pack
     "3241", // Sniper Chip
+    "3242", // Sniper Chip Pack
     "3251", // Caster Chip
+    "3252", // Caster Chip Pack
     "3261", // Medic Chip
+    "3262", // Medic Chip Pack
     "3271", // Supporter Chip
-    "3281"  // Specialist Chip
+    "3272", // Supporter Chip Pack
+    "3281", // Specialist Chip
+    "3282", // Specialist Chip Pack
 ];
 
 const dualchips = [ 
@@ -53,4 +61,4 @@ const dualchips = [
 const chipIds = farmingChips.concat(dualchips);
 efficientToFarmItemIds.push(...chipIds);
 
-export { efficientToFarmItemIds, chipIds };
+export { efficientToFarmItemIds, dualchips };
