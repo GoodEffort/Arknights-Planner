@@ -5,7 +5,7 @@ import { Item } from '../types/item';
 import { storeToRefs } from 'pinia';
 import CraftButton from './CraftButton.vue';
 import ImageFinder from './ImageFinder.vue';
-import Modal from './Modal.vue';
+// import Modal from './Modal.vue';
 
 const { inventory, lmdId, items } = storeToRefs(usePlannerStore());
 
@@ -98,14 +98,14 @@ const showModal = ref(false);
             </div>
         </div>
     </div>
-    <Modal v-if="showModal" @close="showModal = false">
+    <!-- <Modal v-if="showModal" @close="showModal = false">
         <template #header>
             Workshop Recipe
         </template>
         <template #body>
 
         </template>
-    </Modal>
+    </Modal> -->
 </template>
 
 <style scoped>
