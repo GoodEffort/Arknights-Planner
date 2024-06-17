@@ -281,8 +281,8 @@ export const usePlannerStore = defineStore('planner', () => {
 
             // skill level up costs
             for (
-                let currentSkillIndex = currentSkillLevels;
-                currentSkillIndex <= targetSkillLevels - 1;
+                let currentSkillIndex = currentSkillLevels - 1;
+                currentSkillIndex < targetSkillLevels - 1;
                 currentSkillIndex++
             ) {
                 const sluc = skillLevelUpCosts[currentSkillIndex];
