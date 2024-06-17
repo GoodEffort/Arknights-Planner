@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { Item } from '../types/item';
 import { Operator } from '../types/operator';
 
@@ -62,7 +62,9 @@ watch(() => props.subject, async () => {
     await setLink();
 });
 
-setLink();
+onMounted(async () => {
+    await setLink();
+});
 </script>
 
 <template>

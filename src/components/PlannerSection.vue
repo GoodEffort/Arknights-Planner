@@ -28,9 +28,11 @@ if (localStorageId !== '') {
 }
 
 const collapsed = ref(state);
+const hasBeenOpened = ref(collapsed.value);
 
 function toggleCollapse() {
     collapsed.value = !collapsed.value;
+    hasBeenOpened.value = true;
 
     if (localStorageId !== '') {
         localStorage.setItem(localStorageId, collapsed.value.toString());
@@ -44,7 +46,9 @@ function toggleCollapse() {
     </div>
 
     <Collapse :when="collapsed" :class="{ 'fast-collapse': fastCollapse }">
-        <slot />
+        <div v-if="hasBeenOpened">
+            <slot />
+        </div>
     </Collapse>
 </template>
 
