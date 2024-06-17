@@ -58,6 +58,15 @@ const stages: { [key: string]: string } = {
     "31063": "11-15",           // Transmuted Salt
     "31073": "13-5",            // Fuscous Fiber
     "31083": "13-15",           // Aggregate Cyclicene
+    "3301": "CA-5",             // Skill Summarry - 1
+    "3302": "CA-5",             // Skill Summarry - 2
+    "3303": "CA-5",             // Skill Summarry - 3
+    "4001": "CE-6",             // LMD
+    "4006": "AP-5",             // Purchase Certificates
+    "2001": "LS-6",             // EXP Card - Green
+    "2002": "LS-6",             // EXP Card - Blue
+    "2003": "LS-6",             // EXP Card - Yellow
+    "2004": "LS-6",             // EXP Card - Gold
 };
 
 // ignore these crafting recipes in efficiency calc because they'll cause an infinite loop as they craft into each other
