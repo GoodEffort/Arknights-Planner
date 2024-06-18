@@ -102,7 +102,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
         if (saveData) {
             const SaveRecord: SaveRecord = JSON.parse(saveData);
-            selectedOperator = new SelectedOperator(operator, modulesarray, SaveRecord.plans);
+            selectedOperator = new SelectedOperator(operator, modulesarray, SaveRecord.plans, SaveRecord.active);
         }
         else {
             selectedOperator = new SelectedOperator(operator, modulesarray);
@@ -335,9 +335,12 @@ export const usePlannerStore = defineStore('planner', () => {
 
     const totalCosts = computed(() => {
         const neededItems = getBlankInventory();
-        for (const items of Object.values(totalCostsByOperator.value)) {
-            for (const [id, count] of Object.entries(items)) {
-                neededItems[id] += count;
+
+        for (const [operatorId, items] of Object.entries(totalCostsByOperator.value)) {
+            if (selectedOperators.value.find(c => c.operator.id === operatorId)?.active) {
+                for (const [id, count] of Object.entries(items)) {
+                    neededItems[id] += count;
+                }
             }
         }
         return neededItems;

@@ -206,24 +206,28 @@ class SelectedOperator {
     operator: Operator;
     plans: OperatorPlans;
     modules: Module[];
+    active: boolean;
 
-    constructor(operator: Operator, modules: Module[], plans?: OperatorPlans) {
+    constructor(operator: Operator, modules: Module[], plans?: OperatorPlans, active: boolean = true) {
         this.operator = operator;
 
         this.plans = plans || new OperatorPlans();
 
         this.modules = modules;
+
+        this.active = active;
     }
 }
 
 class SaveRecord {
     operatorId: string;
+    active: boolean;
     plans: OperatorPlans;
 
     constructor(operator: SelectedOperator) {
         this.operatorId = operator.operator.id;
         this.plans = operator.plans;
-    
+        this.active = !!operator.active;
     }
 }
 
