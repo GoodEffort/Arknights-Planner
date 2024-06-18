@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { getCurrentInstance, ref } from 'vue';
 import { Collapse } from 'vue-collapsed'
 
 const { title, initialState, localStorageId, fastCollapse } = defineProps({
@@ -31,11 +31,24 @@ const collapsed = ref(state);
 const hasBeenOpened = ref(collapsed.value);
 
 function toggleCollapse() {
-    collapsed.value = !collapsed.value;
-    hasBeenOpened.value = true;
 
-    if (localStorageId !== '') {
-        localStorage.setItem(localStorageId, collapsed.value.toString());
+
+    const toggleCol = () => {
+        collapsed.value = !collapsed.value;
+
+        if (localStorageId !== '') {
+            localStorage.setItem(localStorageId, collapsed.value.toString());
+        }
+    };
+
+    if (hasBeenOpened.value === false) {
+        hasBeenOpened.value = true;
+        const instance = getCurrentInstance();
+        instance?.proxy?.$forceUpdate();
+        setTimeout(toggleCol, 200);
+    }
+    else {
+        toggleCol();
     }
 }
 </script>
