@@ -10,13 +10,6 @@ import AddOperatorsCell from './AddOperatorsCell.vue';
 const { operators } = storeToRefs(usePlannerStore());
 
 const pageCount = computed(() => Math.ceil(operators.value.length / pageSize.value));
-const pagedOperators = computed(() => {
-    const pages = Array.from({ length: pageCount.value }, (_, index) => {
-        const start = index * pageSize.value;
-        return sortedCharacters.value.slice(start, start + pageSize.value);
-    });
-    return pages;
-});
 
 const selectedSort = ref<'Name' | 'Rarity' | 'Class'>('Name');
 const operatorFilter = ref('');
@@ -25,6 +18,13 @@ const pageSize = ref(6); // make it divisible by 12 for bootstrap grids
 const filteredCharacters = computed(() => operators.value.filter(character => character.name.toLowerCase().includes(operatorFilter.value.toLowerCase())));
 const sortedCharacters = computed(() => filteredCharacters.value.sort(characterSort));
 
+const pagedOperators = computed(() => {
+    const pages = Array.from({ length: pageCount.value }, (_, index) => {
+        const start = index * pageSize.value;
+        return sortedCharacters.value.slice(start, start + pageSize.value);
+    });
+    return pages;
+});
 
 function sortByName(a: Operator, b: Operator) {
     return a.name.localeCompare(b.name);
@@ -63,7 +63,7 @@ function characterSort(a: Operator, b: Operator) {
         <hr />
 
         <div class="container">
-            <div class="row" v-for="(row, index) in pagedOperators" :key="index">
+            <div class="row" v-for="(row, index) in pagedOperators.slice(0, 6)" :key="index">
                 <AddOperatorsCell v-for="operator in row" :operator="operator" :key="operator.id" />
             </div>
         </div>
