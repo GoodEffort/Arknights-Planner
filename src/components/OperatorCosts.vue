@@ -13,7 +13,7 @@ const props = defineProps<{
 
 const Costs = computed(() => totalCostsByOperatorCategorized.value[props.selectedOperator.operator.id] ?? []);
 
-const ShowRow = (costs: { [key: string]: number }) => costs != null && Object.keys(costs).length > 0;
+const ShowRow = (costs: { [key: string]: number }) => Object.keys(costs??{}).length > 0;
 
 const isE2 = computed(() => props.selectedOperator.plans.currentElite === 2);
 
