@@ -167,34 +167,27 @@ export const usePlannerStore = defineStore('planner', () => {
         }
     }
 
-    const getModuleCosts = (neededItems: { [key: string]: number }, currentModule: number, targetModule: number, module: Module) => {
-        for (
-            let currentModuleIndex = currentModule + 1;
-            currentModuleIndex <= targetModule;
-            currentModuleIndex++
-        ) {
-            const strIndex: '1' | '2' | '3' = currentModuleIndex.toString() as '1' | '2' | '3';
-            const itemCosts = module.itemCost[strIndex];
-
-            for (const { count, id } of itemCosts) {
-                if (neededItems[id] === undefined) {
-                    neededItems[id] = 0;
-                }
-
-                neededItems[id] += count;
-            }
-        }
-
-        return neededItems;
-    }
-
     const getModuleCostsByLevel = (neededItems: LevelUpNeeds, currentModule: number, targetModule: number, module: Module) => {
         const { typeName2: moduleLetter } = module;
 
         for (let moduleIndex = 1; moduleIndex <= 3; moduleIndex++) {
             if (currentModule < moduleIndex && targetModule >= moduleIndex) {
-                const moduleName = `m${moduleLetter}l${moduleIndex}` as 'mxl1' | 'mxl2' | 'mxl3' | 'myl1' | 'myl2' | 'myl3' | 'mzl1' | 'mzl2' | 'mzl3';
-                getModuleCosts(neededItems[moduleName], moduleIndex, currentModule, module);
+                const moduleName = `m${moduleLetter?.toLowerCase()}l${moduleIndex}` as 'mxl1' | 'mxl2' | 'mxl3' | 'myl1' | 'myl2' | 'myl3' | 'mzl1' | 'mzl2' | 'mzl3';
+
+                if (neededItems[moduleName] === undefined) {
+                    neededItems[moduleName] = {};
+                }
+
+                const strIndex = moduleIndex.toString() as '1' | '2' | '3';
+                const itemCosts = module.itemCost[strIndex];
+
+                for (const { count, id } of itemCosts) {
+                    if (neededItems[moduleName][id] === undefined) {
+                        neededItems[moduleName][id] = 0;
+                    }
+    
+                    neededItems[moduleName][id] += count;
+                }
             }
         }
     }
@@ -212,7 +205,7 @@ export const usePlannerStore = defineStore('planner', () => {
     const totalCostsByOperatorCategorized = computed(() => {
         const neededItemsByOperator: { [key: string]: LevelUpNeeds } = {};
 
-        for (const { modules, plans, operator } of selectedOperators.value) {
+        for (const selectedOperator of selectedOperators.value) {
             const {
                 currentElite,
                 targetElite,
@@ -224,7 +217,7 @@ export const usePlannerStore = defineStore('planner', () => {
                 currentSkillMasteries,
                 currentModules,
                 targetModules
-            } = plans;
+            } = selectedOperator.plans;
 
             const {
                 phases: eliteLevelUpCosts,
@@ -232,7 +225,7 @@ export const usePlannerStore = defineStore('planner', () => {
                 skills: skillMasteryCosts,
                 id: operatorId,
                 rarity
-            } = operator;
+            } = selectedOperator.operator;
 
             const neededItems: LevelUpNeeds = {
                 levelup: {},
@@ -385,9 +378,9 @@ export const usePlannerStore = defineStore('planner', () => {
             }
 
             // module costs
-            const moduleX = modules.find(m => m.typeName2 === 'X');
-            const moduleY = modules.find(m => m.typeName2 === 'Y');
-            const moduleZ = modules.find(m => m.typeName2 === 'Z');                
+            const moduleX = selectedOperator.modules.find(m => m.typeName2 === 'X');
+            const moduleY = selectedOperator.modules.find(m => m.typeName2 === 'Y');
+            const moduleZ = selectedOperator.modules.find(m => m.typeName2 === 'Z');                
 
             if (moduleX) {
                 getModuleCostsByLevel(neededItems, currentModules.x, targetModules.x, moduleX);
