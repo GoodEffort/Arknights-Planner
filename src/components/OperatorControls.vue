@@ -404,7 +404,7 @@ const active = computed({
         </div>
     </div>
     <div v-if="section === 'Items'" class="row">
-        <OperatorCosts :operatorId="operator.id" :key="`${operator.id}-costs`" />
+        <OperatorCosts :selected-operator="selectedOperator" :key="`${operator.id}-costs`" />
     </div>
 </template>
 

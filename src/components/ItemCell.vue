@@ -10,23 +10,18 @@ defineProps<{
 </script>
 
 <template>
-    <div class="col-2">
-        <div>
-            <ImageFinder :subject="item" class="item-image" />
-        </div>
-        <div class="name">
-            {{ item.name }}
-        </div>
-        <div class="count">
-            {{ count }}
-        </div>
+    <div>
+        <ImageFinder :subject="item" class="item-image" />
+    </div>
+    <div class="count">
+        {{ count }}
     </div>
 </template>
 
 <style scoped>
 .item-image {
-    max-width: 50px;
-    max-height: 50px;
+    width: 50px;
+    height: 50px;
     object-fit: contain;
 }
 </style>

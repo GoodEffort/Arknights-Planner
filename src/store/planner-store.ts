@@ -1,6 +1,6 @@
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
-import type { Operator, CharEquip, EquipDict, Module, Skill } from '../types/operator';
+import type { Operator, CharEquip, EquipDict, Module, Skill, LevelUpNeeds, LevelUpNeedsKey } from '../types/operator';
 import { SelectedOperator, SaveRecord } from '../types/operator';
 import getChardata from '../data/chardata';
 import getModuledata from '../data/moduledata';
@@ -148,8 +148,21 @@ export const usePlannerStore = defineStore('planner', () => {
                 const { levelUpCost } = lucc;
 
                 for (const { count, id } of levelUpCost ?? []) {
+                    if (neededItems[id] === undefined) {
+                        neededItems[id] = 0;
+                    }
+
                     neededItems[id] += count;
                 }
+            }
+        }
+    }
+
+    const getMasteryCostForSkill = (skillMasteryCosts: Skill, skillNumber: 1 | 2 | 3, neededItems: LevelUpNeeds, target: number, current: number) => {
+        for (let skillIndex: 1 | 2 | 3 = 1; skillIndex <= 3; skillIndex++) {
+            if (current < skillIndex && target >= skillIndex) {
+                const skillMasteryName = `s${skillNumber}m${skillIndex}` as 's1m1' | 's1m2' | 's1m3' | 's2m1' | 's2m2' | 's2m3' | 's3m1' | 's3m2' | 's3m3';
+                getMasteryCost(neededItems[skillMasteryName], skillIndex, skillIndex - 1, skillMasteryCosts)
             }
         }
     }
@@ -164,11 +177,26 @@ export const usePlannerStore = defineStore('planner', () => {
             const itemCosts = module.itemCost[strIndex];
 
             for (const { count, id } of itemCosts) {
+                if (neededItems[id] === undefined) {
+                    neededItems[id] = 0;
+                }
+
                 neededItems[id] += count;
             }
         }
 
         return neededItems;
+    }
+
+    const getModuleCostsByLevel = (neededItems: LevelUpNeeds, currentModule: number, targetModule: number, module: Module) => {
+        const { typeName2: moduleLetter } = module;
+
+        for (let moduleIndex = 1; moduleIndex <= 3; moduleIndex++) {
+            if (currentModule < moduleIndex && targetModule >= moduleIndex) {
+                const moduleName = `m${moduleLetter}l${moduleIndex}` as 'mxl1' | 'mxl2' | 'mxl3' | 'myl1' | 'myl2' | 'myl3' | 'mzl1' | 'mzl2' | 'mzl3';
+                getModuleCosts(neededItems[moduleName], moduleIndex, currentModule, module);
+            }
+        }
     }
 
     const getBlankInventory = () => {
@@ -181,8 +209,8 @@ export const usePlannerStore = defineStore('planner', () => {
         return neededItems;
     }
 
-    const totalCostsByOperator = computed(() => {
-        const neededItemsByOperator: { [key: string]: { [key: string]: number } } = {};
+    const totalCostsByOperatorCategorized = computed(() => {
+        const neededItemsByOperator: { [key: string]: LevelUpNeeds } = {};
 
         for (const { modules, plans, operator } of selectedOperators.value) {
             const {
@@ -206,7 +234,29 @@ export const usePlannerStore = defineStore('planner', () => {
                 rarity
             } = operator;
 
-            const neededItems = getBlankInventory();
+            const neededItems: LevelUpNeeds = {
+                levelup: {},
+                promotion: {},
+                skill: [],
+                s1m1: {},
+                s1m2: {},
+                s1m3: {},
+                s2m1: {},
+                s2m2: {},
+                s2m3: {},
+                s3m1: {},
+                s3m2: {},
+                s3m3: {},
+                mxl1: {},
+                mxl2: {},
+                mxl3: {},
+                myl1: {},
+                myl2: {},
+                myl3: {},
+                mzl1: {},
+                mzl2: {},
+                mzl3: {},
+            };
 
             const promotionLMD = promotionLMDCosts[rarity];
 
@@ -240,7 +290,7 @@ export const usePlannerStore = defineStore('planner', () => {
             }
 
             if (lmd > 0) {
-                neededItems[lmdId.value] += lmd;
+                neededItems.levelup[lmdId.value] = lmd;
             }
 
             // calculate exp items needed
@@ -249,13 +299,22 @@ export const usePlannerStore = defineStore('planner', () => {
                 exp = exp % gainExp;
 
                 if (recordsNeeded > 0) {
-                    neededItems[id] += recordsNeeded;
+                    if (neededItems.levelup[id] === undefined) {
+                        neededItems.levelup[id] = 0;
+                    }
+
+                    neededItems.levelup[id] += recordsNeeded;
                 }
             }
 
             if (exp > 0) {
                 const lastExpItemId = battleRecords.value[battleRecords.value.length - 1].id;
-                neededItems[lastExpItemId] += 1;
+
+                if (neededItems.levelup[lastExpItemId] === undefined) {
+                    neededItems.levelup[lastExpItemId] = 0;
+                }
+                
+                neededItems.levelup[lastExpItemId] += 1;
             }
 
             // promotion costs
@@ -269,13 +328,19 @@ export const usePlannerStore = defineStore('planner', () => {
 
                 if (evolveCost) {
                     for (const { count, id } of evolveCost) {
-                        neededItems[id] += count;
+                        if (neededItems.promotion[id] === undefined)
+                            neededItems.promotion[id] = 0;
+
+                        neededItems.promotion[id] += count;
                     }
 
+                    if (neededItems.promotion[lmdId.value] === undefined)
+                        neededItems.promotion[lmdId.value] = 0;
+
                     if (currentEliteIndex === 1)
-                        neededItems[lmdId.value] += promotionLMD.ELITE_1;
+                        neededItems.promotion[lmdId.value] += promotionLMD.ELITE_1;
                     else if (currentEliteIndex === 2)
-                        neededItems[lmdId.value] += promotionLMD.ELITE_2;
+                        neededItems.promotion[lmdId.value] += promotionLMD.ELITE_2;
                 }
             }
 
@@ -291,7 +356,14 @@ export const usePlannerStore = defineStore('planner', () => {
                     const { lvlUpCost } = sluc;
                     if (lvlUpCost) {
                         for (const { count, id } of lvlUpCost) {
-                            neededItems[id] += count;
+                            if (neededItems.skill[currentSkillIndex] === undefined)
+                                neededItems.skill[currentSkillIndex] = {};
+                            
+                            const skill = neededItems.skill[currentSkillIndex];
+                            if (skill[id] === undefined)
+                                skill[id] = 0;
+
+                            skill[id] += count;
                         }
                     }
                 }
@@ -303,33 +375,62 @@ export const usePlannerStore = defineStore('planner', () => {
             const skill3MasteryCosts = skillMasteryCosts[2];
 
             if (skill1MasteryCosts) {
-                getMasteryCost(neededItems, targetSkillMasteries.skill1, currentSkillMasteries.skill1, skill1MasteryCosts);
+                getMasteryCostForSkill(skill1MasteryCosts, 1, neededItems, targetSkillMasteries.skill1, currentSkillMasteries.skill1);
             }
             if (skill2MasteryCosts) {
-                getMasteryCost(neededItems, targetSkillMasteries.skill2, currentSkillMasteries.skill2, skill2MasteryCosts);
+                getMasteryCostForSkill(skill2MasteryCosts, 2, neededItems, targetSkillMasteries.skill2, currentSkillMasteries.skill2);
             }
             if (skill3MasteryCosts) {
-                getMasteryCost(neededItems, targetSkillMasteries.skill3, currentSkillMasteries.skill3, skill3MasteryCosts);
+                getMasteryCostForSkill(skill3MasteryCosts, 3, neededItems, targetSkillMasteries.skill3, currentSkillMasteries.skill3);
             }
 
             // module costs
             const moduleX = modules.find(m => m.typeName2 === 'X');
             const moduleY = modules.find(m => m.typeName2 === 'Y');
-            const moduleZ = modules.find(m => m.typeName2 === 'Z');
+            const moduleZ = modules.find(m => m.typeName2 === 'Z');                
 
             if (moduleX) {
-                getModuleCosts(neededItems, currentModules.x, targetModules.x, moduleX);
+                getModuleCostsByLevel(neededItems, currentModules.x, targetModules.x, moduleX);
             }
             if (moduleY) {
-                getModuleCosts(neededItems, currentModules.y, targetModules.y, moduleY);
+                getModuleCostsByLevel(neededItems, currentModules.y, targetModules.y, moduleY);
             }
             if (moduleZ) {
-                getModuleCosts(neededItems, currentModules.z, targetModules.z, moduleZ);
+                getModuleCostsByLevel(neededItems, currentModules.z, targetModules.z, moduleZ);
             }
 
             neededItemsByOperator[operatorId] = neededItems;
         }
 
+        return neededItemsByOperator;
+    });
+
+    const totalCostsByOperator = computed(() => {
+        const neededItemsByOperator: { [key: string]: { [key: string]: number} } = {};
+        for (const [operatorId, levelUpNeeds] of Object.entries(totalCostsByOperatorCategorized.value)) {
+            const neededItems: { [key: string]: number } = getBlankInventory();
+            const addNeededItems = (costs: {
+                [key: string]: number;
+            }) => {
+                for (const [id, count] of Object.entries(costs)) {
+                    neededItems[id] += count;
+                }
+            } 
+
+            for (const key in levelUpNeeds) {
+                if (key === 'skill') {
+                    for (const skillCosts of levelUpNeeds.skill) {
+                        if (skillCosts)
+                            addNeededItems(skillCosts);
+                    }
+                }
+                else {
+                    addNeededItems(levelUpNeeds[key as LevelUpNeedsKey]);
+                }
+            }
+
+            neededItemsByOperator[operatorId] = neededItems;
+        }
         return neededItemsByOperator;
     });
 
@@ -484,6 +585,7 @@ export const usePlannerStore = defineStore('planner', () => {
         inventory,
         totalCosts,
         totalCostsByOperator,
+        totalCostsByOperatorCategorized,
         battleRecords,
         neededItems,
         neededItemsBreakdown,

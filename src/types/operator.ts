@@ -51,9 +51,9 @@ type Module = {
     unlockFavorPoint: number;
     missionList: string[];
     itemCost: {
-      1: LevelUpCost[];
-      2: LevelUpCost[];
-      3: LevelUpCost[];
+        1: LevelUpCost[];
+        2: LevelUpCost[];
+        3: LevelUpCost[];
     },
     type: "ADVANCED" | "INITIAL";
     uniEquipGetTime: number;
@@ -194,7 +194,7 @@ type Operator = {
     favorKeyFrames: KeyFrame[];
 
     // Skill Level Up Costs
-    allSkillLvlup: { 
+    allSkillLvlup: {
         unlockCond: UnlockCondition;
         lvlUpCost: LevelUpCost[] | null;
     }[];
@@ -231,6 +231,33 @@ class SaveRecord {
     }
 }
 
+type LevelUpNeedsKey = 'levelup' |
+    'promotion' |
+    's1m1' |
+    's1m2' |
+    's1m3' |
+    's2m1' |
+    's2m2' |
+    's2m3' |
+    's3m1' |
+    's3m2' |
+    's3m3' |
+    'mxl1' |
+    'mxl2' |
+    'mxl3' |
+    'myl1' |
+    'myl2' |
+    'myl3' |
+    'mzl1' |
+    'mzl2' |
+    'mzl3';
+
+type LevelUpNeeds = {
+    [K in LevelUpNeedsKey]: { [key: string]: number };
+} & {
+    skill: { [key: string]: number }[];
+};
+
 export type {
     UniEquip_Table,
     EquipDict,
@@ -248,7 +275,9 @@ export type {
     Skill,
     UnlockCondition,
     Operator,
-    OperatorRecord
+    OperatorRecord,
+    LevelUpNeeds,
+    LevelUpNeedsKey
 }
 
 export {
