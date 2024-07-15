@@ -55,6 +55,10 @@ const lmdChangeAmountString = computed(() => {
 });
 
 const changeItemAmount = (item: Item, amount: number) => {
+    if (inventory.value[item.itemId] === undefined) {
+        inventory.value[item.itemId] = 0;
+    }
+    
     inventory.value[item.itemId] += amount;
 };
 
