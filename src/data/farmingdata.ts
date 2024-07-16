@@ -67,6 +67,22 @@ const stages: { [key: string]: string } = {
     "2002": "LS-6",             // EXP Card - Blue
     "2003": "LS-6",             // EXP Card - Yellow
     "2004": "LS-6",             // EXP Card - Gold
+    "3241": "PR-B-1",           // Sniper Chip
+    "3242": "PR-B-2",           // Sniper Chip Pack
+    "3251": "PR-B-1",           // Caster Chip
+    "3252": "PR-B-2",           // Caster Chip Pack
+    "3221": "PR-D-1",           // Guard Chip
+    "3222": "PR-D-2",           // Guard Chip Pack
+    "3281": "PR-D-1",           // Specialist Chip
+    "3282": "PR-D-2",           // Specialist Chip Pack
+    "3231": "PR-A-1",           // Defender Chip
+    "3232": "PR-A-2",           // Defender Chip Pack
+    "3261": "PR-A-1",           // Medic Chip
+    "3262": "PR-A-2",           // Medic Chip Pack
+    "3211": "PR-C-1",           // Vanguard Chip
+    "3212": "PR-C-2",           // Vanguard Chip Pack
+    "3271": "PR-C-1",           // Supporter Chip
+    "3272": "PR-C-2",           // Supporter Chip Pack
 };
 
 // ignore these crafting recipes in efficiency calc because they'll cause an infinite loop as they craft into each other
