@@ -302,7 +302,7 @@ const active = computed({
 
             <div class="row" v-if="operator.skills.length > 0">
                 <div class="input-group">
-                    <span class="input-group-text">Skills Level</span>
+                    <span class="input-group-text">Skill Level</span>
                     <input type="number" class="form-control" v-model="currentSkill" min="1"
                         :max="currentElite === 0 ? 4 : 7" />
                 </div>
@@ -359,7 +359,7 @@ const active = computed({
 
             <div class="row" v-if="operator.skills.length > 0">
                 <div class="input-group">
-                    <span class="input-group-text">Skills Level</span>
+                    <span class="input-group-text">Skill Level</span>
                     <input type="number" class="form-control" v-model="targetSkill" :min="currentSkill"
                         :max="targetElite === 0 ? 4 : 7" />
                 </div>
