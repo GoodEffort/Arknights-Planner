@@ -33,6 +33,7 @@ export const usePlannerStore = defineStore('planner', () => {
     const reserveTier4 = ref<number>(0);
     const reserveTier5 = ref<number>(0);
     const reserveTier6 = ref<number>(0);
+    const exportString = ref<string>('');
     // Operators
 
     async function loadCharacters() {
@@ -73,6 +74,30 @@ export const usePlannerStore = defineStore('planner', () => {
             }
         }
         return modulesArray;
+    }
+
+    function exportSavedRecords() {
+        const selectedCharacters = selectedOperators.value.map(c => c.operator.id);
+        const currentInventory = Object.fromEntries(Object.entries(inventory.value).filter(b => b[1] > 0));
+        const operatorPlans: SaveRecord[] = [];
+
+        for (const { operator, plans, active } of selectedOperators.value) {
+            const saveRecord: SaveRecord = {
+                operatorId: operator.id,
+                plans,
+                active
+            };
+            operatorPlans.push(saveRecord);
+        }
+
+        const exportData = {
+            s: selectedCharacters,
+            i: currentInventory,
+            p: operatorPlans
+        };
+
+        console.log(exportData);
+        exportString.value = JSON.stringify(exportData);
     }
 
     function loadSavedRecords() {
@@ -185,7 +210,7 @@ export const usePlannerStore = defineStore('planner', () => {
                     if (neededItems[moduleName][id] === undefined) {
                         neededItems[moduleName][id] = 0;
                     }
-    
+
                     neededItems[moduleName][id] += count;
                 }
             }
@@ -307,7 +332,7 @@ export const usePlannerStore = defineStore('planner', () => {
                 if (neededItems.levelup[lastExpItemId] === undefined) {
                     neededItems.levelup[lastExpItemId] = 0;
                 }
-                
+
                 neededItems.levelup[lastExpItemId] += 1;
             }
 
@@ -365,7 +390,7 @@ export const usePlannerStore = defineStore('planner', () => {
                         for (const { count, id } of lvlUpCost) {
                             if (neededItems.skill[currentSkillIndex] === undefined)
                                 neededItems.skill[currentSkillIndex] = {};
-                            
+
                             const skill = neededItems.skill[currentSkillIndex];
                             if (skill[id] === undefined)
                                 skill[id] = 0;
@@ -394,7 +419,7 @@ export const usePlannerStore = defineStore('planner', () => {
             // module costs
             const moduleX = selectedOperator.modules.find(m => m.typeName2 === 'X');
             const moduleY = selectedOperator.modules.find(m => m.typeName2 === 'Y');
-            const moduleD = selectedOperator.modules.find(m => m.typeName2 === 'D');                
+            const moduleD = selectedOperator.modules.find(m => m.typeName2 === 'D');
 
             if (moduleX) {
                 getModuleCostsByLevel(neededItems, currentModules.x, targetModules.x, moduleX);
@@ -413,7 +438,7 @@ export const usePlannerStore = defineStore('planner', () => {
     });
 
     const totalCostsByOperator = computed(() => {
-        const neededItemsByOperator: { [key: string]: { [key: string]: number} } = {};
+        const neededItemsByOperator: { [key: string]: { [key: string]: number } } = {};
         for (const [operatorId, levelUpNeeds] of Object.entries(totalCostsByOperatorCategorized.value)) {
             const neededItems: { [key: string]: number } = getBlankInventory();
             const addNeededItems = (costs: {
@@ -422,7 +447,7 @@ export const usePlannerStore = defineStore('planner', () => {
                 for (const [id, count] of Object.entries(costs)) {
                     neededItems[id] += count;
                 }
-            } 
+            }
 
             for (const key in levelUpNeeds) {
                 if (key === 'skill') {
@@ -577,7 +602,7 @@ export const usePlannerStore = defineStore('planner', () => {
         neededItemsBreakdown.value
             .filter(({ item: { itemId } }) => stages[itemId])
             .sort((a, b) =>
-                ((efficientToFarmItemIds.indexOf(a.item.itemId) >= 0) === (efficientToFarmItemIds.indexOf(b.item.itemId) >= 0)) ? 
+                ((efficientToFarmItemIds.indexOf(a.item.itemId) >= 0) === (efficientToFarmItemIds.indexOf(b.item.itemId) >= 0)) ?
                     b.item.sortId - a.item.sortId :
                     efficientToFarmItemIds.indexOf(b.item.itemId) - efficientToFarmItemIds.indexOf(a.item.itemId))
             .map(({ item }) => ({ stage: stages[item.itemId], item })));
@@ -610,6 +635,8 @@ export const usePlannerStore = defineStore('planner', () => {
         loadSavedRecords,
         selectCharacter,
         craftItem,
-        loadWorkshopFormulas
+        loadWorkshopFormulas,
+        exportSavedRecords,
+        exportString
     }
 });
