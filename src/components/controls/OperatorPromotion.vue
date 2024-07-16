@@ -18,8 +18,15 @@ const showElite2 = ref(phases ? phases.length > 2 : false);
 </script>
 
 <template>
-    <div class="input-group">
+    <div class="input-group d-none d-md-flex">
         <span class="input-group-text">Promotion</span>
+        <select class="form-select" :value="modelValue" @input="$emit('update:model-value', +($event.target as HTMLSelectElement).value)" :disabled="disabled">
+            <option value="0">Elite 0</option>
+            <option v-if="showElite1" value="1">Elite 1</option>
+            <option v-if="showElite2" value="2">Elite 2</option>
+        </select>
+    </div>
+    <div class="d-md-none">
         <select class="form-select" :value="modelValue" @input="$emit('update:model-value', +($event.target as HTMLSelectElement).value)" :disabled="disabled">
             <option value="0">Elite 0</option>
             <option v-if="showElite1" value="1">Elite 1</option>

@@ -256,12 +256,12 @@ const active = computed({
         </div>
     </div>
     <div class="row" v-if="section === 'Plan'">
-        <div class="col-6">
+        <div class="col-12 col-md-6">
             <label>Current</label>
             <hr />
 
             <div class="row">
-                <div class="col-7" v-if="operator.phases.length > 1">
+                <div class="col-md-7 col-5" v-if="operator.phases.length > 1">
                     <OperatorPromotion :phases="operator.phases" v-model="currentElite"
                         :key="`1${operator.id}-elite`" />
                 </div>
@@ -281,17 +281,17 @@ const active = computed({
             <hr v-if="operator.phases.length > 2" />
 
             <div class="row" v-if="operator.phases.length > 2">
-                <label>Skill Masteries</label>
-                <div class="col">
-                    <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="currentMastery1" :skillNumber="1"
+                <label>Masteries</label>
+                <div class="col pe-0 px-md-auto">
+                    <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="currentMastery1" skillNumber="S1"
                         :key="`1${operator.id}-skill1`" />
                 </div>
-                <div class="col">
-                    <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="currentMastery2" :skillNumber="2"
+                <div class="col px-1 px-md-auto">
+                    <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="currentMastery2" skillNumber="S2"
                         :key="`1${operator.id}-skill2`" />
                 </div>
-                <div class="col">
-                    <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="currentMastery3" :skillNumber="3"
+                <div class="col ps-0 px-md-auto">
+                    <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="currentMastery3" skillNumber="S3"
                         :key="`1${operator.id}-skill3`" />
                 </div>
             </div>
@@ -299,22 +299,22 @@ const active = computed({
 
             <div class="row" v-if="selectedOperator.modules.length > 0">
                 <label>Modules</label>
-                <div class="col">
-                    <OperatorModule v-if="hasXModule" v-model="currentModuleX" module-letter="X"
+                <div class="col" v-if="hasXModule">
+                    <OperatorModule  v-model="currentModuleX" module-letter="X"
                         :key="`1${operator.id}-mx`" />
                 </div>
-                <div class="col">
-                    <OperatorModule v-if="hasYModule" v-model="currentModuleY" module-letter="Y"
+                <div class="col" v-if="hasYModule">
+                    <OperatorModule  v-model="currentModuleY" module-letter="Y"
                         :key="`1${operator.id}-my`" />
                 </div>
-                <div class="col">
-                    <OperatorModule v-if="hasDModule" v-model="currentModuleD" module-letter="Δ"
+                <div class="col" v-if="hasDModule">
+                    <OperatorModule v-model="currentModuleD" module-letter="Δ"
                         :key="`1${operator.id}-md`" />
                 </div>
             </div>
 
         </div>
-        <div class="col-6">
+        <div class="col-12 col-md-6">
             <label>Planned</label>
             <hr />
 
@@ -338,17 +338,17 @@ const active = computed({
             <hr v-if="operator.phases.length > 2" />
 
             <div class="row" v-if="operator.phases.length > 2">
-                <label>Skill Masteries</label>
-                <div class="col">
-                    <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="targetMastery1" :skillNumber="1"
+                <label>Skill</label>
+                <div class="col pe-0 px-md-auto">
+                    <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="targetMastery1" skillNumber="S1"
                         :key="`2${operator.id}-skill1`" />
                 </div>
-                <div class="col">
-                    <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="targetMastery2" :skillNumber="2"
+                <div class="col px-1 px-md-auto">
+                    <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="targetMastery2" skillNumber="S2"
                         :key="`2${operator.id}-skill2`" />
                 </div>
-                <div class="col">
-                    <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="targetMastery3" :skillNumber="3"
+                <div class="col ps-0 px-md-auto">
+                    <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="targetMastery3" skillNumber="S3"
                         :key="`2${operator.id}-skill3`" />
                 </div>
             </div>
@@ -356,16 +356,16 @@ const active = computed({
 
             <div class="row" v-if="selectedOperator.modules.length > 0">
                 <label>Modules</label>
-                <div class="col">
-                    <OperatorModule v-if="hasXModule" v-model="targetModuleX" module-letter="X"
+                <div class="col" v-if="hasXModule">
+                    <OperatorModule v-model="targetModuleX" module-letter="X"
                         :key="`2${operator.id}-mx`" />
                 </div>
-                <div class="col">
-                    <OperatorModule v-if="hasYModule" v-model="targetModuleY" module-letter="Y"
+                <div class="col" v-if="hasYModule">
+                    <OperatorModule v-model="targetModuleY" module-letter="Y"
                         :key="`2${operator.id}-my`" />
                 </div>
-                <div class="col">
-                    <OperatorModule v-if="hasDModule" v-model="targetModuleD" module-letter="Δ"
+                <div class="col" v-if="hasDModule">
+                    <OperatorModule v-model="targetModuleD" module-letter="Δ"
                         :key="`2${operator.id}-md`" />
                 </div>
             </div>

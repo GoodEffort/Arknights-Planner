@@ -4,8 +4,8 @@ const emit = defineEmits<{
 }>();
 
 const { modelValue } = defineProps<{
-    modelValue: Number,
-    skillNumber: Number
+    modelValue: number,
+    skillNumber: string
 }>();
 
 const onChange = (e: Event) => {

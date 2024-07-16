@@ -16,7 +16,7 @@ const onChange = (e: Event) => {
 
 <template>
     <div class="input-group">
-        <span class="input-group-text">Level</span>
-        <input type="number" class="form-control" :value="modelValue" @input="onChange" min="1" :max="maxLevel" />
+        <span class="input-group-text ">Level</span>
+        <input placeholder="Level" type="number" class="form-control" :value="modelValue" @input="onChange" min="1" :max="maxLevel" />
     </div>
 </template>
