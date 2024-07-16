@@ -231,32 +231,32 @@ const showAnyRow = computed(() => {
         <!-- Skill up Costs -->
 
         <div class="row" v-if="ShowRow(Costs.skill[0])">
-            <OperatorCostRow :costs="Costs.skill[0]" title="Skill 2 Costs"
+            <OperatorCostRow :costs="Costs.skill[0]" title="Skill 2"
                 :enable-apply="selectedOperator.plans.currentSkillLevels === 1" :hide-apply="false"
                 @apply-upgrade="costs => applyUpgrade(costs, 'SkillLevel', 2)" />
         </div>
         <div class="row" v-if="ShowRow(Costs.skill[1])">
-            <OperatorCostRow :costs="Costs.skill[1]" title="Skill 3 Costs"
+            <OperatorCostRow :costs="Costs.skill[1]" title="Skill 3"
                 :enable-apply="selectedOperator.plans.currentSkillLevels === 2" :hide-apply="false"
                 @apply-upgrade="costs => applyUpgrade(costs, 'SkillLevel', 3)" />
         </div>
         <div class="row" v-if="ShowRow(Costs.skill[2])">
-            <OperatorCostRow :costs="Costs.skill[2]" title="Skill 4 Costs"
+            <OperatorCostRow :costs="Costs.skill[2]" title="Skill 4"
                 :enable-apply="selectedOperator.plans.currentSkillLevels === 3" :hide-apply="false"
                 @apply-upgrade="costs => applyUpgrade(costs, 'SkillLevel', 4)" />
         </div>
         <div class="row" v-if="ShowRow(Costs.skill[3])">
-            <OperatorCostRow :costs="Costs.skill[3]" title="Skill 5 Costs"
+            <OperatorCostRow :costs="Costs.skill[3]" title="Skill 5"
                 :enable-apply="selectedOperator.plans.currentSkillLevels === 4" :hide-apply="false"
                 @apply-upgrade="costs => applyUpgrade(costs, 'SkillLevel', 5)" />
         </div>
         <div class="row" v-if="ShowRow(Costs.skill[4])">
-            <OperatorCostRow :costs="Costs.skill[4]" title="Skill 6 Costs"
+            <OperatorCostRow :costs="Costs.skill[4]" title="Skill 6"
                 :enable-apply="selectedOperator.plans.currentSkillLevels === 5" :hide-apply="false"
                 @apply-upgrade="costs => applyUpgrade(costs, 'SkillLevel', 6)" />
         </div>
         <div class="row" v-if="ShowRow(Costs.skill[5])">
-            <OperatorCostRow :costs="Costs.skill[5]" title="Skill 7 Costs"
+            <OperatorCostRow :costs="Costs.skill[5]" title="Skill 7"
                 :enable-apply="selectedOperator.plans.currentSkillLevels === 6" :hide-apply="false"
                 @apply-upgrade="costs => applyUpgrade(costs, 'SkillLevel', 7)" />
         </div>
@@ -264,15 +264,15 @@ const showAnyRow = computed(() => {
         <!-- Promotion and Level Up Costs -->
 
         <div class="row" v-if="ShowRow(Costs.e1)">
-            <OperatorCostRow :costs="Costs.e1" title="Elite 1 Cost" :enable-apply="CanE1" :hide-apply="false"
+            <OperatorCostRow :costs="Costs.e1" title="Elite 1" :enable-apply="CanE1" :hide-apply="false"
                 @apply-upgrade="costs => applyUpgrade(costs, 'E1', 0)" />
         </div>
         <div class="row" v-if="ShowRow(Costs.e2)">
-            <OperatorCostRow :costs="Costs.e2" title="Elite 2 Cost" :enable-apply="CanE2" :hide-apply="false"
+            <OperatorCostRow :costs="Costs.e2" title="Elite 2" :enable-apply="CanE2" :hide-apply="false"
                 @apply-upgrade="costs => applyUpgrade(costs, 'E2', 0)" />
         </div>
         <div class="row" v-if="ShowRow(Costs.levelup)">
-            <OperatorCostRow :costs="Costs.levelup" title="Level Up Cost" :enable-apply="false" :hide-apply="true" />
+            <OperatorCostRow :costs="Costs.levelup" title="Level Up" :enable-apply="false" :hide-apply="true" />
         </div>
     </div>
     <div class="container mt-4" v-else>
