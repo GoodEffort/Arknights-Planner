@@ -8,7 +8,7 @@ import { SaveRecord } from '../types/operator';
 
 const store = usePlannerStore();
 const { exportSavedRecords, loadSavedRecords } = store;
-const { exportString, inventory } = storeToRefs(store);
+const { exportString, inventory, selectedOperators } = storeToRefs(store);
 
 const showCreditsmodal = ref(false);
 const showExportModal = ref(false);
@@ -50,6 +50,8 @@ const importData = () => {
     const saveString = `plans-${op.operatorId}`;
     localStorage.setItem(saveString, JSON.stringify(op));
   }
+
+  selectedOperators.value = [];
 
   inventory.value = data.i;
   loadSavedRecords();
