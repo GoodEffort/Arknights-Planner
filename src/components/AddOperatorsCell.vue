@@ -38,8 +38,8 @@ const isSelected = computed(() => selectedOperators.value.find(c => c.operator.i
     cursor: pointer;
 }
 
-.character-select.selected {
-    opacity: .05;
+.character-select.selected img {
+    opacity: .2;
 }
 
 .name {
