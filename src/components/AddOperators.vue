@@ -15,7 +15,28 @@ const selectedSort = ref<'Name' | 'Rarity' | 'Class'>('Name');
 const operatorFilter = ref('');
 const pageSize = ref(6); // make it divisible by 12 for bootstrap grids
 
-const filteredCharacters = computed(() => operators.value.filter(character => character.name.toLowerCase().includes(operatorFilter.value.toLowerCase())));
+const localeContains = function (main: string, sub: string): boolean {
+    if (sub === "") return true;
+    if (!sub || !main.length) return false;
+    sub = "" + sub;
+    if (sub.length > main.length) return false;
+    let ascii = (s: string) => s.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    return ascii(main).includes(ascii(sub));
+}
+
+const filteredCharacters = computed(() =>
+    operators.value
+        .filter(character =>
+            localeContains(
+                character.name.toLowerCase(),
+                operatorFilter.value.toLowerCase()
+            ) ||
+            localeContains(
+                character.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^0-9a-z\s]/gi, ''),
+                operatorFilter.value.toLowerCase()
+            )
+        ));
+
 const sortedCharacters = computed(() => filteredCharacters.value.sort(characterSort));
 
 const pagedOperators = computed(() => {
@@ -63,7 +84,8 @@ function characterSort(a: Operator, b: Operator) {
         <hr />
 
         <div v-if="filteredCharacters.length > 36" class="mb-3">
-            Filter more to display different operators, currently showing 36 of {{ filteredCharacters.length }} operators
+            Filter more to display different operators, currently showing 36 of {{ filteredCharacters.length }}
+            operators
         </div>
 
         <div class="container">
