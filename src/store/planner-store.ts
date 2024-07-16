@@ -34,8 +34,8 @@ export const usePlannerStore = defineStore('planner', () => {
     const reserveTier5 = ref<number>(0);
     const reserveTier6 = ref<number>(0);
     const exportString = ref<string>('');
-    // Operators
 
+    // Operators
     async function loadCharacters() {
         const data = await getChardata();
         operators.value = data;
@@ -637,6 +637,7 @@ export const usePlannerStore = defineStore('planner', () => {
         craftItem,
         loadWorkshopFormulas,
         exportSavedRecords,
+        getBlankInventory,
         exportString
     }
 });

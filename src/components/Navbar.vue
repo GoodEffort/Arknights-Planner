@@ -7,7 +7,7 @@ import { storeToRefs } from 'pinia';
 import { SaveRecord } from '../types/operator';
 
 const store = usePlannerStore();
-const { exportSavedRecords, loadSavedRecords } = store;
+const { exportSavedRecords, loadSavedRecords, getBlankInventory } = store;
 const { exportString, inventory, selectedOperators } = storeToRefs(store);
 
 const showCreditsmodal = ref(false);
@@ -53,7 +53,7 @@ const importData = () => {
 
   selectedOperators.value = [];
 
-  inventory.value = data.i;
+  inventory.value = { ...getBlankInventory(), ...data.i };
   loadSavedRecords();
 
   showImportModal.value = false;
