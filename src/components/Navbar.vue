@@ -67,15 +67,17 @@ const importData = () => {
       <night-mode-toggle />
     </div>
     <div>
-      <button class="btn btn-primary" @click="exportData">
-        <font-awesome-icon icon="download"  />
-      </button>
-      <button class="btn btn-primary" @click="showImportModal = !showImportModal">
-        <font-awesome-icon icon="upload"  />
-      </button>
-      <button class="btn btn-secondary" @click="showCreditsmodal = !showCreditsmodal">
-        <font-awesome-icon icon="info-circle"  />
-      </button>
+      <div class="btn-group" role="group">
+        <button class="btn btn-primary" @click="exportData">
+          <font-awesome-icon icon="download" />
+        </button>
+        <button class="btn btn-primary" @click="showImportModal = !showImportModal">
+          <font-awesome-icon icon="upload" />
+        </button>
+        <button class="btn btn-secondary" @click="showCreditsmodal = !showCreditsmodal">
+          <font-awesome-icon icon="info-circle" />
+        </button>
+      </div>
     </div>
   </nav>
 
