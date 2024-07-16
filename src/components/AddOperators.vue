@@ -14,6 +14,7 @@ const pageCount = computed(() => Math.ceil(operators.value.length / pageSize.val
 const selectedSort = ref<'Name' | 'Rarity' | 'Class'>('Name');
 const operatorFilter = ref('');
 const pageSize = ref(6); // make it divisible by 12 for bootstrap grids
+const showAll = ref(false);
 
 const localeContains = function (main: string, sub: string): boolean {
     if (sub === "") return true;
@@ -84,12 +85,15 @@ function characterSort(a: Operator, b: Operator) {
         <hr />
 
         <div v-if="filteredCharacters.length > 36" class="mb-3">
-            Filter more to display different operators, currently showing 36 of {{ filteredCharacters.length }}
-            operators
+            <button @click="showAll = !showAll" class="btn btn-primary">{{ showAll ? 'Limit Selection' : 'Show All' }}</button>
+            <p v-if="!showAll" class="mt-2">
+                Filter more to display different operators, currently showing 36 of {{ filteredCharacters.length }}
+                operators
+            </p>
         </div>
 
         <div class="container">
-            <div class="row" v-for="(row, index) in pagedOperators.slice(0, 6)" :key="index">
+            <div class="row" v-for="(row, index) in (showAll ? pagedOperators : pagedOperators.slice(0, 6))" :key="index">
                 <AddOperatorsCell v-for="operator in row" :operator="operator" :key="operator.id" />
             </div>
         </div>
