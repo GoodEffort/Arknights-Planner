@@ -68,7 +68,7 @@ const showModal = ref(false);
 <template>
     <div class="container">
         <div class="row">
-            <div class="col-2" v-for="{ item, count } in displayItems">
+            <div class="col-md-2 col-6" v-for="{ item, count } in displayItems">
                 <div class="item-col">
                     <div class="name">
                         <span>

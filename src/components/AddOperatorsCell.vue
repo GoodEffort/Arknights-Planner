@@ -5,11 +5,7 @@ import { usePlannerStore } from '../store/planner-store';
 import { Operator } from '../types/operator';
 import ImageFinder from './ImageFinder.vue';
 
-const { columnClass, operator } = defineProps({
-    columnClass: {
-        type: String,
-        default: 'col-2'
-    },
+const { operator } = defineProps({
     operator: {
         type: Object as PropType<Operator>,
         required: true
@@ -23,7 +19,7 @@ const isSelected = computed(() => selectedOperators.value.find(c => c.operator.i
 </script>
 
 <template>
-    <div :class="`character-select ${ columnClass } ${ isSelected ? 'selected' : '' }`" @click="selectCharacter(operator)">
+    <div :class="`character-select col-md-2 col-4 ${ isSelected ? 'selected' : '' }`" @click="selectCharacter(operator)">
         <div>
             <ImageFinder :subject="operator" class="img-thumbnail" />
         </div>
