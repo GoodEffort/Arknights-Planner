@@ -57,6 +57,8 @@ export const usePlannerStore = defineStore('planner', () => {
 
         items.value = itemsObj;
         expItems.value = expItemsObj;
+        const currentInventory = JSON.parse(JSON.stringify(inventory.value)); // don't modify the original inventory
+        inventory.value = { ...getBlankInventory(), ...currentInventory };
     }
 
     async function loadWorkshopFormulas() {
@@ -481,7 +483,10 @@ export const usePlannerStore = defineStore('planner', () => {
 
     // Inventory
     const inventory = ref<{ [key: string]: number }>(
-        JSON.parse(localStorage.getItem('inventory') || 'null') || {}
+        {
+            ...getBlankInventory(),
+            ...(JSON.parse(localStorage.getItem('inventory') || '{}'))
+        }
     );
 
     const craftItem = (item: Item) => {
