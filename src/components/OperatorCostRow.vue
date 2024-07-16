@@ -46,17 +46,22 @@ const ItemsAvailable = computed(() => {
 </script>
 
 <template>
-    <div class="col-2">
-        <label>{{ title }}</label>
+    <div class="col-md-2 col-9">
+        <label class="d-none d-md-inline-block">{{ title }}</label>
+        <h5 class="d-md-none">{{ title }}</h5>
     </div>
-    <div class="col-9">
+    <div class="col-3 d-md-none mb-2" v-if="!hideApply">
+        <button :disabled="!props.enableApply || !ItemsAvailable" class="btn btn-primary"
+            @click="emit('applyUpgrade', costs)">Apply</button>
+    </div>
+    <div class="col-md-9 col-12">
         <div class="row">
             <div class="col-auto" v-for="{ item, count } in entries" :key="item.itemId">
                 <ItemCell :item="item" :count="count" />
             </div>
         </div>
     </div>
-    <div class="col-1" v-if="!hideApply">
+    <div class="col-1 d-md-block d-none" v-if="!hideApply">
         <button :disabled="!props.enableApply || !ItemsAvailable" class="btn btn-primary"
             @click="emit('applyUpgrade', costs)">Apply</button>
     </div>

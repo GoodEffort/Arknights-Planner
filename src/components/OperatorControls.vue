@@ -230,7 +230,7 @@ const active = computed({
 </script>
 
 <template>
-    <div class="row mb-2">
+    <div class="row mb-3">
         <div class="col ">
             <div class="row">
                 <div class="col center-vert">
@@ -255,8 +255,8 @@ const active = computed({
             </div>
         </div>
     </div>
-    <div class="row" v-if="section === 'Plan'">
-        <div class="col-12 col-md-6">
+    <div class="row ms-md-1" v-if="section === 'Plan'">
+        <div class="col-12 col-md-6 plan-section rounded-start">
             <label class="d-md-inline-block d-none">Current</label>
             <h2 class="d-md-none bg-primary border border-info rounded mt-5">Current</h2>
             <hr />
@@ -315,7 +315,7 @@ const active = computed({
             </div>
 
         </div>
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-6 plan-section rounded-end">
             <label class="d-md-inline-block d-none">Planned</label>
             <h2 class="d-md-none bg-primary border border-info rounded mt-5">Planned</h2>
             <hr />
@@ -372,9 +372,6 @@ const active = computed({
                 </div>
             </div>
         </div>
-        <div class="col-12">
-            <hr />
-        </div>
     </div>
     <div v-if="section === 'Items'" class="row">
         <OperatorCosts :selected-operator="selectedOperator" :key="`${operator.id}-costs`" />
@@ -417,5 +414,18 @@ const active = computed({
 
 .operator-header.open::before {
     content: "▾";
+}
+
+html.dark .plan-section {
+    @media screen and (min-width: 500px) {
+        background-image: linear-gradient(rgb(20, 20, 20), rgb(24, 24, 24));
+    }
+}
+
+.plan-section {
+    @media screen and (min-width: 500px) {
+        padding-bottom: 10px;
+        padding-top: 10px;
+    }
 }
 </style>

@@ -126,7 +126,7 @@ const showAnyRow = computed(() => {
 </script>
 
 <template>
-    <div class="container mt-4" v-if="showAnyRow">
+    <div class="container mt-4 ms-md-2 ms-0 me-0" id="asdf" v-if="showAnyRow">
         <!-- Skill 1 Masteries -->
         <div class="row" v-if="ShowRow(Costs.s1m1)">
             <OperatorCostRow :costs="Costs.s1m1" title="Skill 1 Mastery 1"
@@ -284,3 +284,15 @@ const showAnyRow = computed(() => {
         </div>
     </div>
 </template>
+
+<style scoped>
+#asdf > div.row {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+    background-image: linear-gradient(rgb(204, 204, 204), rgb(201, 201, 201));
+}
+html.dark #asdf > div.row {
+    background-image: linear-gradient(rgb(20, 20, 20), rgb(36, 36, 36));
+}
+</style>
