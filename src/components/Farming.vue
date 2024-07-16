@@ -9,18 +9,23 @@ const { recomendedStages } = storeToRefs(usePlannerStore());
 
 <template>
     <PlannerSection title="Farming" local-storage-id="farming-collapsed">
-        <div v-for="{ stage, item } in recomendedStages" :key="stage">
-            <span><ImageFinder :subject="item" class="img-thumbnail" />&nbsp;&nbsp; {{ stage }} </span>
+        <div class="container">
+            <div class="row">
+                <div v-for="{ stage, item } in recomendedStages" :key="stage" class="col-2">
+                    <div>
+                        <ImageFinder :subject="item" class="img-thumbnail" />
+                    </div>
+                    <div class="mb-3">{{ stage }}</div>
+                </div>
+            </div>
         </div>
     </PlannerSection>
 </template>
 
 <style scoped>
-span {
-    display: flex;
-    align-items: center;
-}
-span img {
-    max-width: 50px;
+div.row img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
 }
 </style>
