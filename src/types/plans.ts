@@ -13,12 +13,12 @@ class SkillMasteries {
 class ModuleLevels {
     x: number;
     y: number;
-    z: number;
+    d: number;
 
     constructor() {
         this.x = 0;
         this.y = 0;
-        this.z = 0;
+        this.d = 0;
     }
 }
 

@@ -90,7 +90,7 @@ const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Sk
             currentPlan.currentModules.y = rank;
             break;
         case 'ModuleD':
-            currentPlan.currentModules.z = rank;
+            currentPlan.currentModules.d = rank;
             break;
         case 'E1':
             currentPlan.currentElite = 1;
@@ -193,20 +193,20 @@ const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Sk
                 :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.x === 2" 
                 @apply-upgrade="costs => applyUpgrade(costs, 'ModuleY', 3)"/>
         </div>
-        <!-- Module Z/Δ -->
+        <!-- Module D/Δ -->
         <div class="row" v-if="ShowRow(Costs.mdl1)">
             <OperatorCostRow :costs="Costs.mdl1" title="Module Δ Level 1"
-                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.z === 0" 
+                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.d === 0" 
                 @apply-upgrade="costs => applyUpgrade(costs, 'ModuleD', 1)"/>
         </div>
         <div class="row" v-if="ShowRow(Costs.mdl2)">
             <OperatorCostRow :costs="Costs.mdl2" title="Module Δ Level 2"
-                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.z === 1" 
+                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.d === 1" 
                 @apply-upgrade="costs => applyUpgrade(costs, 'ModuleD', 2)"/>
         </div>
         <div class="row" v-if="ShowRow(Costs.mdl3)">
             <OperatorCostRow :costs="Costs.mdl3" title="Module Δ Level 3"
-                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.x === 2" 
+                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.d === 2" 
                 @apply-upgrade="costs => applyUpgrade(costs, 'ModuleD', 3)"/>
         </div>
 

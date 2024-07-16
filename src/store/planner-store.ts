@@ -403,7 +403,7 @@ export const usePlannerStore = defineStore('planner', () => {
                 getModuleCostsByLevel(neededItems, currentModules.y, targetModules.y, moduleY);
             }
             if (moduleD) {
-                getModuleCostsByLevel(neededItems, currentModules.z, targetModules.z, moduleD);
+                getModuleCostsByLevel(neededItems, currentModules.d, targetModules.d, moduleD);
             }
 
             neededItemsByOperator[operatorId] = neededItems;

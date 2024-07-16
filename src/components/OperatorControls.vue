@@ -189,7 +189,7 @@ const currentMastery3 = computed({
 
 const hasXModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'X') !== undefined);
 const hasYModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'Y') !== undefined);
-const hasZModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'D') !== undefined);
+const hasDModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'D') !== undefined);
 
 const currentModuleX = computed({
     get: () => props.selectedOperator.plans.currentModules.x,
@@ -202,8 +202,8 @@ const currentModuleY = computed({
 });
 
 const currentModuleD = computed({
-    get: () => props.selectedOperator.plans.currentModules.z,
-    set: value => props.selectedOperator.plans.currentModules.z = +value
+    get: () => props.selectedOperator.plans.currentModules.d,
+    set: value => props.selectedOperator.plans.currentModules.d = +value
 });
 
 const targetModuleX = computed({
@@ -217,8 +217,8 @@ const targetModuleY = computed({
 });
 
 const targetModuleD = computed({
-    get: () => props.selectedOperator.plans.targetModules.z,
-    set: value => props.selectedOperator.plans.targetModules.z = +value
+    get: () => props.selectedOperator.plans.targetModules.d,
+    set: value => props.selectedOperator.plans.targetModules.d = +value
 });
 
 const active = computed({
@@ -337,8 +337,8 @@ const active = computed({
                         :key="`1${operator.id}-my`" />
                 </div>
                 <div class="col">
-                    <OperatorModule v-if="hasZModule" v-model="currentModuleD" module-letter="Z"
-                        :key="`1${operator.id}-mz`" />
+                    <OperatorModule v-if="hasDModule" v-model="currentModuleD" module-letter="Δ"
+                        :key="`1${operator.id}-md`" />
                 </div>
             </div>
 
@@ -394,8 +394,8 @@ const active = computed({
                         :key="`2${operator.id}-my`" />
                 </div>
                 <div class="col">
-                    <OperatorModule v-if="hasZModule" v-model="targetModuleD" module-letter="Δ"
-                        :key="`2${operator.id}-mz`" />
+                    <OperatorModule v-if="hasDModule" v-model="targetModuleD" module-letter="Δ"
+                        :key="`2${operator.id}-md`" />
                 </div>
             </div>
         </div>
