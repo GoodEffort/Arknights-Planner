@@ -17,6 +17,7 @@ const props = defineProps<{
     },
     title: string;
     enableApply: boolean;
+    hideApply: boolean;
 }>();
 
 const { items, inventory } = storeToRefs(usePlannerStore());
@@ -55,7 +56,7 @@ const ItemsAvailable = computed(() => {
             </div>
         </div>
     </div>
-    <div class="col-1">
+    <div class="col-1" v-if="!hideApply">
         <button :disabled="!props.enableApply || !ItemsAvailable" class="btn btn-primary"
             @click="emit('applyUpgrade', costs)">Apply</button>
     </div>
