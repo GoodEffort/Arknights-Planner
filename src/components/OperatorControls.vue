@@ -189,7 +189,7 @@ const currentMastery3 = computed({
 
 const hasXModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'X') !== undefined);
 const hasYModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'Y') !== undefined);
-const hasZModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'Z') !== undefined);
+const hasZModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'D') !== undefined);
 
 const currentModuleX = computed({
     get: () => props.selectedOperator.plans.currentModules.x,
@@ -394,7 +394,7 @@ const active = computed({
                         :key="`2${operator.id}-my`" />
                 </div>
                 <div class="col">
-                    <OperatorModule v-if="hasZModule" v-model="targetModuleZ" module-letter="Z"
+                    <OperatorModule v-if="hasZModule" v-model="targetModuleZ" module-letter="Δ"
                         :key="`2${operator.id}-mz`" />
                 </div>
             </div>

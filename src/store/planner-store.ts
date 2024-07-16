@@ -380,7 +380,7 @@ export const usePlannerStore = defineStore('planner', () => {
             // module costs
             const moduleX = selectedOperator.modules.find(m => m.typeName2 === 'X');
             const moduleY = selectedOperator.modules.find(m => m.typeName2 === 'Y');
-            const moduleZ = selectedOperator.modules.find(m => m.typeName2 === 'Z');                
+            const moduleZ = selectedOperator.modules.find(m => m.typeName2 === 'D');                
 
             if (moduleX) {
                 getModuleCostsByLevel(neededItems, currentModules.x, targetModules.x, moduleX);
