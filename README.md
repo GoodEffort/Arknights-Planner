@@ -29,10 +29,9 @@ things I want to add
  - a useful links / data sources page using the sources listed below
 
  Data Sources
-
-  (Currently using)
-  - https://github.com/Kengxxiao/ArknightsGameData_YoStar
-  - https://github.com/Aceship/Arknight-Images
-  - https://github.com/Kengxxiao/ArknightsGameData
-  - https://docs.google.com/spreadsheets/d/12X0uBQaN7MuuMWWDTiUjIni_MOP015GnulggmBJgBaQ/
-  - https://ak.gamepress.gg/news/arknights-material-farming-efficiency-best-stages-farm
+ - https://github.com/Kengxxiao/ArknightsGameData
+ - https://github.com/Kengxxiao/ArknightsGameData_YoStar
+ - https://github.com/Aceship/Arknight-Images
+ - https://github.com/ArknightsAssets/ArknightsAssets
+ - https://docs.google.com/spreadsheets/d/12X0uBQaN7MuuMWWDTiUjIni_MOP015GnulggmBJgBaQ/
+ - https://ak.gamepress.gg/news/arknights-material-farming-efficiency-best-stages-farm
