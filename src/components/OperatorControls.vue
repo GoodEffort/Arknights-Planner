@@ -8,6 +8,7 @@ import OperatorModule from './controls/OperatorModule.vue';
 import OperatorCosts from './OperatorCosts.vue';
 import ImageFinder from './ImageFinder.vue';
 import { usePlannerStore } from '../store/planner-store';
+import OperatorControlsTabs from './OperatorControlsTabs.vue';
 
 const props = defineProps<{
     selectedOperator: SelectedOperator;
@@ -239,43 +240,13 @@ const active = computed({
                 </div>
             </div>
             <div class="col-auto">
-                <div class="row text-start">
-                    <div class="col-2">
-                        <button 
-                        type="button"
-                        class="btn"
-                        :class="`${ active ? 'btn-success' : 'btn-secondary' }`"
-                        @click="active = !active"
-                    >{{ active ? 'Active' : 'Inactive' }}</button>
-                    </div>
-                    <div class="col-8 text-center">
-                        <div class="btn-group" role="group" aria-label="Operator Controls">
-                            <button
-                                type="button"
-                                class="btn btn-secondary"
-                                @click="section === 'Plan' ?
-                                    section = '' :
-                                    section = 'Plan'"
-                                :class="{ active: section === 'Plan' }
-                            ">Plan</button>
-                            <button
-                                type="button"
-                                class="btn btn-secondary" 
-                                @click="section === 'Items' ?
-                                    section = '' :
-                                    section = 'Items'"
-                                :class="{ active: section === 'Items' }"
-                            >Items</button>
-                        </div>  
-                    </div>
-                    <div class="col-2 text-end">
-                        <button 
-                            type="button"
-                            class="btn btn-danger"
-                            @click="selectCharacter(operator)"
-                        >Remove</button>
-                    </div>  
-                </div>
+                <OperatorControlsTabs 
+                    :active="active"
+                    :section="section"
+                    @active="active = !active"
+                    @plan="section === 'Plan' ? section = '' : section = 'Plan'"
+                    @items="section === 'Items' ? section = '' : section = 'Items'"
+                    @remove="selectCharacter(operator)" />
             </div>
         </div>
         <div class="col-auto center-vert">
