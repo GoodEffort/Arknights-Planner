@@ -3,7 +3,8 @@ import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import OperatorCostRow from './OperatorCostRow.vue';
-import { SelectedOperator } from '../types/operator';
+import type { ComputedRef } from 'vue';
+import type { LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from '../types/operator';
 
 const { totalCostsByOperatorCategorized, selectedOperators, inventory } = storeToRefs(usePlannerStore());
 
@@ -11,7 +12,7 @@ const props = defineProps<{
     selectedOperator: SelectedOperator;
 }>();
 
-const Costs = computed(() => totalCostsByOperatorCategorized.value[props.selectedOperator.operator.id] ?? []);
+const Costs: ComputedRef<LevelUpNeeds> = computed(() => totalCostsByOperatorCategorized.value[props.selectedOperator.operator.id] ?? []);
 
 const ShowRow = (costs: { [key: string]: number }) => Object.keys(costs ?? {}).length > 0;
 
@@ -105,10 +106,27 @@ const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Sk
     }
 };
 
+const showAnyRow = computed(() => {
+    const currentCosts = Costs.value;
+    for (const key in currentCosts) {
+        if (key === 'skill') {
+            for (const skillCost of currentCosts[key as 'skill']) {
+                if (ShowRow(skillCost)) {
+                    return true;
+                }
+            }
+        }
+        else if (ShowRow(currentCosts[key as LevelUpNeedsKey])) {
+            return true;
+        }
+    }
+    return false;
+});
+
 </script>
 
 <template>
-    <div class="container mt-4">
+    <div class="container mt-4" v-if="showAnyRow">
         <!-- Skill 1 Masteries -->
         <div class="row" v-if="ShowRow(Costs.s1m1)">
             <OperatorCostRow :costs="Costs.s1m1" title="Skill 1 Mastery 1"
@@ -255,6 +273,14 @@ const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Sk
         </div>
         <div class="row" v-if="ShowRow(Costs.levelup)">
             <OperatorCostRow :costs="Costs.levelup" title="Level Up Cost" :enable-apply="false" :hide-apply="true" />
+        </div>
+    </div>
+    <div class="container mt-4" v-else>
+        <div class="row">
+            <div class="col-12">
+                <p class="text-center">No Costs</p>
+                <p class="text-center">Please add a plan for this operator under the plans section for them to add cost</p>
+            </div>
         </div>
     </div>
 </template>
