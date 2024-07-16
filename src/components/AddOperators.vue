@@ -62,6 +62,10 @@ function characterSort(a: Operator, b: Operator) {
         <input class="form-control" type="text" v-model="operatorFilter" placeholder="Filter by operator name" />
         <hr />
 
+        <div v-if="filteredCharacters.length > 36" class="mb-3">
+            Filter more to display different operators, currently showing 36 of {{ filteredCharacters.length }} operators
+        </div>
+
         <div class="container">
             <div class="row" v-for="(row, index) in pagedOperators.slice(0, 6)" :key="index">
                 <AddOperatorsCell v-for="operator in row" :operator="operator" :key="operator.id" />
@@ -69,3 +73,9 @@ function characterSort(a: Operator, b: Operator) {
         </div>
     </PlannerSection>
 </template>
+
+<style lang="css">
+html.dark input.form-control::placeholder {
+    color: #c5c5c5;
+}
+</style>
