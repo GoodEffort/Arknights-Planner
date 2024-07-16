@@ -232,7 +232,8 @@ class SaveRecord {
 }
 
 type LevelUpNeedsKey = 'levelup' |
-    'promotion' |
+    'e1' |
+    'e2' |
     's1m1' |
     's1m2' |
     's1m3' |

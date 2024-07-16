@@ -15,24 +15,43 @@ const Costs = computed(() => totalCostsByOperatorCategorized.value[props.selecte
 
 const ShowRow = (costs: { [key: string]: number }) => Object.keys(costs??{}).length > 0;
 
-const isE2 = computed(() => props.selectedOperator.plans.currentElite === 2);
+const currentRank = computed(() => props.selectedOperator.plans.currentElite);
 
 const CanMasteryBeApplied = computed(() => {
-    return isE2.value && props.selectedOperator.plans.currentSkillLevels === 7;
+    return currentRank.value === 2 && props.selectedOperator.plans.currentSkillLevels === 7;
 });
 
 const CanModuleBeApplied = computed(() => {
     const operator = props.selectedOperator.operator;
-    const e2 = isE2.value;
-    const level = props.selectedOperator.plans.currentLevel;
 
     switch (operator.rarity) {
         case 'TIER_4':
-            return e2 && level >= 40;
         case 'TIER_5':
-            return e2 && level >= 50;
         case 'TIER_6':
-            return e2 && level >= 60;
+            return currentRank.value === 2;
+        default:
+            return false;
+    }
+});
+
+const CanE1 = computed(() => {
+    switch (props.selectedOperator.operator.rarity) {
+        case 'TIER_3':
+        case 'TIER_4':
+        case 'TIER_5':
+        case 'TIER_6':
+            return currentRank.value === 0;
+        default:
+            return false;
+    }
+});
+
+const CanE2 = computed(() => {
+    switch (props.selectedOperator.operator.rarity) {
+        case 'TIER_4':
+        case 'TIER_5':
+        case 'TIER_6':
+            return currentRank.value === 1;
         default:
             return false;
     }
@@ -226,8 +245,13 @@ const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Sk
 
         <!-- Promotion and Level Up Costs -->
 
-        <div class="row" v-if="ShowRow(Costs.promotion)">
-            <OperatorCostRow :costs="Costs.promotion" title="Promotion Cost" :enable-apply="false" />
+        <div class="row" v-if="ShowRow(Costs.e1)">
+            <OperatorCostRow :costs="Costs.e1" title="Elite 1 Cost" :enable-apply="CanE1" 
+            @apply-upgrade="costs => applyUpgrade(costs, 'E1', 0)"/>
+        </div>
+        <div class="row" v-if="ShowRow(Costs.e2)">
+            <OperatorCostRow :costs="Costs.e2" title="Elite 2 Cost" :enable-apply="CanE2" 
+            @apply-upgrade="costs => applyUpgrade(costs, 'E2', 0)"/>
         </div>
         <div class="row" v-if="ShowRow(Costs.levelup)">
             <OperatorCostRow :costs="Costs.levelup" title="Level Up Cost" :enable-apply="false" />

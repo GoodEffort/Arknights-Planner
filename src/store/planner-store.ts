@@ -229,7 +229,8 @@ export const usePlannerStore = defineStore('planner', () => {
 
             const neededItems: LevelUpNeeds = {
                 levelup: {},
-                promotion: {},
+                e1: {},
+                e2: {},
                 skill: [],
                 s1m1: {},
                 s1m2: {},
@@ -311,29 +312,42 @@ export const usePlannerStore = defineStore('planner', () => {
             }
 
             // promotion costs
-            for (
-                let currentEliteIndex = currentElite + 1;
-                currentEliteIndex <= targetElite;
-                currentEliteIndex++
-            ) {
-                // promotion costs
-                const { evolveCost } = eliteLevelUpCosts[currentEliteIndex];
+
+            // elite 1
+            if (currentElite === 0 && targetElite >= 1) {
+                const { evolveCost } = eliteLevelUpCosts[1];
 
                 if (evolveCost) {
                     for (const { count, id } of evolveCost) {
-                        if (neededItems.promotion[id] === undefined)
-                            neededItems.promotion[id] = 0;
+                        if (neededItems.e1[id] === undefined)
+                            neededItems.e1[id] = 0;
 
-                        neededItems.promotion[id] += count;
+                        neededItems.e1[id] += count;
                     }
 
-                    if (neededItems.promotion[lmdId.value] === undefined)
-                        neededItems.promotion[lmdId.value] = 0;
+                    if (neededItems.e1[lmdId.value] === undefined)
+                        neededItems.e1[lmdId.value] = 0;
 
-                    if (currentEliteIndex === 1)
-                        neededItems.promotion[lmdId.value] += promotionLMD.ELITE_1;
-                    else if (currentEliteIndex === 2)
-                        neededItems.promotion[lmdId.value] += promotionLMD.ELITE_2;
+                    neededItems.e1[lmdId.value] += promotionLMD.ELITE_1;
+                }
+            }
+
+            // elite 2
+            if (currentElite <= 1 && targetElite === 2) {
+                const { evolveCost } = eliteLevelUpCosts[2];
+
+                if (evolveCost) {
+                    for (const { count, id } of evolveCost) {
+                        if (neededItems.e2[id] === undefined)
+                            neededItems.e2[id] = 0;
+
+                        neededItems.e2[id] += count;
+                    }
+
+                    if (neededItems.e2[lmdId.value] === undefined)
+                        neededItems.e2[lmdId.value] = 0;
+
+                    neededItems.e2[lmdId.value] += promotionLMD.ELITE_2;
                 }
             }
 
