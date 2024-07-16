@@ -25,17 +25,30 @@ const copyToClipboard = () => {
   showExportModal.value = false;
 };
 
+const pasteFromClipboard = async () => {
+  const text = await navigator.clipboard.readText();
+  importString.value = text;
+};
+
 const importData = () => {
   if (importString.value === '' || importString.value == null) {
     alert('Please paste data to import');
     return;
   }
 
-  const data: {
+  let data: {
     p: SaveRecord[];
     s: string[];
     i: { [key: string]: number };
-  } = JSON.parse(importString.value);
+  };
+  
+  try {
+    data = JSON.parse(importString.value);
+  }
+  catch (e) {
+    alert('Invalid data format');
+    return;
+  }
 
   if (data == null || !Array.isArray(data.p) || !Array.isArray(data.s) || data.i == null) {
     alert('Invalid data format');
@@ -115,6 +128,9 @@ const importData = () => {
           material farming efficiency quick reference</a>
       </div>
     </template>
+    <template #footer>
+      <button class="btn btn-danger" @click="showCreditsmodal = false">Close</button>
+    </template>
   </modal>
 
   <modal v-if="showExportModal" @close="showExportModal = false">
@@ -123,12 +139,11 @@ const importData = () => {
     </template>
     <template #body>
       <div>
-        <textarea rows="10" cols="50" readonly>
-          {{ exportString }}
-        </textarea>
+        <textarea rows="10" cols="50" readonly>{{ exportString }}</textarea>
       </div>
     </template>
     <template #footer>
+      <button class="btn btn-danger" @click="showExportModal = false">Cancel</button>
       <button class="btn btn-success" @click="copyToClipboard">Copy To Clipboard</button>
     </template>
   </modal>
@@ -138,13 +153,16 @@ const importData = () => {
       Import Data
     </template>
     <template #body>
-      <div>
-        <b>This will overwrite all data currently on the page with what you paste below!</b>
-        <textarea rows="10" cols="50" v-model="importString">
-        </textarea>
+      <div class="mb-2">
+        <h2>This will overwrite all data currently on the page with what you paste below!</h2>
       </div>
+      <div>
+        <textarea rows="10" cols="50" v-model="importString"></textarea>
+      </div>
+      <button class="btn btn-primary" @click="pasteFromClipboard">Paste from Clipboard</button>
     </template>
     <template #footer>
+      <button class="btn btn-danger" @click="showImportModal = false">Cancel</button>
       <button class="btn btn-success" @click="importData">Import Data</button>
     </template>
   </modal>
