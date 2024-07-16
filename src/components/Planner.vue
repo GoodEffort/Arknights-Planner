@@ -23,7 +23,7 @@ onMounted(async () => {
 
 <template>
     <div style="height: 100%;">
-        <h1>Planner</h1>
+        <h1>Arknights Planner</h1>
         <div v-if="!isLoading">
             <SelectedOperators />
             <TotalCostOfPlan />
