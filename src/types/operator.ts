@@ -248,9 +248,9 @@ type LevelUpNeedsKey = 'levelup' |
     'myl1' |
     'myl2' |
     'myl3' |
-    'mzl1' |
-    'mzl2' |
-    'mzl3';
+    'mdl1' |
+    'mdl2' |
+    'mdl3';
 
 type LevelUpNeeds = {
     [K in LevelUpNeedsKey]: { [key: string]: number };

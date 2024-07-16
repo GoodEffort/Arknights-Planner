@@ -172,7 +172,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
         for (let moduleIndex = 1; moduleIndex <= 3; moduleIndex++) {
             if (currentModule < moduleIndex && targetModule >= moduleIndex) {
-                const moduleName = `m${moduleLetter?.toLowerCase()}l${moduleIndex}` as 'mxl1' | 'mxl2' | 'mxl3' | 'myl1' | 'myl2' | 'myl3' | 'mzl1' | 'mzl2' | 'mzl3';
+                const moduleName = `m${moduleLetter?.toLowerCase()}l${moduleIndex}` as 'mxl1' | 'mxl2' | 'mxl3' | 'myl1' | 'myl2' | 'myl3' | 'mdl1' | 'mdl2' | 'mdl3';
 
                 if (neededItems[moduleName] === undefined) {
                     neededItems[moduleName] = {};
@@ -246,9 +246,9 @@ export const usePlannerStore = defineStore('planner', () => {
                 myl1: {},
                 myl2: {},
                 myl3: {},
-                mzl1: {},
-                mzl2: {},
-                mzl3: {},
+                mdl1: {},
+                mdl2: {},
+                mdl3: {},
             };
 
             const promotionLMD = promotionLMDCosts[rarity];
@@ -380,7 +380,7 @@ export const usePlannerStore = defineStore('planner', () => {
             // module costs
             const moduleX = selectedOperator.modules.find(m => m.typeName2 === 'X');
             const moduleY = selectedOperator.modules.find(m => m.typeName2 === 'Y');
-            const moduleZ = selectedOperator.modules.find(m => m.typeName2 === 'D');                
+            const moduleD = selectedOperator.modules.find(m => m.typeName2 === 'D');                
 
             if (moduleX) {
                 getModuleCostsByLevel(neededItems, currentModules.x, targetModules.x, moduleX);
@@ -388,8 +388,8 @@ export const usePlannerStore = defineStore('planner', () => {
             if (moduleY) {
                 getModuleCostsByLevel(neededItems, currentModules.y, targetModules.y, moduleY);
             }
-            if (moduleZ) {
-                getModuleCostsByLevel(neededItems, currentModules.z, targetModules.z, moduleZ);
+            if (moduleD) {
+                getModuleCostsByLevel(neededItems, currentModules.z, targetModules.z, moduleD);
             }
 
             neededItemsByOperator[operatorId] = neededItems;

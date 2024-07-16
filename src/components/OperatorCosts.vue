@@ -38,7 +38,7 @@ const CanModuleBeApplied = computed(() => {
     }
 });
 
-const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Skill1Mastery' | 'Skill2Mastery' | 'Skill3Mastery' | 'ModuleX' | 'ModuleY' | 'ModuleZ' | 'E1' | 'E2', rank: number) => {
+const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Skill1Mastery' | 'Skill2Mastery' | 'Skill3Mastery' | 'ModuleX' | 'ModuleY' | 'ModuleD' | 'E1' | 'E2', rank: number) => {
     const currentPlan = selectedOperators.value.find(op => op.operator.id === props.selectedOperator.operator.id)?.plans;
 
     if (currentPlan == null) {
@@ -70,7 +70,7 @@ const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Sk
         case 'ModuleY':
             currentPlan.currentModules.y = rank;
             break;
-        case 'ModuleZ':
+        case 'ModuleD':
             currentPlan.currentModules.z = rank;
             break;
         case 'E1':
@@ -175,20 +175,20 @@ const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Sk
                 @apply-upgrade="costs => applyUpgrade(costs, 'ModuleY', 3)"/>
         </div>
         <!-- Module Z/Δ -->
-        <div class="row" v-if="ShowRow(Costs.mzl1)">
-            <OperatorCostRow :costs="Costs.mzl1" title="Module Δ Level 1"
+        <div class="row" v-if="ShowRow(Costs.mdl1)">
+            <OperatorCostRow :costs="Costs.mdl1" title="Module Δ Level 1"
                 :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.z === 0" 
-                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleZ', 1)"/>
+                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleD', 1)"/>
         </div>
-        <div class="row" v-if="ShowRow(Costs.mzl2)">
-            <OperatorCostRow :costs="Costs.mzl2" title="Module Δ Level 2"
+        <div class="row" v-if="ShowRow(Costs.mdl2)">
+            <OperatorCostRow :costs="Costs.mdl2" title="Module Δ Level 2"
                 :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.z === 1" 
-                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleZ', 2)"/>
+                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleD', 2)"/>
         </div>
-        <div class="row" v-if="ShowRow(Costs.mzl3)">
-            <OperatorCostRow :costs="Costs.mzl3" title="Module Δ Level 3"
+        <div class="row" v-if="ShowRow(Costs.mdl3)">
+            <OperatorCostRow :costs="Costs.mdl3" title="Module Δ Level 3"
                 :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.x === 2" 
-                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleZ', 3)"/>
+                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleD', 3)"/>
         </div>
 
         <!-- Skill up Costs -->

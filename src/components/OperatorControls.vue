@@ -201,7 +201,7 @@ const currentModuleY = computed({
     set: value => props.selectedOperator.plans.currentModules.y = +value
 });
 
-const currentModuleZ = computed({
+const currentModuleD = computed({
     get: () => props.selectedOperator.plans.currentModules.z,
     set: value => props.selectedOperator.plans.currentModules.z = +value
 });
@@ -216,7 +216,7 @@ const targetModuleY = computed({
     set: value => props.selectedOperator.plans.targetModules.y = +value
 });
 
-const targetModuleZ = computed({
+const targetModuleD = computed({
     get: () => props.selectedOperator.plans.targetModules.z,
     set: value => props.selectedOperator.plans.targetModules.z = +value
 });
@@ -337,7 +337,7 @@ const active = computed({
                         :key="`1${operator.id}-my`" />
                 </div>
                 <div class="col">
-                    <OperatorModule v-if="hasZModule" v-model="currentModuleZ" module-letter="Z"
+                    <OperatorModule v-if="hasZModule" v-model="currentModuleD" module-letter="Z"
                         :key="`1${operator.id}-mz`" />
                 </div>
             </div>
@@ -394,7 +394,7 @@ const active = computed({
                         :key="`2${operator.id}-my`" />
                 </div>
                 <div class="col">
-                    <OperatorModule v-if="hasZModule" v-model="targetModuleZ" module-letter="Δ"
+                    <OperatorModule v-if="hasZModule" v-model="targetModuleD" module-letter="Δ"
                         :key="`2${operator.id}-mz`" />
                 </div>
             </div>
