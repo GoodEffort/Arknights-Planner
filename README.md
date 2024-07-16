@@ -22,7 +22,7 @@ If you run into an issue where the page stops working due to some invalid state 
 things I want to add
  - EXP tracking by value instead of item
  - reordering operators
- - Phone usability (CSS first, maybe app? idk)
+ - Phone app?
  - crafting recommendation
  - share link to move it to another device/browser (new Import/Export feature kind of does this, I want it easier still)
  - a way to sync your saved plans across devices
