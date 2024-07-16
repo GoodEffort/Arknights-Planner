@@ -68,5 +68,5 @@ onMounted(async () => {
 </script>
 
 <template>
-    <img :src="link" :alt="props.subject.name" class="img-thumbnail" :class="class" />
+    <img :src="link" :alt="props.subject.name" :title="props.subject.name" class="img-thumbnail" :class="class" />
 </template>
