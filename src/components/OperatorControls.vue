@@ -257,7 +257,8 @@ const active = computed({
     </div>
     <div class="row" v-if="section === 'Plan'">
         <div class="col-12 col-md-6">
-            <label>Current</label>
+            <label class="d-md-inline-block d-none">Current</label>
+            <h2 class="d-md-none bg-primary border border-info rounded mt-5">Current</h2>
             <hr />
 
             <div class="row">
@@ -315,7 +316,8 @@ const active = computed({
 
         </div>
         <div class="col-12 col-md-6">
-            <label>Planned</label>
+            <label class="d-md-inline-block d-none">Planned</label>
+            <h2 class="d-md-none bg-primary border border-info rounded mt-5">Planned</h2>
             <hr />
 
             <div class="row">
