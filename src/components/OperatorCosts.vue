@@ -253,7 +253,7 @@ const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Sk
             <OperatorCostRow :costs="Costs.e2" title="Elite 2 Cost" :enable-apply="CanE2" 
             @apply-upgrade="costs => applyUpgrade(costs, 'E2', 0)"/>
         </div>
-        <div class="row" v-if="ShowRow(Costs.levelup)">
+        <div class="row" v-if="false && ShowRow(Costs.levelup)">
             <OperatorCostRow :costs="Costs.levelup" title="Level Up Cost" :enable-apply="false" />
         </div>
     </div>
