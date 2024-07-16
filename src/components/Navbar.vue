@@ -55,6 +55,9 @@ const importData = () => {
 
   inventory.value = data.i;
   loadSavedRecords();
+
+  showImportModal.value = false;
+  importString.value = '';
 }
 </script>
 
