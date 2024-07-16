@@ -20,13 +20,12 @@ If you run into an issue where the page stops working due to some invalid state 
  - press Enter and refresh the page
 
 things I want to add
-
- - Phone usability
- - crafting recommendation
+ - EXP tracking by value instead of item
  - reordering operators
+ - Phone usability (CSS first, maybe app? idk)
+ - crafting recommendation
  - share link to move it to another device/browser (new Import/Export feature kind of does this, I want it easier still)
  - a way to sync your saved plans across devices
- - a useful links / data sources page using the sources listed below
 
  Data Sources
  - https://github.com/Kengxxiao/ArknightsGameData
