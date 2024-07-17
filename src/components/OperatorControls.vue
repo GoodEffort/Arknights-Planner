@@ -60,33 +60,37 @@ const active = computed({
             </div>
         </div>
     </div>
-    <div class="row ms-md-1" v-if="section === 'Plan'">
-        <div class="col-12 col-md-6 plan-section rounded-start">
-            <label class="d-md-inline-block d-none">Current</label>
-            <h2 class="d-md-none bg-primary border border-info rounded mt-5">Current</h2>
-            <OperatorLevelPromotion :selectedOperator="selectedOperator" type="current" />
-            <OperatorSkillLevels v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
-                type="current" />
-            <OperatorSkillMasteries v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
-                type="current" />
-            <OperatorModules v-if="selectedOperator.modules.length > 0" :selected-operator="selectedOperator"
-                type="current" />
+    <Transition>
+        <div class="row ms-md-1" v-if="section === 'Plan'">
+            <div class="col-12 col-md-6 plan-section rounded-start">
+                <label class="d-md-inline-block d-none">Current</label>
+                <h2 class="d-md-none bg-primary border border-info rounded mt-5">Current</h2>
+                <OperatorLevelPromotion :selectedOperator="selectedOperator" type="current" />
+                <OperatorSkillLevels v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
+                    type="current" />
+                <OperatorSkillMasteries v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
+                    type="current" />
+                <OperatorModules v-if="selectedOperator.modules.length > 0" :selected-operator="selectedOperator"
+                    type="current" />
+            </div>
+            <div class="col-12 col-md-6 plan-section rounded-end">
+                <label class="d-md-inline-block d-none">Planned</label>
+                <h2 class="d-md-none bg-primary border border-info rounded mt-5">Planned</h2>
+                <OperatorLevelPromotion :selectedOperator="selectedOperator" type="target" />
+                <OperatorSkillLevels v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
+                    type="target" />
+                <OperatorSkillMasteries v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
+                    type="target" />
+                <OperatorModules v-if="selectedOperator.modules.length > 0" :selected-operator="selectedOperator"
+                    type="target" />
+            </div>
         </div>
-        <div class="col-12 col-md-6 plan-section rounded-end">
-            <label class="d-md-inline-block d-none">Planned</label>
-            <h2 class="d-md-none bg-primary border border-info rounded mt-5">Planned</h2>
-            <OperatorLevelPromotion :selectedOperator="selectedOperator" type="target" />
-            <OperatorSkillLevels v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
-                type="target" />
-            <OperatorSkillMasteries v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
-                type="target" />
-            <OperatorModules v-if="selectedOperator.modules.length > 0" :selected-operator="selectedOperator"
-                type="target" />
+    </Transition>
+    <Transition>
+        <div v-if="section === 'Items'" class="row">
+            <OperatorCosts :selected-operator="selectedOperator" :key="`${operator.id}-costs`" />
         </div>
-    </div>
-    <div v-if="section === 'Items'" class="row">
-        <OperatorCosts :selected-operator="selectedOperator" :key="`${operator.id}-costs`" />
-    </div>
+    </Transition>
 </template>
 
 <style scoped>
@@ -146,5 +150,16 @@ html.dark .plan-section {
         padding-bottom: 10px;
         padding-top: 10px;
     }
+}
+.v-move,
+.v-enter-active,
+.v-leave-active {
+  transition: 0.3s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
 }
 </style>
