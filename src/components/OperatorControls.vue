@@ -1,4 +1,3 @@
-<!-- This component is tooooooo biiiiiiig TODO: break this down -->
 <script setup lang="ts">
 import { computed, watch, ref } from 'vue';
 import OperatorSkillMasteries from './controls/OperatorSkillMasteries.vue';
@@ -49,10 +48,7 @@ const active = computed({
                 </div>
             </div>
             <div class="col-auto">
-                <OperatorControlsTabs 
-                    :active="active"
-                    :section="section"
-                    @active="active = !active"
+                <OperatorControlsTabs :active="active" :section="section" @active="active = !active"
                     @plan="section === 'Plan' ? section = '' : section = 'Plan'"
                     @items="section === 'Items' ? section = '' : section = 'Items'"
                     @remove="selectCharacter(operator)" />
@@ -68,54 +64,23 @@ const active = computed({
         <div class="col-12 col-md-6 plan-section rounded-start">
             <label class="d-md-inline-block d-none">Current</label>
             <h2 class="d-md-none bg-primary border border-info rounded mt-5">Current</h2>
-
-            <OperatorLevelPromotion
-                :selectedOperator="selectedOperator"
-                type="current"
-            />
-
-            <OperatorSkillLevels
-                v-if="operator.skills.length > 0"
-                :selected-operator="selectedOperator"
-                type="current"
-            />
-
-            <OperatorSkillMasteries
-                v-if="operator.skills.length > 0"
-                :selected-operator="selectedOperator"
-                type="current"
-                />
-
-            <OperatorModules
-                v-if="selectedOperator.modules.length > 0"
-                :selected-operator="selectedOperator"
+            <OperatorLevelPromotion :selectedOperator="selectedOperator" type="current" />
+            <OperatorSkillLevels v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
                 type="current" />
-
+            <OperatorSkillMasteries v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
+                type="current" />
+            <OperatorModules v-if="selectedOperator.modules.length > 0" :selected-operator="selectedOperator"
+                type="current" />
         </div>
         <div class="col-12 col-md-6 plan-section rounded-end">
             <label class="d-md-inline-block d-none">Planned</label>
             <h2 class="d-md-none bg-primary border border-info rounded mt-5">Planned</h2>
-
-            <OperatorLevelPromotion
-                :selectedOperator="selectedOperator"
-                type="target"
-            />
-
-            <OperatorSkillLevels
-                v-if="operator.skills.length > 0"
-                :selected-operator="selectedOperator"
-                type="target"
-            />
-            
-            <OperatorSkillMasteries
-                v-if="operator.skills.length > 0"
-                :selected-operator="selectedOperator"
-                type="target"
-                />
-
-            <OperatorModules
-                v-if="selectedOperator.modules.length > 0"
-                :selected-operator="selectedOperator"
+            <OperatorLevelPromotion :selectedOperator="selectedOperator" type="target" />
+            <OperatorSkillLevels v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
+                type="target" />
+            <OperatorSkillMasteries v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
+                type="target" />
+            <OperatorModules v-if="selectedOperator.modules.length > 0" :selected-operator="selectedOperator"
                 type="target" />
         </div>
     </div>
@@ -150,6 +115,7 @@ const active = computed({
     @media screen and (min-width: 768px) {
         width: 75px;
     }
+
     @media screen and (max-width: 768px) {
         margin-top: 1em;
         margin-bottom: 0px;
