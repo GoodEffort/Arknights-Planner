@@ -10,26 +10,27 @@ const props = defineProps<{
 }>();
 
 const operator = computed(() => props.selectedOperator.operator);
-const plansKey = computed(() => `${props.type}Elite` as 'currentElite' | 'targetElite');
+const eliteKey = computed(() => `${props.type}Elite` as 'currentElite' | 'targetElite');
+const levelKey = computed(() => `${props.type}Level` as 'currentLevel' | 'targetLevel');
 
 const elite = computed({
-    get: () => props.selectedOperator.plans[plansKey.value],
+    get: () => props.selectedOperator.plans[eliteKey.value],
     set: value => {
-        props.selectedOperator.plans.currentElite = (+value) as 0 | 1 | 2;
+        props.selectedOperator.plans[eliteKey.value] = (+value) as 0 | 1 | 2;
     }
 });
 
 const levelMax = computed(() => operator.value.phases[elite.value].maxLevel);
 
 const level = computed({
-    get: () => props.selectedOperator.plans.currentLevel,
+    get: () => props.selectedOperator.plans[levelKey.value],
     set: value => {
         let newLevel = +value;
 
         if (newLevel < 1) newLevel = 1;
         if (newLevel > levelMax.value) newLevel = levelMax.value;
 
-        props.selectedOperator.plans.currentLevel = newLevel;
+        props.selectedOperator.plans[levelKey.value] = newLevel;
     }
 });
 
