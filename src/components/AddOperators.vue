@@ -90,6 +90,9 @@ function characterSort(a: Operator, b: Operator) {
                 Filter more to display different operators, currently showing 36 of {{ filteredCharacters.length }}
                 operators
             </p>
+            <p v-else class="mt-2">
+                &nbsp;
+            </p>
         </div>
 
         <div class="container">

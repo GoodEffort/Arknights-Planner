@@ -47,4 +47,11 @@ defineProps({
 div.row.d-flex.d-md-none div.btn-group button.btn {
     width: 50%;
 }
+
+div.btn-group :first-child {
+    border-right: 1px solid #000;
+}
+div.btn-group :last-child {
+    border-left: 1px solid #000;
+}
 </style>

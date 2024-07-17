@@ -46,23 +46,23 @@ const ItemsAvailable = computed(() => {
 </script>
 
 <template>
-    <div class="col-md-2 col-9">
-        <label class="d-none d-md-inline-block">{{ title }}</label>
+    <div class="col-md-2 col-8 mb-2 mb-md-0">
+        <label class="d-none d-md-inline-block mt-4">{{ title }}</label>
         <h5 class="d-md-none">{{ title }}</h5>
     </div>
-    <div class="col-3 d-md-none mb-2" v-if="!hideApply">
-        <button :disabled="!props.enableApply || !ItemsAvailable" class="btn btn-primary"
+    <div class="col-4 d-md-none mb-2" v-if="!hideApply">
+        <button :disabled="!props.enableApply || !ItemsAvailable" class="btn btn-primary form-control"
             @click="emit('applyUpgrade', costs)">Apply</button>
     </div>
-    <div class="col-md-9 col-12">
+    <div class="col-lg-9 col-md-8 col-12 mt-md-2">
         <div class="row">
             <div class="col-auto" v-for="{ item, count } in entries" :key="item.itemId">
                 <ItemCell :item="item" :count="count" />
             </div>
         </div>
     </div>
-    <div class="col-1 d-md-block d-none" v-if="!hideApply">
-        <button :disabled="!props.enableApply || !ItemsAvailable" class="btn btn-primary"
+    <div class="col-md-2 col-lg-1 d-md-block d-none" v-if="!hideApply">
+        <button :disabled="!props.enableApply || !ItemsAvailable" class="btn btn-primary mt-3"
             @click="emit('applyUpgrade', costs)">Apply</button>
     </div>
 </template>
