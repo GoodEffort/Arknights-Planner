@@ -1,14 +1,15 @@
+<!-- This component is tooooooo biiiiiiig TODO: break this down -->
 <script setup lang="ts">
 import { computed, watch, ref } from 'vue';
 import OperatorPromotion from './controls/OperatorPromotion.vue';
 import OperatorLevel from './controls/OperatorLevel.vue';
 import OperatorSkillMasteries from './controls/OperatorMasteries.vue';
 import type { SaveRecord, SelectedOperator } from '../types/operator';
-import OperatorModule from './controls/OperatorModule.vue';
 import OperatorCosts from './OperatorCosts.vue';
 import ImageFinder from './ImageFinder.vue';
 import { usePlannerStore } from '../store/planner-store';
 import OperatorControlsTabs from './OperatorControlsTabs.vue';
+import OperatorModules from './controls/OperatorModules.vue';
 
 const props = defineProps<{
     selectedOperator: SelectedOperator;
@@ -188,40 +189,6 @@ const currentMastery3 = computed({
     set: currentMasterySetFn(3)
 });
 
-const hasXModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'X') !== undefined);
-const hasYModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'Y') !== undefined);
-const hasDModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'D') !== undefined);
-
-const currentModuleX = computed({
-    get: () => props.selectedOperator.plans.currentModules.x,
-    set: value => props.selectedOperator.plans.currentModules.x = +value
-});
-
-const currentModuleY = computed({
-    get: () => props.selectedOperator.plans.currentModules.y,
-    set: value => props.selectedOperator.plans.currentModules.y = +value
-});
-
-const currentModuleD = computed({
-    get: () => props.selectedOperator.plans.currentModules.d,
-    set: value => props.selectedOperator.plans.currentModules.d = +value
-});
-
-const targetModuleX = computed({
-    get: () => props.selectedOperator.plans.targetModules.x,
-    set: value => props.selectedOperator.plans.targetModules.x = +value
-});
-
-const targetModuleY = computed({
-    get: () => props.selectedOperator.plans.targetModules.y,
-    set: value => props.selectedOperator.plans.targetModules.y = +value
-});
-
-const targetModuleD = computed({
-    get: () => props.selectedOperator.plans.targetModules.d,
-    set: value => props.selectedOperator.plans.targetModules.d = +value
-});
-
 const active = computed({
     get: () => props.selectedOperator.active,
     set: value => props.selectedOperator.active = value
@@ -231,7 +198,7 @@ const active = computed({
 
 <template>
     <div class="row mb-3">
-        <div class="col ">
+        <div class="col-9 col-md">
             <div class="row">
                 <div class="col center-vert">
                     <h4>
@@ -249,7 +216,7 @@ const active = computed({
                     @remove="selectCharacter(operator)" />
             </div>
         </div>
-        <div class="col-auto center-vert">
+        <div class="col-md-auto col-3 center-vert p-0 px-md-2">
             <div class="operator-image">
                 <ImageFinder :subject="operator" />
             </div>
@@ -296,23 +263,11 @@ const active = computed({
                         :key="`1${operator.id}-skill3`" />
                 </div>
             </div>
-            <hr v-if="selectedOperator.modules.length > 0" />
 
-            <div class="row" v-if="selectedOperator.modules.length > 0">
-                <label>Modules</label>
-                <div class="col" v-if="hasXModule">
-                    <OperatorModule  v-model="currentModuleX" module-letter="X"
-                        :key="`1${operator.id}-mx`" />
-                </div>
-                <div class="col" v-if="hasYModule">
-                    <OperatorModule  v-model="currentModuleY" module-letter="Y"
-                        :key="`1${operator.id}-my`" />
-                </div>
-                <div class="col" v-if="hasDModule">
-                    <OperatorModule v-model="currentModuleD" module-letter="Δ"
-                        :key="`1${operator.id}-md`" />
-                </div>
-            </div>
+            <OperatorModules
+                v-if="selectedOperator.modules.length > 0"
+                :selected-operator="selectedOperator"
+                type="current" />
 
         </div>
         <div class="col-12 col-md-6 plan-section rounded-end">
@@ -340,7 +295,7 @@ const active = computed({
             <hr v-if="operator.phases.length > 2" />
 
             <div class="row" v-if="operator.phases.length > 2">
-                <label>Skill</label>
+                <label>Masteries</label>
                 <div class="col pe-0 px-md-auto">
                     <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="targetMastery1" skillNumber="S1"
                         :key="`2${operator.id}-skill1`" />
@@ -354,23 +309,11 @@ const active = computed({
                         :key="`2${operator.id}-skill3`" />
                 </div>
             </div>
-            <hr v-if="selectedOperator.modules.length > 0" />
 
-            <div class="row" v-if="selectedOperator.modules.length > 0">
-                <label>Modules</label>
-                <div class="col" v-if="hasXModule">
-                    <OperatorModule v-model="targetModuleX" module-letter="X"
-                        :key="`2${operator.id}-mx`" />
-                </div>
-                <div class="col" v-if="hasYModule">
-                    <OperatorModule v-model="targetModuleY" module-letter="Y"
-                        :key="`2${operator.id}-my`" />
-                </div>
-                <div class="col" v-if="hasDModule">
-                    <OperatorModule v-model="targetModuleD" module-letter="Δ"
-                        :key="`2${operator.id}-md`" />
-                </div>
-            </div>
+            <OperatorModules
+                v-if="selectedOperator.modules.length > 0"
+                :selected-operator="selectedOperator"
+                type="current" />
         </div>
     </div>
     <div v-if="section === 'Items'" class="row">
@@ -401,7 +344,14 @@ const active = computed({
 }
 
 .operator-image {
-    width: 75px;
+    @media screen and (min-width: 768px) {
+        width: 75px;
+    }
+    @media screen and (max-width: 768px) {
+        margin-top: 1em;
+        margin-bottom: 0px;
+        width: 100%;
+    }
 }
 
 .operator-header:hover {
