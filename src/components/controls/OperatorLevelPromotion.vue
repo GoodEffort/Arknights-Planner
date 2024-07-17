@@ -43,7 +43,11 @@ watch(elite, () => {
 });
 
 watch(level, () => {
-    if (props.type === "current" && props.selectedOperator.plans.targetLevel < level.value) {
+    if (
+        props.type === "current" &&
+        props.selectedOperator.plans.currentElite === props.selectedOperator.plans.targetElite && 
+        props.selectedOperator.plans.targetLevel < level.value
+    ) {
         props.selectedOperator.plans.targetLevel = level.value;
     }
 });
