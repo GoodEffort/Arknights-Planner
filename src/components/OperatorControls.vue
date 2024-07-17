@@ -9,6 +9,7 @@ import { usePlannerStore } from '../store/planner-store';
 import OperatorControlsTabs from './OperatorControlsTabs.vue';
 import OperatorModules from './controls/OperatorModules.vue';
 import OperatorLevelPromotion from './controls/OperatorLevelPromotion.vue';
+import OperatorSkillLevels from './controls/OperatorSkillLevels.vue';
 
 const props = defineProps<{
     selectedOperator: SelectedOperator;
@@ -29,110 +30,6 @@ watch(props.selectedOperator, ({ operator, plans }) => {
 }, { deep: true });
 
 const operator = computed(() => props.selectedOperator.operator);
-
-const currentElite = computed({
-    get: () => props.selectedOperator.plans.currentElite,
-    set: value => {
-        const elite: 0 | 1 | 2 = (+value) as 0 | 1 | 2
-
-        if (elite > targetElite.value) {
-            targetElite.value = elite;
-        }
-
-        props.selectedOperator.plans.currentElite = elite;
-    }
-});
-
-const targetElite = computed({
-    get: () => props.selectedOperator.plans.targetElite,
-    set: value => {
-        const elite: 0 | 1 | 2 = (+value) as 0 | 1 | 2
-
-        if (elite < currentElite.value) {
-            currentElite.value = elite;
-        }
-
-        props.selectedOperator.plans.targetElite = elite;
-    }
-});
-
-const targetLevelMax = computed(() => {
-    const phases = props.selectedOperator.operator.phases;
-    const te = targetElite.value;
-
-    const maxLevel = phases[te].maxLevel;
-    return maxLevel;
-});
-
-const currentLevelMax = computed(() => {
-    const phases = operator.value.phases;
-    const ce = currentElite.value;
-
-    const maxLevel = phases[ce].maxLevel;
-    return maxLevel;
-});
-
-const currentLevel = computed({
-    get: () => props.selectedOperator.plans.currentLevel,
-    set: value => {
-        let newLevel = +value;
-
-        if (newLevel < 1) newLevel = 1;
-        if (newLevel > currentLevelMax.value) newLevel = currentLevelMax.value;
-
-        if (newLevel > targetLevel.value && targetElite.value === currentElite.value) {
-            targetLevel.value = newLevel;
-        }
-
-        props.selectedOperator.plans.currentLevel = newLevel;
-    }
-});
-
-const targetLevel = computed({
-    get: () => props.selectedOperator.plans.targetLevel,
-    set: value => {
-        let newLevel = +value;
-
-        if (newLevel < 1) newLevel = 1;
-        if (newLevel > targetLevelMax.value) newLevel = targetLevelMax.value;
-
-        if (newLevel < currentLevel.value && targetElite.value === currentElite.value) {
-            currentLevel.value = newLevel;
-        }
-
-        props.selectedOperator.plans.targetLevel = newLevel;
-    }
-});
-
-const currentSkill = computed({
-    get: () => props.selectedOperator.plans.currentSkillLevels,
-    set: value => {
-        let newSkill = +value;
-        const maxSkill = currentElite.value === 0 ? 4 : 7;
-
-        if (newSkill < 1) newSkill = 1;
-        if (newSkill > maxSkill) newSkill = maxSkill;
-
-        if (newSkill > targetSkill.value) {
-            targetSkill.value = newSkill;
-        }
-
-        props.selectedOperator.plans.currentSkillLevels = newSkill;
-    }
-});
-
-const targetSkill = computed({
-    get: () => props.selectedOperator.plans.targetSkillLevels,
-    set: value => {
-        let newSkill = +value;
-        const maxSkill = targetElite.value === 0 ? 4 : 7;
-
-        if (newSkill < currentSkill.value) newSkill = currentSkill.value;
-        if (newSkill > maxSkill) newSkill = maxSkill;
-
-        props.selectedOperator.plans.targetSkillLevels = newSkill;
-    }
-});
 
 const active = computed({
     get: () => props.selectedOperator.active,
@@ -177,15 +74,12 @@ const active = computed({
                 type="current"
             />
 
-            <hr v-if="operator.skills.length > 0" />
+            <OperatorSkillLevels
+                v-if="operator.skills.length > 0"
+                :selected-operator="selectedOperator"
+                type="current"
+            />
 
-            <div class="row" v-if="operator.skills.length > 0">
-                <div class="input-group">
-                    <span class="input-group-text">Skill Level</span>
-                    <input type="number" class="form-control" v-model="currentSkill" min="1"
-                        :max="currentElite === 0 ? 4 : 7" />
-                </div>
-            </div>
             <OperatorSkillMasteries
                 v-if="operator.skills.length > 0"
                 :selected-operator="selectedOperator"
@@ -207,15 +101,11 @@ const active = computed({
                 type="target"
             />
 
-            <hr v-if="operator.skills.length > 0" />
-
-            <div class="row" v-if="operator.skills.length > 0">
-                <div class="input-group">
-                    <span class="input-group-text">Skill Level</span>
-                    <input type="number" class="form-control" v-model="targetSkill" :min="currentSkill"
-                        :max="targetElite === 0 ? 4 : 7" />
-                </div>
-            </div>
+            <OperatorSkillLevels
+                v-if="operator.skills.length > 0"
+                :selected-operator="selectedOperator"
+                type="target"
+            />
             
             <OperatorSkillMasteries
                 v-if="operator.skills.length > 0"
