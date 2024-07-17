@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { SelectedOperator } from '../../types/operator';
 import OperatorModule from './OperatorModule.vue';
 
@@ -30,6 +30,24 @@ const moduleD = computed({
 });
 
 const operatorId = computed(() => props.selectedOperator.operator.id);
+
+watch(moduleX, () => {
+    if (props.type === "current" && props.selectedOperator.plans.targetModules.x < moduleX.value) {
+        props.selectedOperator.plans.targetModules.x = moduleX.value;
+    }
+});
+
+watch(moduleY, () => {
+    if (props.type === "current" && props.selectedOperator.plans.targetModules.y < moduleY.value) {
+        props.selectedOperator.plans.targetModules.y = moduleY.value;
+    }
+});
+
+watch(moduleD, () => {
+    if (props.type === "current" && props.selectedOperator.plans.targetModules.d < moduleD.value) {
+        props.selectedOperator.plans.targetModules.d = moduleD.value;
+    }
+});
 </script>
 
 <template>
