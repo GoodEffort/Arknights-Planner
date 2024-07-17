@@ -1,8 +1,6 @@
 <!-- This component is tooooooo biiiiiiig TODO: break this down -->
 <script setup lang="ts">
 import { computed, watch, ref } from 'vue';
-import OperatorPromotion from './controls/OperatorPromotion.vue';
-import OperatorLevel from './controls/OperatorLevel.vue';
 import OperatorSkillMasteries from './controls/OperatorSkillMasteries.vue';
 import type { SaveRecord, SelectedOperator } from '../types/operator';
 import OperatorCosts from './OperatorCosts.vue';
@@ -10,6 +8,7 @@ import ImageFinder from './ImageFinder.vue';
 import { usePlannerStore } from '../store/planner-store';
 import OperatorControlsTabs from './OperatorControlsTabs.vue';
 import OperatorModules from './controls/OperatorModules.vue';
+import OperatorLevelPromotion from './controls/OperatorLevelPromotion.vue';
 
 const props = defineProps<{
     selectedOperator: SelectedOperator;
@@ -172,17 +171,12 @@ const active = computed({
         <div class="col-12 col-md-6 plan-section rounded-start">
             <label class="d-md-inline-block d-none">Current</label>
             <h2 class="d-md-none bg-primary border border-info rounded mt-5">Current</h2>
-            <hr />
 
-            <div class="row">
-                <div class="col-md-7 col-5" v-if="operator.phases.length > 1">
-                    <OperatorPromotion :phases="operator.phases" v-model="currentElite"
-                        :key="`1${operator.id}-elite`" />
-                </div>
-                <div class="col">
-                    <OperatorLevel :maxLevel="currentLevelMax" v-model="currentLevel" :key="`1${operator.id}-level`" />
-                </div>
-            </div>
+            <OperatorLevelPromotion
+                :selectedOperator="selectedOperator"
+                type="current"
+            />
+
             <hr v-if="operator.skills.length > 0" />
 
             <div class="row" v-if="operator.skills.length > 0">
@@ -207,16 +201,12 @@ const active = computed({
         <div class="col-12 col-md-6 plan-section rounded-end">
             <label class="d-md-inline-block d-none">Planned</label>
             <h2 class="d-md-none bg-primary border border-info rounded mt-5">Planned</h2>
-            <hr />
 
-            <div class="row">
-                <div class="col-7" v-if="operator.phases.length > 1">
-                    <OperatorPromotion :phases="operator.phases" v-model="targetElite" :key="`2${operator.id}-elite`" />
-                </div>
-                <div class="col">
-                    <OperatorLevel :maxLevel="targetLevelMax" v-model="targetLevel" :key="`2${operator.id}-level`" />
-                </div>
-            </div>
+            <OperatorLevelPromotion
+                :selectedOperator="selectedOperator"
+                type="target"
+            />
+
             <hr v-if="operator.skills.length > 0" />
 
             <div class="row" v-if="operator.skills.length > 0">
