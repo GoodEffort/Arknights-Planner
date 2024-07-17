@@ -3,7 +3,7 @@
 import { computed, watch, ref } from 'vue';
 import OperatorPromotion from './controls/OperatorPromotion.vue';
 import OperatorLevel from './controls/OperatorLevel.vue';
-import OperatorSkillMasteries from './controls/OperatorMasteries.vue';
+import OperatorSkillMasteries from './controls/OperatorSkillMasteries.vue';
 import type { SaveRecord, SelectedOperator } from '../types/operator';
 import OperatorCosts from './OperatorCosts.vue';
 import ImageFinder from './ImageFinder.vue';
@@ -135,60 +135,6 @@ const targetSkill = computed({
     }
 });
 
-const targetMasterySetFn = (skill: 1 | 2 | 3) => (value: number) => {
-    let newMastery = +value;
-
-    if (newMastery < 0) newMastery = 0;
-    if (newMastery > 3) newMastery = 3;
-
-    props.selectedOperator.plans.targetSkillMasteries[`skill${skill}`] = newMastery;
-};
-
-const targetMastery1 = computed({
-    get: () => props.selectedOperator.plans.targetSkillMasteries.skill1,
-    set: targetMasterySetFn(1)
-});
-
-const targetMastery2 = computed({
-    get: () => props.selectedOperator.plans.targetSkillMasteries.skill2,
-    set: targetMasterySetFn(2)
-});
-
-const targetMastery3 = computed({
-    get: () => props.selectedOperator.plans.targetSkillMasteries.skill3,
-    set: targetMasterySetFn(3)
-});
-
-const currentMasterySetFn = (skill: 1 | 2 | 3) => (value: number) => {
-    let newMastery = +value;
-
-    if (newMastery < 0) newMastery = 0;
-    if (newMastery > 3) newMastery = 3;
-
-    const target = skill === 1 ? targetMastery1 : skill === 2 ? targetMastery2 : targetMastery3;
-
-    if (newMastery > target.value) {
-        target.value = newMastery;
-    }
-
-    props.selectedOperator.plans.currentSkillMasteries[`skill${skill}`] = newMastery;
-};
-
-const currentMastery1 = computed({
-    get: () => props.selectedOperator.plans.currentSkillMasteries.skill1,
-    set: currentMasterySetFn(1)
-});
-
-const currentMastery2 = computed({
-    get: () => props.selectedOperator.plans.currentSkillMasteries.skill2,
-    set: currentMasterySetFn(2)
-});
-
-const currentMastery3 = computed({
-    get: () => props.selectedOperator.plans.currentSkillMasteries.skill3,
-    set: currentMasterySetFn(3)
-});
-
 const active = computed({
     get: () => props.selectedOperator.active,
     set: value => props.selectedOperator.active = value
@@ -246,23 +192,11 @@ const active = computed({
                         :max="currentElite === 0 ? 4 : 7" />
                 </div>
             </div>
-            <hr v-if="operator.phases.length > 2" />
-
-            <div class="row" v-if="operator.phases.length > 2">
-                <label>Masteries</label>
-                <div class="col pe-0 px-md-auto">
-                    <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="currentMastery1" skillNumber="S1"
-                        :key="`1${operator.id}-skill1`" />
-                </div>
-                <div class="col px-1 px-md-auto">
-                    <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="currentMastery2" skillNumber="S2"
-                        :key="`1${operator.id}-skill2`" />
-                </div>
-                <div class="col ps-0 px-md-auto">
-                    <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="currentMastery3" skillNumber="S3"
-                        :key="`1${operator.id}-skill3`" />
-                </div>
-            </div>
+            <OperatorSkillMasteries
+                v-if="operator.skills.length > 0"
+                :selected-operator="selectedOperator"
+                type="current"
+                />
 
             <OperatorModules
                 v-if="selectedOperator.modules.length > 0"
@@ -292,28 +226,17 @@ const active = computed({
                         :max="targetElite === 0 ? 4 : 7" />
                 </div>
             </div>
-            <hr v-if="operator.phases.length > 2" />
-
-            <div class="row" v-if="operator.phases.length > 2">
-                <label>Masteries</label>
-                <div class="col pe-0 px-md-auto">
-                    <OperatorSkillMasteries v-if="operator.skills.length > 0" v-model="targetMastery1" skillNumber="S1"
-                        :key="`2${operator.id}-skill1`" />
-                </div>
-                <div class="col px-1 px-md-auto">
-                    <OperatorSkillMasteries v-if="operator.skills.length > 1" v-model="targetMastery2" skillNumber="S2"
-                        :key="`2${operator.id}-skill2`" />
-                </div>
-                <div class="col ps-0 px-md-auto">
-                    <OperatorSkillMasteries v-if="operator.skills.length > 2" v-model="targetMastery3" skillNumber="S3"
-                        :key="`2${operator.id}-skill3`" />
-                </div>
-            </div>
+            
+            <OperatorSkillMasteries
+                v-if="operator.skills.length > 0"
+                :selected-operator="selectedOperator"
+                type="target"
+                />
 
             <OperatorModules
                 v-if="selectedOperator.modules.length > 0"
                 :selected-operator="selectedOperator"
-                type="current" />
+                type="target" />
         </div>
     </div>
     <div v-if="section === 'Items'" class="row">
