@@ -12,14 +12,15 @@ const eliteKey = computed(() => `${props.type}Elite` as 'currentElite' | 'target
 const skillsKey = computed(() => `${props.type}SkillLevels` as 'currentSkillLevels' | 'targetSkillLevels');
 
 const maxSkill = computed(() => plans.value[eliteKey.value] === 0 ? 4 : 7);
+const minSkill = computed(() => props.type === "current" ? 1 : props.selectedOperator.plans.currentSkillLevels);
 
 const skillLevel = computed({
     get: () => plans.value[skillsKey.value],
     set: value => {
         let newSkill = +value;
 
-        if (newSkill < 1) {
-            newSkill = 1;
+        if (newSkill < minSkill.value) {
+            newSkill = minSkill.value;
         }
         else if (newSkill > maxSkill.value) {
             newSkill = maxSkill.value;
@@ -42,7 +43,7 @@ watch(skillLevel, () => {
     <div class="row">
         <div class="input-group">
             <span class="input-group-text">Skill Level</span>
-            <input type="number" class="form-control" v-model="skillLevel" min="1" :max="maxSkill" />
+            <input type="number" class="form-control" v-model="skillLevel" :min="minSkill" :max="maxSkill" />
         </div>
     </div>
 </template>

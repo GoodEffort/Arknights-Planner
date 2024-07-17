@@ -16,19 +16,20 @@ const levelKey = computed(() => `${props.type}Level` as 'currentLevel' | 'target
 const elite = computed({
     get: () => props.selectedOperator.plans[eliteKey.value],
     set: value => {
-        props.selectedOperator.plans[eliteKey.value] = (+value) as 0 | 1 | 2;
+        props.selectedOperator.plans[eliteKey.value] = +value as 0 | 1 | 2;
     }
 });
 
 const levelMax = computed(() => operator.value.phases[elite.value].maxLevel);
+const levelMin = computed(() => props.type === "current" ? 1 : props.selectedOperator.plans.currentLevel);
 
 const level = computed({
     get: () => props.selectedOperator.plans[levelKey.value],
     set: value => {
         let newLevel = +value;
 
-        if (newLevel < 1) newLevel = 1;
-        if (newLevel > levelMax.value) newLevel = levelMax.value;
+        if (newLevel < levelMin.value) newLevel = levelMin.value;
+        else if (newLevel > levelMax.value) newLevel = levelMax.value;
 
         props.selectedOperator.plans[levelKey.value] = newLevel;
     }
@@ -37,6 +38,9 @@ const level = computed({
 watch(elite, () => {
     if (props.type === "current" && props.selectedOperator.plans.targetElite < elite.value) {
         props.selectedOperator.plans.targetElite = elite.value;
+    }
+    else if (props.type === "target" && props.selectedOperator.plans.currentElite > elite.value) {
+        props.selectedOperator.plans.currentElite = elite.value;
     }
 
     level.value = 1;
@@ -60,7 +64,7 @@ watch(level, () => {
             <OperatorPromotion :phases="operator.phases" v-model="elite" :key="`1${operator.id}-elite`" />
         </div>
         <div class="col">
-            <OperatorLevel :maxLevel="levelMax" v-model="level" :key="`1${operator.id}-level`" />
+            <OperatorLevel :maxLevel="levelMax" :minLevel="levelMin" v-model="level" :key="`1${operator.id}-level`" />
         </div>
     </div>
 </template>

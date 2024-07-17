@@ -6,6 +6,7 @@ const emit = defineEmits<{
 const { modelValue, maxLevel } = defineProps<{
     modelValue: number;
     maxLevel: number;
+    minLevel: number;
 }>();
 
 const onChange = (e: Event) => {
@@ -17,6 +18,6 @@ const onChange = (e: Event) => {
 <template>
     <div class="input-group">
         <span class="input-group-text ">Level</span>
-        <input placeholder="Level" type="number" class="form-control" :value="modelValue" @input="onChange" min="1" :max="maxLevel" />
+        <input placeholder="Level" type="number" class="form-control" :value="modelValue" @input="onChange" :min="minLevel" :max="maxLevel" />
     </div>
 </template>

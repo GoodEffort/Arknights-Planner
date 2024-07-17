@@ -5,7 +5,8 @@ const emit = defineEmits<{
 
 const { modelValue } = defineProps<{
     modelValue: number,
-    skillNumber: string
+    skillNumber: string,
+    min: number
 }>();
 
 const onChange = (e: Event) => {
@@ -18,6 +19,6 @@ const onChange = (e: Event) => {
 <template>
     <div class="input-group">
         <span class="input-group-text">{{ skillNumber }}</span>
-        <input type="number" class="form-control" :value="modelValue" @input="onChange" min="0" max="3" />
+        <input type="number" class="form-control" :value="modelValue" @input="onChange" :min="min" max="3" />
     </div>
 </template>
