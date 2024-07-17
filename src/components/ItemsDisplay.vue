@@ -102,14 +102,6 @@ const showModal = ref(false);
             </div>
         </div>
     </div>
-    <!-- <Modal v-if="showModal" @close="showModal = false">
-        <template #header>
-            Workshop Recipe
-        </template>
-        <template #body>
-
-        </template>
-    </Modal> -->
 </template>
 
 <style scoped>

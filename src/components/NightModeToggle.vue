@@ -36,7 +36,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <button class="btn btn-primary" @click="toggleTheme">
+    <button class="btn" :class="{ 'btn-info': (userTheme === 'dark'), 'btn-warning': (userTheme === 'light') }" @click="toggleTheme">
         <font-awesome-icon v-if="userTheme === 'dark'" icon="moon" />
         <font-awesome-icon v-else icon="sun" />
     </button>

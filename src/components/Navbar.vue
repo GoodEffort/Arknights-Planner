@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Modal from './Modal.vue';
 import NightModeToggle from './NightModeToggle.vue';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
 import { SaveRecord } from '../types/operator';
@@ -10,10 +10,18 @@ const store = usePlannerStore();
 const { exportSavedRecords, loadSavedRecords, getBlankInventory } = store;
 const { exportString, inventory, selectedOperators } = storeToRefs(store);
 
+const lastUse = new Date(localStorage.getItem('last-use-timestamp') ?? 0);
+
 const showCreditsmodal = ref(false);
 const showExportModal = ref(false);
 const showImportModal = ref(false);
 const importString = ref('');
+const showNewFeaturesModal = ref(lastUse < new Date(BUILD_DATE));
+const doNotShowAgain = ref(localStorage.getItem('do-not-show-again') === 'true');
+
+watch(doNotShowAgain, (val) => {
+  localStorage.setItem('do-not-show-again', val.toString());
+});
 
 const exportData = () => {
   exportSavedRecords();
@@ -30,6 +38,11 @@ const pasteFromClipboard = async () => {
   importString.value = text;
 };
 
+const closeNewFeaturesModal = () => {
+  showNewFeaturesModal.value = false;
+  localStorage.setItem('last-use-timestamp', new Date().toISOString());
+};
+
 const importData = () => {
   if (importString.value === '' || importString.value == null) {
     alert('Please paste data to import');
@@ -41,7 +54,7 @@ const importData = () => {
     s: string[];
     i: { [key: string]: number };
   };
-  
+
   try {
     data = JSON.parse(importString.value);
   }
@@ -77,16 +90,25 @@ const importData = () => {
 <template>
   <nav class="navbar navbar-expand-lg fixed-top">
     <div>
-      <night-mode-toggle />
+      <a class="navbar-brand" href="#" @click="showNewFeaturesModal = true">Arknights Planner</a>
+    </div>
+    <div>
     </div>
     <div>
       <div class="btn-group" role="group">
         <button class="btn btn-primary" @click="exportData">
           <font-awesome-icon icon="download" />
+          <span class="d-none d-md-inline"> Export</span>
         </button>
         <button class="btn btn-primary" @click="showImportModal = !showImportModal">
           <font-awesome-icon icon="upload" />
+          <span class="d-none d-md-inline"> Import</span>
         </button>
+        <a href="https://arknights.wiki.gg/wiki/Event" target="_blank" class="btn btn-primary text-light">
+          <font-awesome-icon icon="calendar-day" />
+          <span class="d-none d-md-inline"> Upcoming Events</span>
+        </a>
+        <night-mode-toggle />
         <button class="btn btn-secondary" @click="showCreditsmodal = !showCreditsmodal">
           <font-awesome-icon icon="info-circle" />
         </button>
@@ -94,7 +116,7 @@ const importData = () => {
     </div>
   </nav>
 
-  <modal v-if="showCreditsmodal" @close="showCreditsmodal = false">
+  <modal v-model="showCreditsmodal">
     <template #header>
       Data Source Credits
     </template>
@@ -133,7 +155,7 @@ const importData = () => {
     </template>
   </modal>
 
-  <modal v-if="showExportModal" @close="showExportModal = false">
+  <modal v-model="showExportModal">
     <template #header>
       Export Data
     </template>
@@ -148,7 +170,7 @@ const importData = () => {
     </template>
   </modal>
 
-  <modal v-if="showImportModal" @close="showImportModal = false">
+  <modal v-model="showImportModal">
     <template #header>
       Import Data
     </template>
@@ -164,6 +186,67 @@ const importData = () => {
     <template #footer>
       <button class="btn btn-danger" @click="showImportModal = false">Cancel</button>
       <button class="btn btn-success" @click="importData">Import Data</button>
+    </template>
+  </modal>
+
+  <modal v-model="showNewFeaturesModal">
+    <template #header>
+      New Features
+    </template>
+    <template #body>
+      <div>
+        <h2>New Features</h2>
+        <div>
+          <h3>7/17/2024</h3>
+          <ul>
+            <li>Added a new feature to import and export data</li>
+            <li>Added mobile support</li>
+            <li>Added a new feature notification! (here it is!)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <p>
+          If you run into any issues or are missing a feature be sure to let me know here: <a
+            href="https://github.com/GoodEffort/Arknights-Planner/issues">Github Issues</a>
+        </p>
+      </div>
+
+      <div>
+        <h2>Potential Features</h2>
+        <div>
+          <ul>
+            <li>Optional Google Account sign in (for the feature below)</li>
+            <li>Ability to save plans to your Google Drive so that you can use your plans between different devices and
+              browsers</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <h2>Known Issues</h2>
+        <div>
+          <ul>
+            <li>Amiya alternate forms aren't available</li>
+            <li>EXP items are finicky, I plan to change these to calculate by EXP value rather than item count. For now
+              if you are running into issues with it I'd reccommend just putting a ton of EXP items in each type in your
+              inventory.</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <p>
+          This is shown only once when new features are added, if you refresh after closing it (without the checkbox) it
+          won't show until new features are added!
+          If you would like to not see new features check the box below.
+        </p>
+        <input type="checkbox" class="formControl" v-model="doNotShowAgain" id="noshowagain" />
+        <label for="noshowagain">Do not show this message again</label>
+      </div>
+    </template>
+    <template #footer>
+      <button class="btn btn-danger" @click="closeNewFeaturesModal">Close</button>
     </template>
   </modal>
 </template>
@@ -230,5 +313,20 @@ nav.navbar a.navbar-brand {
 nav.navbar {
   background-color: white;
   border-bottom: 1px solid black;
+}
+
+p {
+  white-space: pre-line;
+}
+
+ul {
+  list-style-type: none;
+}
+
+html.dark nav.navbar a.navbar-brand {
+  color: rgb(231, 231, 231);
+}
+html.dark nav.navbar a.navbar-brand:hover {
+  color: rgb(179, 179, 179);
 }
 </style>

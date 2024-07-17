@@ -23,8 +23,7 @@ onMounted(async () => {
 
 <template>
     <div style="height: 100%;">
-        <h1>Arknights Planner</h1>
-        <div v-if="!isLoading">
+        <div v-if="!isLoading" class="mt-4">
             <SelectedOperators />
             <TotalCostOfPlan />
             <MissingItems />
