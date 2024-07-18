@@ -199,6 +199,7 @@ const importData = () => {
         <div>
           <h3>7/17/2024</h3>
           <ul>
+            <li>Added Amiya forms support</li>
             <li>Added a new feature to import and export data</li>
             <li>Added mobile support</li>
             <li>Added a new feature notification! (here it is!)</li>

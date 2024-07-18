@@ -19,7 +19,7 @@ const isSelected = computed(() => selectedOperators.value.find(c => c.operator.i
 </script>
 
 <template>
-    <div :class="`character-select col-md-2 col-4 ${ isSelected ? 'selected' : '' }`" @click="selectCharacter(operator)">
+    <div :class="`character-select col-lg-2 col-4 ${ isSelected ? 'selected' : '' }`" @click="selectCharacter(operator)">
         <div>
             <ImageFinder :subject="operator" class="img-thumbnail" />
         </div>
@@ -40,5 +40,10 @@ const isSelected = computed(() => selectedOperators.value.find(c => c.operator.i
 
 .name {
     min-height: 4em;
+}
+
+img {
+    height: 180px;
+    width: 180px;
 }
 </style>

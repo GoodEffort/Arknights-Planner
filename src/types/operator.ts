@@ -157,6 +157,19 @@ type UnlockCondition = {
     level: number;
 }
 
+type CharacterPatch = {
+    infos: {
+        [key: string]: { 
+            tmplIds: string[]; 
+            default: string;
+        };
+    };
+
+    patchChars: {
+        [key: string]: Operator;
+    };
+}
+
 type Operator = {
     id: keyof Character_Table & string;
     name: string;
@@ -278,7 +291,8 @@ export type {
     Operator,
     OperatorRecord,
     LevelUpNeeds,
-    LevelUpNeedsKey
+    LevelUpNeedsKey,
+    CharacterPatch,
 }
 
 export {

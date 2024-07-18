@@ -115,14 +115,16 @@ const active = computed({
     cursor: pointer;
 }
 
-.operator-image {
+.operator-image img {
     @media screen and (min-width: 768px) {
+        max-height: 75px;
         width: 75px;
-    }
-
+    } 
+    
     @media screen and (max-width: 768px) {
         margin-top: 1em;
         margin-bottom: 0px;
+        max-height: 8em;
         width: 100%;
     }
 }

@@ -8,16 +8,30 @@ async function getOperatorImageLink(character: Operator) {
     const primarySource = "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/";
     const secondarySource = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/charavatars/";
 
-    let primary = true;
+    // why are you like this Amiya
+    const amiyaSource = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/charportraits/"
 
     try {
-        primary = (await fetch(`${primarySource}${character.id}.png`)).ok;
+        if ((await fetch(`${primarySource}${character.id}.png`)).ok) {
+            return `${primarySource}${character.id}.png`;
+        }
+        else {
+            throw new Error("Not found");
+        }
     }
     catch (e) {
-        primary = false;
+        try {
+            if ((await fetch(`${secondarySource}${character.id}.png`)).ok) {
+                return `${secondarySource}${character.id}.png`;
+            }
+            else {
+                throw new Error("Not found");
+            }
+        }
+        catch (e) {
+            return `${amiyaSource}${character.id}_2.png`;
+        }
     }
-
-    return `${primary ? primarySource : secondarySource}${character.id}.png`;
 }
 
 async function getItemImageLink(item: Item) {
@@ -70,3 +84,10 @@ onMounted(async () => {
 <template>
     <img :src="link" :alt="props.subject.name" :title="props.subject.name" class="img-thumbnail" :class="class" />
 </template>
+
+<style scoped>
+    img {
+        object-fit: cover;
+        object-position: top;
+    }
+</style>
