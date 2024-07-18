@@ -62,6 +62,11 @@ const close = () => show.value = false;
     opacity: 100%;
 }
 
+.modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
 button.close {
     padding: 1rem;
     margin: -1rem -1rem -1rem auto;
