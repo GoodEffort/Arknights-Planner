@@ -197,6 +197,12 @@ const importData = () => {
       <div>
         <h2>New Features</h2>
         <div>
+          <h3>7/24/2024</h3>
+          <ul>
+            <li>Fixed EXP calculations, now calculated by value</li>
+          </ul>
+        </div>
+        <div>
           <h3>7/17/2024</h3>
           <ul>
             <li>Added Amiya forms support</li>
@@ -221,18 +227,6 @@ const importData = () => {
             <li>Optional Google Account sign in (for the feature below)</li>
             <li>Ability to save plans to your Google Drive so that you can use your plans between different devices and
               browsers</li>
-          </ul>
-        </div>
-      </div>
-
-      <div>
-        <h2>Known Issues</h2>
-        <div>
-          <ul>
-            <li>Amiya alternate forms aren't available</li>
-            <li>EXP items are finicky, I plan to change these to calculate by EXP value rather than item count. For now
-              if you are running into issues with it I'd reccommend just putting a ton of EXP items in each type in your
-              inventory.</li>
           </ul>
         </div>
       </div>
