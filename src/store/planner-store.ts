@@ -35,6 +35,15 @@ export const usePlannerStore = defineStore('planner', () => {
     const reserveTier6 = ref<number>(0);
     const exportString = ref<string>('');
 
+    const getEXPValue = (inventory: { [key: string]: number; }, expItems: { [key: string]: ExpItem; }) => {
+        let exp = 0;
+        for (const expItemId in expItems) {
+            const { gainExp } = expItems[expItemId];
+            exp += inventory[expItemId] * gainExp;
+        }
+        return exp;
+    }
+
     // Operators
     async function loadCharacters() {
         const data = await getChardata();
@@ -481,6 +490,8 @@ export const usePlannerStore = defineStore('planner', () => {
         return neededItems;
     });
 
+    const totalEXPValueCost = computed(() => getEXPValue(totalCosts.value, expItems.value));
+
     // Inventory
     const inventory = ref<{ [key: string]: number }>(
         {
@@ -488,6 +499,8 @@ export const usePlannerStore = defineStore('planner', () => {
             ...(JSON.parse(localStorage.getItem('inventory') || '{}'))
         }
     );
+
+    const inventoryEXPValue = computed(() => getEXPValue(inventory.value, expItems.value));
 
     const craftItem = (item: Item) => {
         const { itemId } = item;
@@ -517,17 +530,48 @@ export const usePlannerStore = defineStore('planner', () => {
     }, 250), { deep: true });
 
     // Needed Items
+    const neededEXPItems = computed(() => {
+        const needed: { item: Item, count: number }[] = [];
+
+        let neededEXP = totalEXPValueCost.value - inventoryEXPValue.value;
+        if (neededEXP > 0) {
+            for (const { id, gainExp } of battleRecords.value) {
+                const count = Math.floor(neededEXP / gainExp);
+                neededEXP = neededEXP % gainExp;
+                if (count > 0) {
+                    needed.push({ item: items.value[id], count });
+                }
+            }
+        }
+
+        if (neededEXP > 0) {
+            const lastExpItemId = battleRecords.value[battleRecords.value.length - 1].id;
+            if (needed.find(n => n.item.itemId === lastExpItemId)) {
+                needed.find(n => n.item.itemId === lastExpItemId)!.count += 1;
+            }
+            else {
+                needed.push({ item: items.value[lastExpItemId], count: 1 });
+            }
+        }
+
+        return needed;
+    });
 
     const neededItems = computed(() => {
         const needed: { item: Item, count: number }[] = [];
 
         for (const key in totalCosts.value) {
+            if (battleRecords.value.find(b => b.id === key)) {
+                continue;
+            }
             const count = totalCosts.value[key] - (inventory.value[key] ?? 0);
             if (count > 0) {
                 const item = items.value[key];
                 needed.push({ item, count });
             }
         }
+
+        needed.push(...neededEXPItems.value);
 
         return needed.sort((a, b) => a.item.sortId - b.item.sortId);
     });
@@ -591,6 +635,9 @@ export const usePlannerStore = defineStore('planner', () => {
         };
 
         for (const key in totalCostDict) {
+            if (battleRecords.value.find(b => b.id === key)) {
+                continue;
+            }
             breakdownItem(totalCostDict[key], key);
         }
 
@@ -599,6 +646,8 @@ export const usePlannerStore = defineStore('planner', () => {
         for (const [key, value] of Object.entries(breakdownCosts)) {
             costs.push({ item: items.value[key], count: value });
         }
+
+        costs.push(...neededEXPItems.value);
 
         return costs.sort((a, b) => a.item.sortId - b.item.sortId);
     });
@@ -643,6 +692,6 @@ export const usePlannerStore = defineStore('planner', () => {
         loadWorkshopFormulas,
         exportSavedRecords,
         getBlankInventory,
-        exportString
+        exportString,
     }
 });
