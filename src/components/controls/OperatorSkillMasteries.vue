@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
-import OperatorMasteries from './OperatorMasteries.vue';
+import OperatorInputGroup from './OperatorInputGroup.vue';
 import { SelectedOperator } from '../../types/operator';
 
 const props = defineProps<{
@@ -64,15 +64,15 @@ watch(mastery3, val => {
     <div class="row" v-if="operator.phases.length > 2">
         <label>Masteries</label>
         <div class="col pe-0 px-md-auto">
-            <OperatorMasteries v-if="operator.skills.length > 0" v-model="mastery1" skillNumber="S1"
+            <OperatorInputGroup v-if="operator.skills.length > 0" v-model="mastery1" label="S1"
                 :key="`2${operator.id}-skill1`" :min="min1" />
         </div>
         <div class="col px-1 px-md-auto">
-            <OperatorMasteries v-if="operator.skills.length > 1" v-model="mastery2" skillNumber="S2"
+            <OperatorInputGroup v-if="operator.skills.length > 1" v-model="mastery2" label="S2"
                 :key="`2${operator.id}-skill2`" :min="min2" />
         </div>
         <div class="col ps-0 px-md-auto">
-            <OperatorMasteries v-if="operator.skills.length > 2" v-model="mastery3" skillNumber="S3"
+            <OperatorInputGroup v-if="operator.skills.length > 2" v-model="mastery3" label="S3"
                 :key="`2${operator.id}-skill3`" :min="min3" />
         </div>
     </div>

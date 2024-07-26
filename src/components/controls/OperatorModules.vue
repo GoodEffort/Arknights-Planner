@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
 import { SelectedOperator } from '../../types/operator';
-import OperatorModule from './OperatorModule.vue';
+import OperatorInputGroup from './OperatorInputGroup.vue';
 
 const props = defineProps<{
     selectedOperator: SelectedOperator;
@@ -58,13 +58,13 @@ watch(moduleD, () => {
     <div class="row" v-if="selectedOperator.modules.length > 0">
         <label>Modules</label>
         <div class="col" v-if="hasXModule">
-            <OperatorModule v-model="moduleX" module-letter="X" :key="`1${operatorId}-mx`" :min="minX" />
+            <OperatorInputGroup v-model="moduleX" label="X" :key="`1${operatorId}-mx`" :min="minX" />
         </div>
         <div class="col" v-if="hasYModule">
-            <OperatorModule v-model="moduleY" module-letter="Y" :key="`1${operatorId}-my`" :min="minY" />
+            <OperatorInputGroup v-model="moduleY" label="Y" :key="`1${operatorId}-my`" :min="minY" />
         </div>
         <div class="col" v-if="hasDModule">
-            <OperatorModule v-model="moduleD" module-letter="Δ" :key="`1${operatorId}-md`" :min="minD" />
+            <OperatorInputGroup v-model="moduleD" label="Δ" :key="`1${operatorId}-md`" :min="minD" />
         </div>
     </div>
 </template>
