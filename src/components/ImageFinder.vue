@@ -1,58 +1,27 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Item } from '../types/item';
 import { Operator } from '../types/operator';
 
-async function getOperatorImageLink(character: Operator) {
-    // one of these should work... hopefully
-    const primarySource = "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/";
-    const secondarySource = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/charavatars/";
+const operatorSources = [
+    "images/operators/{id}.webp",
+    "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/{id}.png",
+    "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/charavatars/{id}.png",
+    "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/charportraits/{id}_2.png"
+];
 
-    // why are you like this Amiya
-    const amiyaSource = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/charportraits/"
+const itemSources = [
+    "images/items/{id}.webp",
+    "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/items/{id}.png",
+    "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/items/icons/{id}.png"
+];
 
-    try {
-        if ((await fetch(`${primarySource}${character.id}.png`)).ok) {
-            return `${primarySource}${character.id}.png`;
-        }
-        else {
-            throw new Error("Not found");
-        }
-    }
-    catch (e) {
-        try {
-            if ((await fetch(`${secondarySource}${character.id}.png`)).ok) {
-                return `${secondarySource}${character.id}.png`;
-            }
-            else {
-                throw new Error("Not found");
-            }
-        }
-        catch (e) {
-            return `${amiyaSource}${character.id}_2.png`;
-        }
-    }
-}
+const errorIndex = ref(0);
+const type = computed(() => 'itemId' in props.subject ? 'item' : 'operator');
 
-async function getItemImageLink(item: Item) {
-    // one of these should work... hopefully
-    const primarySource = "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/items/";
-    const secondarySource = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/items/icons/";
-
-    let primary = true;
-
-    try {
-        // ignore 404 errors from this fetch in the console
-        // it is just checking if the primary image source is valid
-        // if not, it will use the secondary source
-        primary = (await fetch(`${primarySource}${item.iconId}.png`)).ok;
-    }
-    catch (e) {
-        primary = false;
-    }
-
-    return `${primary ? primarySource : secondarySource}${item.iconId}.png`;
-}
+const onError = () => {
+    errorIndex.value++;
+};
 
 export interface Props {
     subject: Item | Operator;
@@ -61,33 +30,29 @@ export interface Props {
 
 const props = defineProps<Props>();
 
-const setLink = async () => {
-    if ('itemId' in props.subject) {
-        link.value = await getItemImageLink(props.subject);
-    }
-    else {
-        link.value = await getOperatorImageLink(props.subject);
-    }
-};
+const link = computed<string>(() => {
+    const isItem = type.value === 'item';
+    const subject = props.subject as Item & Operator;
 
-const link = ref<string>("");
+    let baseURL = (isItem ? itemSources[errorIndex.value] : operatorSources[errorIndex.value])
+        ?? "images/other/missing.webp";
 
-watch(() => props.subject, async () => {
-    await setLink();
+    return baseURL.replace('{id}', isItem ? subject.iconId : subject.id);
 });
 
-onMounted(async () => {
-    await setLink();
+watch(() => props.subject, () => {
+    errorIndex.value = 0;
 });
 </script>
 
 <template>
-    <img :src="link" :alt="props.subject.name" :title="props.subject.name" class="img-thumbnail" :class="class" />
+    <img :src="link" :alt="props.subject.name" :title="props.subject.name" class="img-thumbnail" :class="class"
+        @error="onError" />
 </template>
 
 <style scoped>
-    img {
-        object-fit: cover;
-        object-position: top;
-    }
+img {
+    object-fit: cover;
+    object-position: top
+}
 </style>
