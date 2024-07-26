@@ -4,14 +4,14 @@ import { Item } from '../types/item';
 import { Operator } from '../types/operator';
 
 const operatorSources = [
-    "images/operators/{id}.webp",
+    "https://goodeffort.github.io/Arknights-Planner-Data/images/operators/{id}.webp",
     "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/{id}.png",
     "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/charavatars/{id}.png",
     "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/charportraits/{id}_2.png"
 ];
 
 const itemSources = [
-    "images/items/{id}.webp",
+    "https://goodeffort.github.io/Arknights-Planner-Data/images/items/{id}.webp",
     "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/items/{id}.png",
     "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/items/icons/{id}.png"
 ];
