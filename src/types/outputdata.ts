@@ -30,7 +30,7 @@ type Skill = {
 }
 
 type Module = {
-    type: "X" | "Y" | "D";
+    type: string;
     name: string;
     icon: string;
     description: string;

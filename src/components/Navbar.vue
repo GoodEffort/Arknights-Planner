@@ -5,7 +5,8 @@ import NightModeToggle from './NightModeToggle.vue';
 import { ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
-import { SaveRecord } from '../types/operator';
+import { OldSaveRecord, SaveRecord } from '../types/planner-types';
+import { OperatorPlans } from '../types/plans';
 
 const store = usePlannerStore();
 const { exportSavedRecords, loadSavedRecords, getBlankInventory } = store;
@@ -40,14 +41,35 @@ const importData = () => {
     return;
   }
 
-  let data: {
-    p: SaveRecord[];
+  let dataold: {
+    p: OldSaveRecord[] | SaveRecord[];
     s: string[];
     i: { [key: string]: number };
   };
 
+  let data: {
+    p: SaveRecord[];
+    s: string[];
+    i: { [key: string]: number };
+  } | null = null;
+
   try {
-    data = JSON.parse(importString.value);
+    dataold = JSON.parse(importString.value);
+
+    if (dataold.p.length > 0 && dataold.p[0].plans instanceof OldSaveRecord) {
+      const oldP = dataold.p as OldSaveRecord[];
+      dataold.p = oldP.map((op): SaveRecord => ({
+        operatorId: op.operatorId,
+        plans: new OperatorPlans(op.plans),
+        active: op.active,
+      }));
+
+      data = {
+        p: dataold.p,
+        s: dataold.s,
+        i: dataold.i,
+      };
+    }
   }
   catch (e) {
     alert('Invalid data format');

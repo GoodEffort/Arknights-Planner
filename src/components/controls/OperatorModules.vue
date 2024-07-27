@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
-import { SelectedOperator } from '../../types/operator';
+import { SelectedOperator } from '../../types/planner-types';
 import OperatorInputGroup from './OperatorInputGroup.vue';
 
 const props = defineProps<{

@@ -22,7 +22,7 @@ class ModuleLevels {
     }
 }
 
-class OperatorPlans {
+class OldOperatorPlans {
     currentLevel: number;
     currentElite: 0 | 1 | 2;
     currentSkillLevels: number;
@@ -50,4 +50,61 @@ class OperatorPlans {
     }
 }
 
-export { OperatorPlans, SkillMasteries, ModuleLevels }
+class OperatorPlans {
+    currentLevel: number;
+    currentElite: 0 | 1 | 2;
+    currentSkillLevels: number;
+    currentSkillMasteries: SkillMasteries;
+    currentModules: {
+        type: string;
+        level: number;
+    }[];
+
+
+    targetLevel: number;
+    targetElite: 0 | 1 | 2;
+    targetSkillLevels: number;
+    targetSkillMasteries: SkillMasteries;
+    targetModules: {
+        type: string;
+        level: number;
+    }[];
+
+    constructor(oldPlans?: OldOperatorPlans) {
+        if (oldPlans) {
+            this.currentLevel = oldPlans.currentLevel;
+            this.currentElite = oldPlans.currentElite;
+            this.currentSkillLevels = oldPlans.currentSkillLevels;
+            this.currentSkillMasteries = oldPlans.currentSkillMasteries;
+            this.currentModules = [
+                { type: 'x', level: oldPlans.currentModules.x },
+                { type: 'y', level: oldPlans.currentModules.y },
+                { type: 'd', level: oldPlans.currentModules.d },
+            ];
+
+            this.targetLevel = oldPlans.targetLevel;
+            this.targetElite = oldPlans.targetElite;
+            this.targetSkillLevels = oldPlans.targetSkillLevels;
+            this.targetSkillMasteries = oldPlans.targetSkillMasteries;
+            this.targetModules = [
+                { type: 'x', level: oldPlans.targetModules.x },
+                { type: 'y', level: oldPlans.targetModules.y },
+                { type: 'd', level: oldPlans.targetModules.d },
+            ];
+        } else {
+            this.currentLevel = 1;
+            this.currentElite = 0;
+            this.currentSkillLevels = 1;
+            this.currentSkillMasteries = new SkillMasteries();
+            this.currentModules = [];
+
+            this.targetLevel = 1;
+            this.targetElite = 0;
+            this.targetSkillLevels = 1;
+            this.targetSkillMasteries = new SkillMasteries();
+            this.targetModules = [];
+        }
+    }
+}
+
+export { OldOperatorPlans, OperatorPlans, SkillMasteries, ModuleLevels }

@@ -2,7 +2,7 @@
 import { PropType, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlannerStore } from '../store/planner-store';
-import { Operator } from '../types/operator';
+import { Operator } from '../types/outputdata';
 import ImageFinder from './ImageFinder.vue';
 
 const { operator } = defineProps({

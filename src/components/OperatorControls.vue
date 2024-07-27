@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, watch, ref } from 'vue';
 import OperatorSkillMasteries from './controls/OperatorSkillMasteries.vue';
-import type { SaveRecord, SelectedOperator } from '../types/operator';
+import type { SaveRecord, SelectedOperator } from '../types/planner-types';
 import OperatorCosts from './OperatorCosts.vue';
 import ImageFinder from './ImageFinder.vue';
 import { usePlannerStore } from '../store/planner-store';

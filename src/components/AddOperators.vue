@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlannerStore } from '../store/planner-store';
 
-import type { Operator } from '../types/operator';
+import type { Operator } from '../types/outputdata';
 import PlannerSection from './PlannerSection.vue';
 import AddOperatorsCell from './AddOperatorsCell.vue';
 
