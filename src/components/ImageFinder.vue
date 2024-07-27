@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { Item } from '../types/item';
+import { Item } from '../types/outputdata';
 import { Operator } from '../types/operator';
 
 const operatorSources = [

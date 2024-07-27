@@ -20,7 +20,7 @@ const elite = computed({
     }
 });
 
-const levelMax = computed(() => operator.value.phases[elite.value].maxLevel);
+const levelMax = computed(() => operator.value.promotions[elite.value].maxLevel);
 const levelMin = computed(() => props.type === "current" ? 1 : props.selectedOperator.plans.currentLevel);
 
 const level = computed({
@@ -60,8 +60,8 @@ watch(level, () => {
 <template>
     <hr />
     <div class="row">
-        <div class="col-md-7 col-5" v-if="operator.phases.length > 1">
-            <OperatorPromotion :phases="operator.phases" v-model="elite" :key="`1${operator.id}-elite`" />
+        <div class="col-md-7 col-5" v-if="operator.promotions.length > 1">
+            <OperatorPromotion :promotions="operator.promotions" v-model="elite" :key="`1${operator.id}-elite`" />
         </div>
         <div class="col">
             <OperatorLevel :maxLevel="levelMax" :minLevel="levelMin" v-model="level" :key="`1${operator.id}-level`" />

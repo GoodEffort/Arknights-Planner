@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { usePlannerStore } from '../store/planner-store';
-import { Item } from '../types/item';
+import { Item } from '../types/outputdata';
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 const { craftItem } = usePlannerStore();
-const { inventory, recipes } = storeToRefs(usePlannerStore());
+const { inventory } = storeToRefs(usePlannerStore());
 
 export interface Props {
     item: Item;
@@ -19,8 +19,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const enableCraftButton = computed(() => {
-    const formula = recipes.value[props.item.itemId];
-    return formula.every(cost => {
+    const formula = props.item.recipe;
+    return !!formula?.costs && formula.costs.every(cost => {
         const { id: itemId, count } = cost;
         return inventory.value[itemId] >= count;
     });
@@ -28,7 +28,7 @@ const enableCraftButton = computed(() => {
 </script>
 
 <template>
-    <div :class="class" v-if="item.buildingProductList.length > 0">
+    <div :class="class" v-if="item.recipe">
         <button
             :class="buttonClass"
             :disabled="!enableCraftButton"

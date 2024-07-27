@@ -61,7 +61,7 @@ watch(mastery3, val => {
 <template>
     <hr />
 
-    <div class="row" v-if="operator.phases.length > 2">
+    <div class="row" v-if="operator.promotions.length > 2">
         <label>Masteries</label>
         <div class="col pe-0 px-md-auto">
             <OperatorInputGroup v-if="operator.skills.length > 0" v-model="mastery1" label="S1"

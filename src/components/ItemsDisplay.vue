@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
-import { Item } from '../types/item';
+import { Item } from '../types/outputdata';
 import { storeToRefs } from 'pinia';
 import CraftButton from './CraftButton.vue';
 import ImageFinder from './ImageFinder.vue';
@@ -89,6 +89,7 @@ const showModal = ref(false);
                     <div v-if="!editInventory && controls" class="row mb-2">
                         <div class="col px-0">
                             <button class="btn btn-primary"
+                                :disabled="inventory[item.itemId] === undefined || inventory[item.itemId] === 0"
                                 @click="changeItemAmount(item, item.itemId === lmdId ? -lmdChangeAmount : -1)">-{{
                                     item.itemId === lmdId ? lmdChangeAmountString : '1' }}</button>
                         </div>
@@ -117,6 +118,11 @@ const showModal = ref(false);
     margin-bottom: 1em;
     border-radius: 5px;
     background-color: rgb(197, 197, 197);
+}
+
+html.dark > body .item-col {
+    background-color: rgb(31, 31, 31);
+    border: 1px solid rgb(172, 172, 172);
 }
 
 .name {

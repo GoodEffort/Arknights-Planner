@@ -1,31 +1,17 @@
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
-import type { Operator, CharEquip, EquipDict, Module, Skill, LevelUpNeeds, LevelUpNeedsKey } from '../types/operator';
-import { SelectedOperator, SaveRecord } from '../types/operator';
-import getChardata from '../data/chardata';
-import getModuledata from '../data/moduledata';
-import getItemdata from '../data/itemdata';
-import { ExpItem, Item } from '../types/item';
+import { SelectedOperator, SaveRecord, LevelUpNeeds, LevelUpNeedsKey } from '../types/operator';
 import { debounce } from 'lodash';
 import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
-import getBuildingdata from '../data/buildingdata';
-import { dualchips, efficientToFarmItemIds, stages } from '../data/farmingdata';
+import { efficientToFarmItemIds, stages } from '../data/farmingdata';
+import getArknightsData from '../data/arknightsdata';
+import type { Item, Operator } from '../types/outputdata';
 
 export const usePlannerStore = defineStore('planner', () => {
     const operators = ref<Operator[]>([]);
-    const modules = ref<EquipDict>({});
-    const charactersToModules = ref<CharEquip>({});
     const selectedOperators = ref<SelectedOperator[]>([]);
-    const expItems = ref<{ [key: string]: ExpItem }>({});
     const items = ref<{ [key: string]: Item }>({});
-    const recipes = ref<{
-        [key: string]: {
-            id: string;
-            count: number;
-            type: string;
-        }[]
-    }>({});
     const lmdId = ref<string>('4001'); // this should be constant
     const reserveTier1 = ref<number>(0);
     const reserveTier2 = ref<number>(0);
@@ -35,56 +21,36 @@ export const usePlannerStore = defineStore('planner', () => {
     const reserveTier6 = ref<number>(0);
     const exportString = ref<string>('');
 
-    const getEXPValue = (inventory: { [key: string]: number; }, expItems: { [key: string]: ExpItem; }) => {
+    const getEXPValue = (inventory: { [key: string]: number; }) => {
         let exp = 0;
-        for (const expItemId in expItems) {
-            const { gainExp } = expItems[expItemId];
-            exp += inventory[expItemId] * gainExp;
+        for (const itemId in inventory) {
+            const gainExp = items.value[itemId]?.gainExp ?? 0;
+            exp += inventory[itemId] * gainExp;
         }
         return exp;
     }
 
     // Operators
     async function loadCharacters() {
-        const data = await getChardata();
-        operators.value = data;
-    }
+        const data = await getArknightsData();
 
-    async function loadModules() {
-        const { ModuleDict, CharacterModules } = await getModuledata();
-        modules.value = ModuleDict;
-        charactersToModules.value = CharacterModules;
-    }
+        const opsval: {
+            [key: string]: Operator;
+        } = data.operators as {
+            [key: string]: Operator;
+        };
 
-    async function loadItems() {
-        const { itemsObj, expItemsObj } = await getItemdata();
+        for (const operatorId in opsval) {
+            const opVal = opsval[operatorId];
+            opVal.id = operatorId;
 
-        for (const key in itemsObj) {
-            const item = itemsObj[key];
-            item.buildingProductList = item.buildingProductList.filter(b => dualchips.indexOf(item.itemId) >= 0 || b.roomType === 'WORKSHOP');
+            operators.value.push(opVal);
         }
 
-        items.value = itemsObj;
-        expItems.value = expItemsObj;
+        items.value = data.items;
+
         const currentInventory = JSON.parse(JSON.stringify(inventory.value)); // don't modify the original inventory
         inventory.value = { ...getBlankInventory(), ...currentInventory };
-    }
-
-    async function loadWorkshopFormulas() {
-        const data = await getBuildingdata();
-        recipes.value = data;
-    }
-
-    function getModulesForCharacter(operatorId: string): Module[] {
-        const moduleIds = charactersToModules.value[operatorId] || [];
-        const modulesArray: Module[] = [];
-        for (const moduleId of moduleIds) {
-            const module = modules.value[moduleId];
-            if (module && module.type !== 'INITIAL') {
-                modulesArray.push(module);
-            }
-        }
-        return modulesArray;
     }
 
     function exportSavedRecords() {
@@ -117,8 +83,13 @@ export const usePlannerStore = defineStore('planner', () => {
             const operatorIds: string[] = JSON.parse(saveData);
 
             for (const operatorId of operatorIds) {
+                const operator = operators.value.find(c => c.id === operatorId);
 
-                const saveRecord = getSavedOperatorData(operatorId) || new SelectedOperator(operators.value.find(c => c.id === operatorId)!, getModulesForCharacter(operatorId));
+                if (operator === undefined) {
+                    throw new Error(`Operator with id ${operatorId} not found.`);
+                }
+
+                const saveRecord = getSavedOperatorData(operatorId) || new SelectedOperator(operator);
                 selectedOperators.value.push(saveRecord);
             }
         }
@@ -128,7 +99,6 @@ export const usePlannerStore = defineStore('planner', () => {
         const saveString = `plans-${operatorId}`;
         const saveData: string | null = localStorage.getItem(saveString);
         const operator = operators.value.find(c => c.id === operatorId);
-        const modulesarray = getModulesForCharacter(operatorId);
 
         if (operator === undefined) {
             throw new Error(`Operator with id ${operatorId} not found.`);
@@ -138,10 +108,10 @@ export const usePlannerStore = defineStore('planner', () => {
 
         if (saveData) {
             const SaveRecord: SaveRecord = JSON.parse(saveData);
-            selectedOperator = new SelectedOperator(operator, modulesarray, SaveRecord.plans, SaveRecord.active);
+            selectedOperator = new SelectedOperator(operator, SaveRecord.plans, SaveRecord.active);
         }
         else {
-            selectedOperator = new SelectedOperator(operator, modulesarray);
+            selectedOperator = new SelectedOperator(operator);
             localStorage.setItem(saveString, JSON.stringify(new SaveRecord(selectedOperator)));
         }
 
@@ -164,69 +134,14 @@ export const usePlannerStore = defineStore('planner', () => {
     }
 
     // Costs
-    const battleRecords = computed<ExpItem[]>(() => {
-        let br = [];
-        for (let [_, expItem] of Object.entries(expItems.value)) {
-            br.push(expItem);
+    const battleRecords = computed(() => {
+        let br: { gainExp: number; id: string; }[] = [];
+        for (let [_, expItem] of Object.entries(items.value)) {
+            if (expItem.gainExp !== undefined)
+                br.push({ gainExp: expItem.gainExp, id: expItem.itemId });
         }
         return br.sort((a, b) => b.gainExp - a.gainExp);
     });
-
-    const getMasteryCost = (neededItems: { [key: string]: number }, targetMasteryIndex: number, currentMastery: number, skillMasteryCosts: Skill) => {
-        for (
-            let currentMasteryIndex = currentMastery;
-            currentMasteryIndex < targetMasteryIndex;
-            currentMasteryIndex++
-        ) {
-            const lucc = skillMasteryCosts.levelUpCostCond[currentMasteryIndex];
-
-            if (lucc) {
-                const { levelUpCost } = lucc;
-
-                for (const { count, id } of levelUpCost ?? []) {
-                    if (neededItems[id] === undefined) {
-                        neededItems[id] = 0;
-                    }
-
-                    neededItems[id] += count;
-                }
-            }
-        }
-    }
-
-    const getMasteryCostForSkill = (skillMasteryCosts: Skill, skillNumber: 1 | 2 | 3, neededItems: LevelUpNeeds, target: number, current: number) => {
-        for (let skillIndex: 1 | 2 | 3 = 1; skillIndex <= 3; skillIndex++) {
-            if (current < skillIndex && target >= skillIndex) {
-                const skillMasteryName = `s${skillNumber}m${skillIndex}` as 's1m1' | 's1m2' | 's1m3' | 's2m1' | 's2m2' | 's2m3' | 's3m1' | 's3m2' | 's3m3';
-                getMasteryCost(neededItems[skillMasteryName], skillIndex, skillIndex - 1, skillMasteryCosts)
-            }
-        }
-    }
-
-    const getModuleCostsByLevel = (neededItems: LevelUpNeeds, currentModule: number, targetModule: number, module: Module) => {
-        const { typeName2: moduleLetter } = module;
-
-        for (let moduleIndex = 1; moduleIndex <= 3; moduleIndex++) {
-            if (currentModule < moduleIndex && targetModule >= moduleIndex) {
-                const moduleName = `m${moduleLetter?.toLowerCase()}l${moduleIndex}` as 'mxl1' | 'mxl2' | 'mxl3' | 'myl1' | 'myl2' | 'myl3' | 'mdl1' | 'mdl2' | 'mdl3';
-
-                if (neededItems[moduleName] === undefined) {
-                    neededItems[moduleName] = {};
-                }
-
-                const strIndex = moduleIndex.toString() as '1' | '2' | '3';
-                const itemCosts = module.itemCost[strIndex];
-
-                for (const { count, id } of itemCosts) {
-                    if (neededItems[moduleName][id] === undefined) {
-                        neededItems[moduleName][id] = 0;
-                    }
-
-                    neededItems[moduleName][id] += count;
-                }
-            }
-        }
-    }
 
     const getBlankInventory = () => {
         const neededItems: { [key: string]: number } = {};
@@ -256,9 +171,9 @@ export const usePlannerStore = defineStore('planner', () => {
             } = selectedOperator.plans;
 
             const {
-                phases: eliteLevelUpCosts,
-                allSkillLvlup: skillLevelUpCosts,
-                skills: skillMasteryCosts,
+                promotions,
+                skillLevelUpCosts,
+                skills,
                 id: operatorId,
                 rarity
             } = selectedOperator.operator;
@@ -301,10 +216,10 @@ export const usePlannerStore = defineStore('planner', () => {
                 currentEliteIndex <= targetElite;
                 currentEliteIndex++
             ) {
-                const maxLevel = eliteLevelUpCosts[currentEliteIndex].maxLevel;
+                const maxLevel = promotions[currentEliteIndex].maxLevel;
 
                 const endLevel = currentEliteIndex < targetElite ?
-                    eliteLevelUpCosts[currentEliteIndex].maxLevel :
+                    promotions[currentEliteIndex].maxLevel :
                     Math.min(maxLevel, targetLevel);
 
                 for (; currentLevelIndex < endLevel; currentLevelIndex++) {
@@ -351,7 +266,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
             // elite 1
             if (currentElite === 0 && targetElite >= 1) {
-                const { evolveCost } = eliteLevelUpCosts[1];
+                const { evolveCost } = promotions[1];
 
                 if (evolveCost) {
                     for (const { count, id } of evolveCost) {
@@ -370,7 +285,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
             // elite 2
             if (currentElite <= 1 && targetElite === 2) {
-                const { evolveCost } = eliteLevelUpCosts[2];
+                const { evolveCost } = promotions[2];
 
                 if (evolveCost) {
                     for (const { count, id } of evolveCost) {
@@ -393,53 +308,65 @@ export const usePlannerStore = defineStore('planner', () => {
                 currentSkillIndex < targetSkillLevels - 1;
                 currentSkillIndex++
             ) {
-                const sluc = skillLevelUpCosts[currentSkillIndex];
+                const lvlUpCost = skillLevelUpCosts[currentSkillIndex] ?? [];
 
-                if (sluc) {
-                    const { lvlUpCost } = sluc;
-                    if (lvlUpCost) {
-                        for (const { count, id } of lvlUpCost) {
-                            if (neededItems.skill[currentSkillIndex] === undefined)
-                                neededItems.skill[currentSkillIndex] = {};
+                for (const { count, id } of lvlUpCost) {
+                    if (neededItems.skill[currentSkillIndex] === undefined)
+                        neededItems.skill[currentSkillIndex] = {};
 
-                            const skill = neededItems.skill[currentSkillIndex];
-                            if (skill[id] === undefined)
-                                skill[id] = 0;
+                    const skill = neededItems.skill[currentSkillIndex];
+                    if (skill[id] === undefined)
+                        skill[id] = 0;
 
-                            skill[id] += count;
-                        }
-                    }
+                    skill[id] += count;
                 }
             }
 
             // mastery costs
-            const skill1MasteryCosts = skillMasteryCosts[0];
-            const skill2MasteryCosts = skillMasteryCosts[1];
-            const skill3MasteryCosts = skillMasteryCosts[2];
+            for (let skillIndex = 0; skillIndex < skills.length; skillIndex++) {
+                const { masteryCosts } = skills[skillIndex];
+                const skillKey = 'skill' + (skillIndex + 1) as 'skill1' | 'skill2' | 'skill3';
+                const currentSkillMastery = currentSkillMasteries[skillKey];
+                const targetSkillMastery = targetSkillMasteries[skillKey];
 
-            if (skill1MasteryCosts) {
-                getMasteryCostForSkill(skill1MasteryCosts, 1, neededItems, targetSkillMasteries.skill1, currentSkillMasteries.skill1);
-            }
-            if (skill2MasteryCosts) {
-                getMasteryCostForSkill(skill2MasteryCosts, 2, neededItems, targetSkillMasteries.skill2, currentSkillMasteries.skill2);
-            }
-            if (skill3MasteryCosts) {
-                getMasteryCostForSkill(skill3MasteryCosts, 3, neededItems, targetSkillMasteries.skill3, currentSkillMasteries.skill3);
+                for (let masteryIndex = currentSkillMastery; masteryIndex < targetSkillMastery; masteryIndex++) {
+
+                    const skillMasteryName = `s${skillIndex+1}m${masteryIndex+1}` as 's1m1' | 's1m2' | 's1m3' | 's2m1' | 's2m2' | 's2m3' | 's3m1' | 's3m2' | 's3m3';
+                    const cost = masteryCosts[masteryIndex];
+
+                    for (const {id: itemId, count } of cost) {
+                        if (neededItems[skillMasteryName][itemId] === undefined) {
+                            neededItems[skillMasteryName][itemId] = 0;
+                        }
+
+                        neededItems[skillMasteryName][itemId] += count;
+                    }
+                }
             }
 
             // module costs
-            const moduleX = selectedOperator.modules.find(m => m.typeName2 === 'X');
-            const moduleY = selectedOperator.modules.find(m => m.typeName2 === 'Y');
-            const moduleD = selectedOperator.modules.find(m => m.typeName2 === 'D');
+            const moduleTypes: ('x' | 'y' | 'd')[] = ['x', 'y', 'd'];
+            for (const moduleType of moduleTypes) {
+                const module = selectedOperator.operator.modules.find(m => m.type === moduleType.toLocaleUpperCase());
+                if (module) {
+                    const currentModuleLevel = currentModules[moduleType];
+                    const targetModuleLevel = targetModules[moduleType];
+                    const moduleCosts = module.cost;
 
-            if (moduleX) {
-                getModuleCostsByLevel(neededItems, currentModules.x, targetModules.x, moduleX);
-            }
-            if (moduleY) {
-                getModuleCostsByLevel(neededItems, currentModules.y, targetModules.y, moduleY);
-            }
-            if (moduleD) {
-                getModuleCostsByLevel(neededItems, currentModules.d, targetModules.d, moduleD);
+                    for (let moduleIndex = currentModuleLevel; moduleIndex < targetModuleLevel; moduleIndex++) {
+
+                        const moduleName = `m${moduleType}l${moduleIndex + 1}` as 'mxl1' | 'mxl2' | 'mxl3' | 'myl1' | 'myl2' | 'myl3' | 'mdl1' | 'mdl2' | 'mdl3';
+                        const cost = moduleCosts[moduleIndex];
+
+                        for (const { id: itemId, count } of cost) {
+                            if (neededItems[moduleName][itemId] === undefined) {
+                                neededItems[moduleName][itemId] = 0;
+                            }
+
+                            neededItems[moduleName][itemId] += count;
+                        }
+                    }
+                }
             }
 
             neededItemsByOperator[operatorId] = neededItems;
@@ -490,7 +417,7 @@ export const usePlannerStore = defineStore('planner', () => {
         return neededItems;
     });
 
-    const totalEXPValueCost = computed(() => getEXPValue(totalCosts.value, expItems.value));
+    const totalEXPValueCost = computed(() => getEXPValue(totalCosts.value));
 
     // Inventory
     const inventory = ref<{ [key: string]: number }>(
@@ -500,11 +427,16 @@ export const usePlannerStore = defineStore('planner', () => {
         }
     );
 
-    const inventoryEXPValue = computed(() => getEXPValue(inventory.value, expItems.value));
+    const inventoryEXPValue = computed(() => getEXPValue(inventory.value));
 
     const craftItem = (item: Item) => {
+        if (item.recipe === undefined) {
+            alert(`Item ${item.name} cannot be crafted.`);
+            return;
+        }
+        
         const { itemId } = item;
-        const costs = recipes.value[itemId];
+        const { count: outputCount, costs } = item.recipe;
 
         // verify if we have enough items
         for (const { id, count } of costs) {
@@ -520,7 +452,7 @@ export const usePlannerStore = defineStore('planner', () => {
         }
 
         // add crafted item to inventory
-        inventory.value[itemId] += 1;
+        inventory.value[itemId] += outputCount;
     }
 
     watch(inventory, debounce((value: {
@@ -582,7 +514,7 @@ export const usePlannerStore = defineStore('planner', () => {
         const breakdownCosts: { [key: string]: number } = {};
 
         const stopItems = efficientToFarmItemIds;
-        stopItems.push(...Object.keys(expItems.value));
+        stopItems.push(...Object.keys(battleRecords.value));
 
         const subtractFromInventory = (neededCount: number, id: string) => {
             let currentCount = currentInventory[id] || 0;
@@ -603,21 +535,11 @@ export const usePlannerStore = defineStore('planner', () => {
             neededCount = subtractFromInventory(neededCount, itemId);
 
             if (neededCount > 0) {
+                const item = items.value[itemId];
                 // and we should not breakdown the item
-                const { rarity } = items.value[itemId];
-                const recipe = itemId === "32001" ? [{
-                    id: "4006",
-                    count: 90,
-                    type: ""
-                }] : recipes.value[itemId];
-
                 if (
-                    !dualchips.includes(itemId) && (
-                        stopItems.includes(itemId) ||
-                        rarity === "TIER_1" ||
-                        rarity === "TIER_2" ||
-                        recipe === undefined ||
-                        recipe.length === 0)
+                    stopItems.indexOf(itemId) >= 0 || 
+                    item.recipe === undefined
                 ) {
                     if (breakdownCosts[itemId] === undefined) {
                         breakdownCosts[itemId] = 0;
@@ -627,8 +549,9 @@ export const usePlannerStore = defineStore('planner', () => {
                 }
                 // otherwise we need to break it down
                 else {
-                    for (const { id: recipeItemId, count: recipeCount } of recipe) {
-                        breakdownItem(recipeCount * neededCount, recipeItemId);
+                    const costs = item.recipe.costs;
+                    for (const { id: recipeItemId, count: recipeCount } of costs) {
+                        breakdownItem((recipeCount * neededCount), recipeItemId);
                     }
                 }
             }
@@ -664,8 +587,6 @@ export const usePlannerStore = defineStore('planner', () => {
     return {
         items,
         operators,
-        modules,
-        expItems,
         lmdId,
         selectedOperators,
         inventory,
@@ -675,7 +596,6 @@ export const usePlannerStore = defineStore('planner', () => {
         battleRecords,
         neededItems,
         neededItemsBreakdown,
-        recipes,
         reserveTier1,
         reserveTier2,
         reserveTier3,
@@ -684,12 +604,9 @@ export const usePlannerStore = defineStore('planner', () => {
         reserveTier6,
         recomendedStages,
         loadCharacters,
-        loadModules,
-        loadItems,
         loadSavedRecords,
         selectCharacter,
         craftItem,
-        loadWorkshopFormulas,
         exportSavedRecords,
         getBlankInventory,
         exportString,

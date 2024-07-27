@@ -83,7 +83,6 @@ const stages: { [key: string]: string } = {
     "3212": "PR-C-2",           // Vanguard Chip Pack
     "3271": "PR-C-1",           // Supporter Chip
     "3272": "PR-C-2",           // Supporter Chip Pack
-    "mod_unlock_token": "AP-5", // Module Data Block
 };
 
 // ignore these crafting recipes in efficiency calc because they'll cause an infinite loop as they craft into each other

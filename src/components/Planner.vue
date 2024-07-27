@@ -9,12 +9,12 @@ import TotalCostOfPlan from './TotalCostOfPlan.vue';
 import MissingItems from './MissingItems.vue';
 import Farming from './Farming.vue';
 
-const { loadCharacters, loadModules, loadSavedRecords, loadItems, loadWorkshopFormulas } = usePlannerStore();
+const { loadCharacters, loadSavedRecords } = usePlannerStore();
 
 const isLoading = ref(true);
 
 onMounted(async () => {
-    await Promise.all([loadCharacters(), loadModules(), loadItems(), loadWorkshopFormulas()]);
+    await loadCharacters();
     loadSavedRecords();
     isLoading.value = false;
 });

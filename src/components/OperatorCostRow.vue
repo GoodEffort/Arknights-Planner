@@ -3,7 +3,7 @@ import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import ItemCell from './ItemCell.vue';
-import { Item } from '../types/item';
+import { Item } from '../types/outputdata';
 
 const emit = defineEmits<{
     (e: 'applyUpgrade', costs: {

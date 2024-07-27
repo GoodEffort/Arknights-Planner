@@ -8,9 +8,9 @@ const props = defineProps<{
     type: 'current' | 'target';
 }>();
 
-const hasXModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'X') !== undefined);
-const hasYModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'Y') !== undefined);
-const hasDModule = computed(() => props.selectedOperator.modules.find(m => m.typeName2 === 'D') !== undefined);
+const hasXModule = computed(() => props.selectedOperator.operator.modules.find(m => m.type === 'X') !== undefined);
+const hasYModule = computed(() => props.selectedOperator.operator.modules.find(m => m.type === 'Y') !== undefined);
+const hasDModule = computed(() => props.selectedOperator.operator.modules.find(m => m.type === 'D') !== undefined);
 
 const moduleX = computed({
     get: () => props.selectedOperator.plans[`${props.type}Modules`].x,
@@ -55,7 +55,7 @@ watch(moduleD, () => {
 
 <template>
     <hr />
-    <div class="row" v-if="selectedOperator.modules.length > 0">
+    <div class="row" v-if="selectedOperator.operator.modules.length > 0">
         <label>Modules</label>
         <div class="col" v-if="hasXModule">
             <OperatorInputGroup v-model="moduleX" label="X" :key="`1${operatorId}-mx`" :min="minX" />

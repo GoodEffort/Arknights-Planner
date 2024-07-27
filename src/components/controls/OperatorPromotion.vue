@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { Phase } from '../../types/operator';
 import { ref } from 'vue';
+import { Promotion } from '../../types/outputdata';
 
 defineEmits<{
     (e: 'update:model-value', value: number): void;
 }>();
 
-const { modelValue, phases } = defineProps<{
+const { modelValue, promotions } = defineProps<{
     modelValue: Number,
-    phases: Array<Phase>
+    promotions: Array<Promotion>
 }>();
 
-const disabled = ref(phases ? phases.length == 1 : false);
-const showElite1 = ref(phases ? phases.length > 1 : false);
-const showElite2 = ref(phases ? phases.length > 2 : false);
+const disabled = ref(promotions ? promotions.length == 1 : false);
+const showElite1 = ref(promotions ? promotions.length > 1 : false);
+const showElite2 = ref(promotions ? promotions.length > 2 : false);
 
 </script>
 

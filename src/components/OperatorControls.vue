@@ -70,7 +70,7 @@ const active = computed({
                     type="current" />
                 <OperatorSkillMasteries v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
                     type="current" />
-                <OperatorModules v-if="selectedOperator.modules.length > 0" :selected-operator="selectedOperator"
+                <OperatorModules v-if="operator.modules.length > 0" :selected-operator="selectedOperator"
                     type="current" />
             </div>
             <div class="col-12 col-md-6 plan-section rounded-end">
@@ -81,7 +81,7 @@ const active = computed({
                     type="target" />
                 <OperatorSkillMasteries v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
                     type="target" />
-                <OperatorModules v-if="selectedOperator.modules.length > 0" :selected-operator="selectedOperator"
+                <OperatorModules v-if="operator.modules.length > 0" :selected-operator="selectedOperator"
                     type="target" />
             </div>
         </div>
@@ -119,8 +119,8 @@ const active = computed({
     @media screen and (min-width: 768px) {
         max-height: 75px;
         width: 75px;
-    } 
-    
+    }
+
     @media screen and (max-width: 768px) {
         margin-top: 1em;
         margin-bottom: 0px;
@@ -144,6 +144,9 @@ const active = computed({
 html.dark .plan-section {
     @media screen and (min-width: 500px) {
         background-image: linear-gradient(rgb(20, 20, 20), rgb(24, 24, 24));
+        border: 1px solid #3d3d3d;
+        border-left: 0px;
+        border-right: 0px;
     }
 }
 
@@ -153,15 +156,19 @@ html.dark .plan-section {
         padding-top: 10px;
     }
 }
+
 .v-move,
-.v-enter-active,
+.v-enter-active {
+    transition: 0.2s .1 ease-in-out;
+}
+
 .v-leave-active {
-  transition: 0.3s ease;
+    transition: 0.1s ease-in-out;
 }
 
 .v-enter-from,
 .v-leave-to {
-  opacity: 0;
-  transform: translateY(10px);
+    opacity: 0;
+    transform: translateY(10px);
 }
 </style>
