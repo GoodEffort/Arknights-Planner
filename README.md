@@ -3,6 +3,9 @@
 Hosted:
 https://goodeffort.github.io/Arknights-Planner/
 
+Data Compilation:
+https://github.com/GoodEffort/Arknights-Planner-Data
+
 How to use
  - On the bottom of the page you can add operators to your plan
  - From there you can click Plan up top on and input the current levels and the planned levels
