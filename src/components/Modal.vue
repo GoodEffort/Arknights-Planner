@@ -51,7 +51,7 @@ const close = () => show.value = false;
 
 <style scoped>
 .modal.fade {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.8);
 }
 
 .modal.show {
@@ -82,5 +82,11 @@ button.close {
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
+}
+
+html.dark > body .modal-content {
+    background-color: #000000;
+    border: 2px solid #3d3d3d;
+    color: #eee;
 }
 </style>

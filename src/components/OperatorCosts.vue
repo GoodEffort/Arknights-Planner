@@ -293,6 +293,9 @@ const showAnyRow = computed(() => {
     background-image: linear-gradient(rgb(204, 204, 204), rgb(201, 201, 201));
 }
 html.dark #asdf > div.row {
-    background-image: linear-gradient(rgb(20, 20, 20), rgb(36, 36, 36));
+    background-image: linear-gradient(rgb(0, 0, 0), rgb(19, 19, 19));
+    border: 1px solid #616161;
+    border-right: 0px;
+    border-left: 0px;
 }
 </style>

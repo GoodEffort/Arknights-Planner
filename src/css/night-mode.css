@@ -96,42 +96,14 @@ html.dark > body {
     }
 }
 
-html.dark > body div.planner-section {
-    background: #151515;
-    color: #eee;
-}
-
 html.dark > body button.btn.btn-primary {
     background-color: #0d3e88;
     border-color: #0d6efd;
 }
 
-html.dark > body button.btn.btn-primary:hover {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-
+html.dark > body button.btn.btn-primary:focus,
+html.dark > body button.btn.btn-primary:hover,
 html.dark > body button.btn.btn-primary:active {
     background-color: #0d6efd;
     border-color: #0d6efd;
-}
-
-html.dark > body button.btn.btn-primary:focus {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-
-html.dark > body .selected-operator {
-    background-color: #050505;
-    color: #fff;
-}
-
-html.dark > body .modal-content {
-    background-color: #0c0c0c;
-    color: #eee;
-}
-
-html.dark > body .item-col {
-    background-color: rgb(31, 31, 31);
-    border: 1px solid rgb(172, 172, 172);
 }

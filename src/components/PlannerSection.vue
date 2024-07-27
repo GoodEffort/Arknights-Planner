@@ -67,6 +67,12 @@ function toggleCollapse() {
 
 
 <style scoped>
+html.dark > body div.planner-section {
+    background: #272727;
+    border: 2px solid #313131;
+    color: #eee;
+}
+
 .planner-section {
     border-radius: 3px;
     font-size: x-large;

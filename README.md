@@ -4,7 +4,6 @@ Hosted:
 https://goodeffort.github.io/Arknights-Planner/
 
 How to use
-
  - On the bottom of the page you can add operators to your plan
  - From there you can click Plan up top on and input the current levels and the planned levels
  - Then input the items in your inventor under "Current Inventory"
@@ -20,12 +19,11 @@ If you run into an issue where the page stops working due to some invalid state 
  - press Enter and refresh the page
 
 things I want to add
- - EXP tracking by value instead of item
+ - a way to sync your saved plans across devices
+ - crafting recommendation
  - reordering operators
  - Phone app?
- - crafting recommendation
  - share link to move it to another device/browser (new Import/Export feature kind of does this, I want it easier still)
- - a way to sync your saved plans across devices
 
  Data Sources
  - https://github.com/Kengxxiao/ArknightsGameData
@@ -34,3 +32,4 @@ things I want to add
  - https://github.com/ArknightsAssets/ArknightsAssets
  - https://docs.google.com/spreadsheets/d/12X0uBQaN7MuuMWWDTiUjIni_MOP015GnulggmBJgBaQ/
  - https://ak.gamepress.gg/news/arknights-material-farming-efficiency-best-stages-farm
+ 
