@@ -2,7 +2,7 @@
 
 <template>
     <Transition>
-        <div :class="{ show: show }" class="modal fade show modal-lg" tabindex="-1" role="dialog"
+        <div :class="{ show: show }" class="modal fade show modal-xl" tabindex="-1" role="dialog"
             aria-labelledby="modal-title" v-if="show" @click.self="close">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">

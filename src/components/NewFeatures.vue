@@ -39,7 +39,9 @@ watch(doNotShowAgain, (val) => {
           <h3>7/26/2024</h3>
           <p>
             Changed how data was being fetched, let me know if you run into any issues as this was a larger change.
-            
+          </p>
+          <p>
+            Added an Item BOM crafting modal, clicking the Hammer Icon will open it.
           </p>
         </div>
         <!-- <div>

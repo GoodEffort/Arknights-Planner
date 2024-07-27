@@ -5,7 +5,7 @@ import { Item } from '../types/outputdata';
 import { storeToRefs } from 'pinia';
 import CraftButton from './CraftButton.vue';
 import ImageFinder from './ImageFinder.vue';
-// import Modal from './Modal.vue';
+import ItemModal from './ItemModal.vue';
 
 const { inventory, lmdId, items } = storeToRefs(usePlannerStore());
 
@@ -62,13 +62,13 @@ const changeItemAmount = (item: Item, amount: number) => {
     inventory.value[item.itemId] += amount;
 };
 
-const showModal = ref(false);
+const showItem = ref<Item>();
 </script>
 
 <template>
     <div class="container">
         <div class="row">
-            <div class="col-sm-3 col-lg-2 col-6" v-for="{ item, count } in displayItems">
+            <div class="col-md-3 col-lg-2 col-6" v-for="{ item, count } in displayItems">
                 <div class="item-col">
                     <div class="name">
                         <span>
@@ -76,8 +76,13 @@ const showModal = ref(false);
                         </span>
                     </div>
                     <div class="text-align-end">
-                        <ImageFinder :subject="item" class="item-image" @click="showModal = !showModal" />
+                        <ImageFinder :subject="item" class="item-image" />
                         <CraftButton v-if="controls" :item="item" />
+                        <div class="bom" v-if="item.recipe?.costs.length ?? 0 > 0">
+                            <button @click="showItem=item" class="btn btn-primary">
+                                <font-awesome-icon icon="hammer" />
+                            </button>
+                        </div>
                     </div>
                     <div class="count">
                         <input v-if="editInventory" type="number" class="form-control" min="0"
@@ -103,6 +108,7 @@ const showModal = ref(false);
             </div>
         </div>
     </div>
+    <ItemModal v-model="showItem" />
 </template>
 
 <style scoped>
@@ -145,5 +151,24 @@ html.dark > body .item-col {
 .count {
     margin-top: .25em;
     margin-bottom: .25em;
+}
+
+.container :deep(.craft-button-parent) {
+    position: relative;
+    top: -2.5em;
+    right: 2px;
+    height: 0px;
+}
+
+.container :deep(.craft-button:disabled) {
+    opacity: 0.25;
+}
+
+.bom {
+    position: relative;
+    top: -2.5em;
+    right: 70%;
+    height: 0px;
+    margin-left: 5px;
 }
 </style>

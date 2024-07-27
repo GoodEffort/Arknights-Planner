@@ -36,16 +36,3 @@ const enableCraftButton = computed(() => {
         >Craft</button>
     </div>
 </template>
-
-<style scoped>
-.craft-button-parent {
-    position: relative;
-    top: -2.5em;
-    right: 2px;
-    height: 0px;
-}
-
-.craft-button:disabled {
-    opacity: 0.25;
-}
-</style>
