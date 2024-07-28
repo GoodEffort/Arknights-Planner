@@ -199,7 +199,7 @@ const showAnyRow = computed(() => {
 
         <!-- Modules -->
         <div v-for="[type, moduleCosts] in Object.entries(Costs.modules)">
-            <div class="row" v-if="moduleCosts.length > 0" v-for="(cost, level) in moduleCosts.filter(a => JSON.stringify(a) !== '{}')">
+            <div class="row" v-if="moduleCosts.length > 0" v-for="cost in moduleCosts.filter(a => JSON.stringify(a) !== '{}')">
                 <OperatorCostRow :costs="cost"
                     :title="`Module ${type} Level ${ moduleCosts.indexOf(cost) + 1 }`"
                     :enable-apply="moduleCosts.indexOf(cost) === (moduleCosts.filter(a => JSON.stringify(a) === '{}').length) && CanModuleBeApplied"
