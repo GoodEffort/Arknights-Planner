@@ -20,16 +20,10 @@ class SelectedOperator {
     }
 }
 
-class OldSaveRecord {
+type OldSaveRecord = {
     operatorId: string;
     active: boolean;
     plans: OldOperatorPlans;
-
-    constructor() {
-        this.operatorId = "";
-        this.plans = new OldOperatorPlans();
-        this.active = false;
-    }
 }
 
 class SaveRecord {
@@ -67,13 +61,19 @@ type LevelUpNeeds = {
     modules: { [key: string]: { [key: string]: number }[] };
 };
 
+const IsOldSaveRecord = (record: OldSaveRecord | SaveRecord): record is OldSaveRecord => {
+    const plans = record.plans;
+    return !Array.isArray(plans.currentModules);
+}
+
 export type {
     LevelUpNeeds,
     LevelUpNeedsKey,
+    OldSaveRecord
 }
 
 export {
     SelectedOperator,
-    OldSaveRecord,
-    SaveRecord
+    SaveRecord,
+    IsOldSaveRecord
 }
