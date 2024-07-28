@@ -76,21 +76,37 @@ class OperatorPlans {
             this.currentElite = oldPlans.currentElite;
             this.currentSkillLevels = oldPlans.currentSkillLevels;
             this.currentSkillMasteries = oldPlans.currentSkillMasteries;
-            this.currentModules = [
-                { type: 'x', level: oldPlans.currentModules.x },
-                { type: 'y', level: oldPlans.currentModules.y },
-                { type: 'd', level: oldPlans.currentModules.d },
-            ];
+            this.currentModules = [];
+
+            if (oldPlans.currentModules.x > 0) {
+                this.currentModules.push({ type: 'X', level: oldPlans.currentModules.x });
+            }
+
+            if (oldPlans.currentModules.y > 0) {
+                this.currentModules.push({ type: 'Y', level: oldPlans.currentModules.y });
+            }
+
+            if (oldPlans.currentModules.d > 0) {
+                this.currentModules.push({ type: 'D', level: oldPlans.currentModules.d });
+            }
 
             this.targetLevel = oldPlans.targetLevel;
             this.targetElite = oldPlans.targetElite;
             this.targetSkillLevels = oldPlans.targetSkillLevels;
             this.targetSkillMasteries = oldPlans.targetSkillMasteries;
-            this.targetModules = [
-                { type: 'x', level: oldPlans.targetModules.x },
-                { type: 'y', level: oldPlans.targetModules.y },
-                { type: 'd', level: oldPlans.targetModules.d },
-            ];
+            this.targetModules = [];
+
+            if (oldPlans.targetModules.x > 0) {
+                this.targetModules.push({ type: 'X', level: oldPlans.targetModules.x });
+            }
+
+            if (oldPlans.targetModules.y > 0) {
+                this.targetModules.push({ type: 'Y', level: oldPlans.targetModules.y });
+            }
+
+            if (oldPlans.targetModules.d > 0) {
+                this.targetModules.push({ type: 'D', level: oldPlans.targetModules.d });
+            }
         } else {
             this.currentLevel = 1;
             this.currentElite = 0;
@@ -107,4 +123,8 @@ class OperatorPlans {
     }
 }
 
-export { OldOperatorPlans, OperatorPlans, SkillMasteries, ModuleLevels }
+const IsOldOperatorPlans = (plans: OldOperatorPlans | OperatorPlans): plans is OldOperatorPlans => {
+    return (<OldOperatorPlans>plans).currentModules.x !== undefined;
+}
+
+export { OldOperatorPlans, OperatorPlans, SkillMasteries, ModuleLevels, IsOldOperatorPlans }

@@ -6,7 +6,7 @@ import { ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
 import { OldSaveRecord, SaveRecord } from '../types/planner-types';
-import { OperatorPlans } from '../types/plans';
+import { OperatorPlans, IsOldOperatorPlans } from '../types/plans';
 
 const store = usePlannerStore();
 const { exportSavedRecords, loadSavedRecords, getBlankInventory } = store;
@@ -56,7 +56,7 @@ const importData = () => {
   try {
     dataold = JSON.parse(importString.value);
 
-    if (dataold.p.length > 0 && dataold.p[0].plans instanceof OldSaveRecord) {
+    if (dataold.p.length > 0 && IsOldOperatorPlans(dataold.p[0].plans)) {
       const oldP = dataold.p as OldSaveRecord[];
       dataold.p = oldP.map((op): SaveRecord => ({
         operatorId: op.operatorId,

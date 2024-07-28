@@ -1,4 +1,4 @@
-import { OldOperatorPlans, OperatorPlans } from "./plans";
+import { IsOldOperatorPlans, OldOperatorPlans, OperatorPlans } from "./plans";
 import { Operator } from "./outputdata";
 
 class SelectedOperator {
@@ -12,10 +12,10 @@ class SelectedOperator {
         
         if (!plans) {
             this.plans = new OperatorPlans();
-        } else if ((<OldOperatorPlans>plans).currentModules.x !== undefined) {
-            this.plans = new OperatorPlans(<OldOperatorPlans>plans);
+        } else if (IsOldOperatorPlans(plans)) {
+            this.plans = new OperatorPlans(plans);
         } else {
-            this.plans = <OperatorPlans>plans;
+            this.plans = plans;
         }
     }
 }
