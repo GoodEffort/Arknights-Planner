@@ -5,8 +5,8 @@ import NightModeToggle from './NightModeToggle.vue';
 import { ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
-import { OldSaveRecord, SaveRecord } from '../types/planner-types';
-import { OperatorPlans, IsOldOperatorPlans } from '../types/plans';
+import { IsOldSaveRecord, OldSaveRecord, SaveRecord } from '../types/planner-types';
+import { OperatorPlans } from '../types/plans';
 
 const store = usePlannerStore();
 const { exportSavedRecords, loadSavedRecords, getBlankInventory } = store;
@@ -55,21 +55,50 @@ const importData = () => {
 
   try {
     dataold = JSON.parse(importString.value);
+    data = {
+      p: [],
+      s: dataold.s,
+      i: dataold.i
+    };
 
-    if (dataold.p.length > 0 && IsOldOperatorPlans(dataold.p[0].plans)) {
-      const oldP = dataold.p as OldSaveRecord[];
-      dataold.p = oldP.map((op): SaveRecord => ({
-        operatorId: op.operatorId,
-        plans: new OperatorPlans(op.plans),
-        active: op.active,
-      }));
+    data.p = dataold.p.map((record): SaveRecord => {
+      if (IsOldSaveRecord(record)) {
+        const oldPlans = record.plans;
+        const newPlans: OperatorPlans = {
+          ...oldPlans,
+          targetModules: [],
+          currentModules: []
+        };
 
-      data = {
-        p: dataold.p,
-        s: dataold.s,
-        i: dataold.i,
-      };
-    }
+        if ((oldPlans.currentModules.x ?? 0) > 0) {
+          newPlans.currentModules.push({ type: 'X', level: oldPlans.currentModules.x });
+        }
+        if ((oldPlans.currentModules.y ?? 0) > 0) {
+          newPlans.currentModules.push({ type: 'Y', level: oldPlans.currentModules.y });
+        }
+        if ((oldPlans.currentModules.d ?? 0) > 0) {
+          newPlans.currentModules.push({ type: 'D', level: oldPlans.currentModules.d });
+        }
+
+        if ((oldPlans.targetModules.x ?? 0) > 0) {
+          newPlans.targetModules.push({ type: 'X', level: oldPlans.targetModules.x });
+        }
+        if ((oldPlans.targetModules.y ?? 0) > 0) {
+          newPlans.targetModules.push({ type: 'Y', level: oldPlans.targetModules.y });
+        }
+        if ((oldPlans.targetModules.d ?? 0) > 0) {
+          newPlans.targetModules.push({ type: 'D', level: oldPlans.targetModules.d });
+        }
+
+        return {
+          ...record,
+          plans: newPlans
+        };
+      }
+      else {
+        return record;
+      }
+    });
   }
   catch (e) {
     alert('Invalid data format');
