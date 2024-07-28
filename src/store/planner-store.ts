@@ -349,16 +349,22 @@ export const usePlannerStore = defineStore('planner', () => {
                     const cost = moduleCosts[moduleLevelIndex];
 
                     for (const { id: itemId, count } of cost) {
-                        if (neededItems.modules[module.type] === undefined) {
-                            neededItems.modules[module.type] = [];
+                        let neededmodule = neededItems.modules[module.type];
+
+                        if (neededmodule === undefined) {
+                            neededItems.modules[module.type] = [{}, {}, {}];
+                            neededmodule = neededItems.modules[module.type];
                         }
 
-                        if (neededItems.modules[module.type][moduleLevelIndex] === undefined) {
+                        let neededModuleLevel = neededmodule[moduleLevelIndex];
+
+                        if (neededModuleLevel == null) {
                             neededItems.modules[module.type][moduleLevelIndex] = {};
+                            neededModuleLevel = neededItems.modules[module.type][moduleLevelIndex];
                         }
 
-                        if (neededItems.modules[module.type][moduleLevelIndex][itemId] === undefined) {
-                            neededItems.modules[module.type][moduleLevelIndex][itemId] = 0;
+                        if (neededModuleLevel != null && neededModuleLevel[itemId] == null) {
+                            neededModuleLevel[itemId] = 0;
                         }
 
                         neededItems.modules[module.type][moduleLevelIndex][itemId] += count;
@@ -389,6 +395,13 @@ export const usePlannerStore = defineStore('planner', () => {
                     for (const skillCosts of levelUpNeeds.skill) {
                         if (skillCosts)
                             addNeededItems(skillCosts);
+                    }
+                }
+                if (key === 'modules') {
+                    for (const moduleType in levelUpNeeds.modules) {
+                        for (let levelIndex = 0; levelIndex < levelUpNeeds.modules[moduleType].length; levelIndex++) {
+                            addNeededItems(levelUpNeeds.modules[moduleType][levelIndex]);
+                        }
                     }
                 }
                 else {

@@ -58,7 +58,34 @@ const CanE2 = computed(() => {
     }
 });
 
-const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Skill1Mastery' | 'Skill2Mastery' | 'Skill3Mastery' | 'ModuleX' | 'ModuleY' | 'ModuleD' | 'E1' | 'E2', rank: number) => {
+const applyModuleUpgrade = (costs: { [key: string]: number }, type: string, rank: number) => {
+    const currentPlan = selectedOperators.value.find(op => op.operator.id === props.selectedOperator.operator.id)?.plans;
+
+    if (currentPlan == null) {
+        return;
+    }
+
+    for (const [itemId, count] of Object.entries(costs)) {
+        if (inventory.value[itemId] < count) {
+            return;
+        }
+    }
+
+    const currentModule = currentPlan.currentModules.find(a => a.type === type);
+
+    if (currentModule == null) {
+        currentPlan.currentModules.push({ type, level: rank });
+    }
+    else {
+        currentModule.level = rank;
+    }
+
+    for (const [itemId, count] of Object.entries(costs)) {
+        inventory.value[itemId] -= count;
+    }
+};
+
+const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Skill1Mastery' | 'Skill2Mastery' | 'Skill3Mastery' | 'E1' | 'E2', rank: number) => {
     const currentPlan = selectedOperators.value.find(op => op.operator.id === props.selectedOperator.operator.id)?.plans;
 
     if (currentPlan == null) {
@@ -83,15 +110,6 @@ const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Sk
             break;
         case 'Skill3Mastery':
             currentPlan.currentSkillMasteries.skill3 = rank;
-            break;
-        case 'ModuleX':
-            currentPlan.currentModules.x = rank;
-            break;
-        case 'ModuleY':
-            currentPlan.currentModules.y = rank;
-            break;
-        case 'ModuleD':
-            currentPlan.currentModules.d = rank;
             break;
         case 'E1':
             currentPlan.currentElite = 1;
@@ -126,7 +144,7 @@ const showAnyRow = computed(() => {
 </script>
 
 <template>
-    <div class="container mt-4 ms-md-2 ms-0 me-0" id="asdf" v-if="showAnyRow">
+    <div class="container mt-4 ms-md-2 ms-0 me-0 asdf" v-if="showAnyRow">
         <!-- Skill 1 Masteries -->
         <div class="row" v-if="ShowRow(Costs.s1m1)">
             <OperatorCostRow :costs="Costs.s1m1" title="Skill 1 Mastery 1"
@@ -179,53 +197,14 @@ const showAnyRow = computed(() => {
                 :hide-apply="false" @apply-upgrade="costs => applyUpgrade(costs, 'Skill3Mastery', 3)" />
         </div>
 
-        <!-- Module X -->
-        <div class="row" v-if="ShowRow(Costs.mxl1)">
-            <OperatorCostRow :costs="Costs.mxl1" title="Module X Level 1"
-                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.x === 0" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleX', 1)" />
-        </div>
-        <div class="row" v-if="ShowRow(Costs.mxl2)">
-            <OperatorCostRow :costs="Costs.mxl2" title="Module X Level 2"
-                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.x === 1" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleX', 2)" />
-        </div>
-        <div class="row" v-if="ShowRow(Costs.mxl3)">
-            <OperatorCostRow :costs="Costs.mxl3" title="Module X Level 3"
-                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.x === 2" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleX', 3)" />
-        </div>
-        <!-- Module Y -->
-        <div class="row" v-if="ShowRow(Costs.myl1)">
-            <OperatorCostRow :costs="Costs.myl1" title="Module Y Level 1"
-                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.y === 0" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleY', 1)" />
-        </div>
-        <div class="row" v-if="ShowRow(Costs.myl2)">
-            <OperatorCostRow :costs="Costs.myl2" title="Module Y Level 2"
-                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.y === 1" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleY', 2)" />
-        </div>
-        <div class="row" v-if="ShowRow(Costs.myl3)">
-            <OperatorCostRow :costs="Costs.myl3" title="Module Y Level 3"
-                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.x === 2" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleY', 3)" />
-        </div>
-        <!-- Module D/Δ -->
-        <div class="row" v-if="ShowRow(Costs.mdl1)">
-            <OperatorCostRow :costs="Costs.mdl1" title="Module Δ Level 1"
-                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.d === 0" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleD', 1)" />
-        </div>
-        <div class="row" v-if="ShowRow(Costs.mdl2)">
-            <OperatorCostRow :costs="Costs.mdl2" title="Module Δ Level 2"
-                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.d === 1" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleD', 2)" />
-        </div>
-        <div class="row" v-if="ShowRow(Costs.mdl3)">
-            <OperatorCostRow :costs="Costs.mdl3" title="Module Δ Level 3"
-                :enable-apply="CanModuleBeApplied && selectedOperator.plans.currentModules.d === 2" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'ModuleD', 3)" />
+        <!-- Modules -->
+        <div v-for="[type, moduleCosts] in Object.entries(Costs.modules)">
+            <div class="row" v-if="moduleCosts.length > 0" v-for="(cost, level) in moduleCosts.filter(a => JSON.stringify(a) !== '{}')">
+                <OperatorCostRow :costs="cost"
+                    :title="`Module ${type} Level ${ moduleCosts.indexOf(cost) + 1 }`"
+                    :enable-apply="moduleCosts.indexOf(cost) === (moduleCosts.filter(a => JSON.stringify(a) === '{}').length) && CanModuleBeApplied"
+                    :hide-apply="false" @apply-upgrade="costs => applyModuleUpgrade(costs, type, moduleCosts.indexOf(cost) + 1)" />
+            </div>
         </div>
 
         <!-- Skill up Costs -->
@@ -279,20 +258,22 @@ const showAnyRow = computed(() => {
         <div class="row">
             <div class="col-12">
                 <p class="text-center">No Costs</p>
-                <p class="text-center">Please add a plan for this operator under the plans section for them to add cost</p>
+                <p class="text-center">Please add a plan for this operator under the plans section for them to add cost
+                </p>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-#asdf > div.row {
+.asdf div.row {
     padding: 0.5rem;
     border-radius: 0.25rem;
     margin-bottom: 0.5rem;
     background-image: linear-gradient(rgb(204, 204, 204), rgb(201, 201, 201));
 }
-html.dark #asdf > div.row {
+
+html.dark .asdf div.row {
     background-image: linear-gradient(rgb(0, 0, 0), rgb(19, 19, 19));
     border: 1px solid #616161;
     border-right: 0px;
