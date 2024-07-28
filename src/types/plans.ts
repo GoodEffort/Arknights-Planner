@@ -127,4 +127,4 @@ const IsOldOperatorPlans = (plans: OldOperatorPlans | OperatorPlans): plans is O
     return (<OldOperatorPlans>plans).currentModules.x !== undefined;
 }
 
-export { OldOperatorPlans, OperatorPlans, SkillMasteries, ModuleLevels, IsOldOperatorPlans }
+export { OldOperatorPlans, OperatorPlans, SkillMasteries, IsOldOperatorPlans }

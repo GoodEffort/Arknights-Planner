@@ -62,18 +62,53 @@ watch(mastery3, val => {
     <hr />
 
     <div class="row" v-if="operator.promotions.length > 2">
-        <label>Masteries</label>
-        <div class="col pe-0 px-md-auto">
-            <OperatorInputGroup v-if="operator.skills.length > 0" v-model="mastery1" label="S1"
-                :key="`2${operator.id}-skill1`" :min="min1" />
+        <div class="row">
+            <h5>{{ type === 'current' ? 'Current' : 'Target' }} Skill Masteries</h5>
         </div>
-        <div class="col px-1 px-md-auto">
-            <OperatorInputGroup v-if="operator.skills.length > 1" v-model="mastery2" label="S2"
-                :key="`2${operator.id}-skill2`" :min="min2" />
+        <div class="row mb-2">
+            <div class="col-auto">
+                <img :src="`https://goodeffort.github.io/Arknights-Planner-Data/images/skills/${ operator.skills[0].icon }.webp`"
+                    :alt="operator.skills[0]?.name" class="img-thumbnail skill-img" />
+            </div>
+            <div class="col text-start">
+                <div>{{ operator.skills[0]?.name }}</div>
+                <div class="skill-input">
+                    <OperatorInputGroup v-model="mastery1" label="S1"
+                        :key="`2${operator.id}-skill1`" :min="min1" />
+                </div>
+            </div>
         </div>
-        <div class="col ps-0 px-md-auto">
-            <OperatorInputGroup v-if="operator.skills.length > 2" v-model="mastery3" label="S3"
-                :key="`2${operator.id}-skill3`" :min="min3" />
+        <div class="row mb-2" v-if="operator.skills.length > 1">
+            <div class="col-auto">
+                <img :src="`https://goodeffort.github.io/Arknights-Planner-Data/images/skills/${ operator.skills[1].icon }.webp`"
+                    :alt="operator.skills[1]?.name" class="img-thumbnail skill-img" />
+            </div>
+            <div class="col text-start">
+                <div>{{ operator.skills[1]?.name }}</div>
+                <div class="skill-input">
+                    <OperatorInputGroup v-model="mastery2" label="S2"
+                        :key="`2${operator.id}-skill2`" :min="min2" />
+                </div>
+            </div>
+        </div>
+        <div class="row" v-if="operator.skills.length > 2">
+            <div class="col-auto">
+                <img :src="`https://goodeffort.github.io/Arknights-Planner-Data/images/skills/${ operator.skills[2].icon }.webp`"
+                    :alt="operator.skills[2]?.name" class="img-thumbnail skill-img" />
+            </div>
+            <div class="col text-start">
+                <div>{{ operator.skills[2]?.name }}</div>
+                <div class="skill-input">
+                    <OperatorInputGroup v-model="mastery3" label="S3"
+                        :key="`2${operator.id}-skill3`" :min="min3" />
+                </div>
+            </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+.skill-img {
+    width: 4em;
+}
+</style>

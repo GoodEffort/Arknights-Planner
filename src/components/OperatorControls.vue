@@ -63,7 +63,7 @@ const active = computed({
     <Transition>
         <div class="row ms-md-1" v-if="section === 'Plan'">
             <div class="col-12 col-md-6 plan-section rounded-start">
-                <label class="d-md-inline-block d-none">Current</label>
+                <h5 class="d-md-inline-block d-none">Current Stats</h5>
                 <h2 class="d-md-none bg-primary border border-info rounded mt-5">Current</h2>
                 <OperatorLevelPromotion :selectedOperator="selectedOperator" type="current" />
                 <OperatorSkillLevels v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
@@ -74,7 +74,7 @@ const active = computed({
                     type="current" />
             </div>
             <div class="col-12 col-md-6 plan-section rounded-end">
-                <label class="d-md-inline-block d-none">Planned</label>
+                <h5 class="d-md-inline-block d-none">Target Stats</h5>
                 <h2 class="d-md-none bg-primary border border-info rounded mt-5">Planned</h2>
                 <OperatorLevelPromotion :selectedOperator="selectedOperator" type="target" />
                 <OperatorSkillLevels v-if="operator.skills.length > 0" :selected-operator="selectedOperator"

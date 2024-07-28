@@ -26,6 +26,7 @@ type LevelUpCost = {
 type Skill = {
     name: string;
     id: string;
+    icon: string;
     masteryCosts: LevelUpCost[][];
 }
 

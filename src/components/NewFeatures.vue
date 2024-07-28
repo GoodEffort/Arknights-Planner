@@ -36,6 +36,21 @@ watch(doNotShowAgain, (val) => {
       <div>
         <h2>New Features</h2>
         <div>
+          <h3>7/28/2024</h3>
+          <p>
+            Updated Modules to support future module types (hopefully).
+
+            This is for the new IS only modules for Phantom and Kal'tsit in CN. Hopefully these changes will automatically pick those up when they are added to the game.
+
+            I had to update the underlying data structures for plans so if you run into any issues please let me know.
+            I had to change how imports/exports worked to support as well but I believe you shouldn't even be able to notice anything.
+          </p>
+          <p>
+            Also updated module and skill display to show the name of the skills and modules.
+            And Skill Icons
+          </p>
+        </div>
+        <div>
           <h3>7/26/2024</h3>
           <p>
             Changed how data was being fetched, let me know if you run into any issues as this was a larger change.
