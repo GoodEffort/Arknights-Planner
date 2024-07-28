@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import OperatorCostRow from './OperatorCostRow.vue';
 import type { ComputedRef } from 'vue';
-import type { LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from '../types/operator';
+import type { LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from '../types/planner-types';
 
 const { totalCostsByOperatorCategorized, selectedOperators, inventory } = storeToRefs(usePlannerStore());
 

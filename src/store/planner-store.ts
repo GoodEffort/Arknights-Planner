@@ -1,6 +1,6 @@
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { SelectedOperator, SaveRecord, LevelUpNeeds, LevelUpNeedsKey } from '../types/operator';
+import { SelectedOperator, OldSaveRecord, LevelUpNeeds, LevelUpNeedsKey, SaveRecord } from '../types/planner-types';
 import { debounce } from 'lodash';
 import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
@@ -107,7 +107,7 @@ export const usePlannerStore = defineStore('planner', () => {
         let selectedOperator: SelectedOperator;
 
         if (saveData) {
-            const SaveRecord: SaveRecord = JSON.parse(saveData);
+            const SaveRecord: OldSaveRecord | SaveRecord = JSON.parse(saveData);
             selectedOperator = new SelectedOperator(operator, SaveRecord.plans, SaveRecord.active);
         }
         else {
@@ -192,15 +192,7 @@ export const usePlannerStore = defineStore('planner', () => {
                 s3m1: {},
                 s3m2: {},
                 s3m3: {},
-                mxl1: {},
-                mxl2: {},
-                mxl3: {},
-                myl1: {},
-                myl2: {},
-                myl3: {},
-                mdl1: {},
-                mdl2: {},
-                mdl3: {},
+                modules: {}
             };
 
             const promotionLMD = promotionLMDCosts[rarity];
@@ -345,26 +337,31 @@ export const usePlannerStore = defineStore('planner', () => {
             }
 
             // module costs
-            const moduleTypes: ('x' | 'y' | 'd')[] = ['x', 'y', 'd'];
-            for (const moduleType of moduleTypes) {
-                const module = selectedOperator.operator.modules.find(m => m.type === moduleType.toLocaleUpperCase());
-                if (module) {
-                    const currentModuleLevel = currentModules[moduleType];
-                    const targetModuleLevel = targetModules[moduleType];
-                    const moduleCosts = module.cost;
+            for (const module of selectedOperator.operator.modules) {
+                const moduleType = module.type.toLowerCase();
+                
+                const currentModuleLevel = currentModules.find(m => m.type.toLowerCase() === moduleType)?.level ?? 0;
+                const targetModuleLevel = targetModules.find(m => m.type.toLowerCase() === moduleType)?.level ?? 0;
 
-                    for (let moduleIndex = currentModuleLevel; moduleIndex < targetModuleLevel; moduleIndex++) {
+                const moduleCosts = module.cost;
 
-                        const moduleName = `m${moduleType}l${moduleIndex + 1}` as 'mxl1' | 'mxl2' | 'mxl3' | 'myl1' | 'myl2' | 'myl3' | 'mdl1' | 'mdl2' | 'mdl3';
-                        const cost = moduleCosts[moduleIndex];
+                for (let moduleLevelIndex = currentModuleLevel; moduleLevelIndex < targetModuleLevel; moduleLevelIndex++) {
+                    const cost = moduleCosts[moduleLevelIndex];
 
-                        for (const { id: itemId, count } of cost) {
-                            if (neededItems[moduleName][itemId] === undefined) {
-                                neededItems[moduleName][itemId] = 0;
-                            }
-
-                            neededItems[moduleName][itemId] += count;
+                    for (const { id: itemId, count } of cost) {
+                        if (neededItems.modules[module.type] === undefined) {
+                            neededItems.modules[module.type] = [];
                         }
+
+                        if (neededItems.modules[module.type][moduleLevelIndex] === undefined) {
+                            neededItems.modules[module.type][moduleLevelIndex] = {};
+                        }
+
+                        if (neededItems.modules[module.type][moduleLevelIndex][itemId] === undefined) {
+                            neededItems.modules[module.type][moduleLevelIndex][itemId] = 0;
+                        }
+
+                        neededItems.modules[module.type][moduleLevelIndex][itemId] += count;
                     }
                 }
             }
