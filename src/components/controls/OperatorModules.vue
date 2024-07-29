@@ -73,7 +73,7 @@ const setModule = ({ value, type }: { value: number | undefined; type: string; }
 <template>
     <hr />
     <div v-if="selectedOperator.operator.modules.length > 0">
-        <h5>Modules</h5>
+        <h5>{{ props.type === 'current' ? 'Current' : 'Target' }} Modules</h5>
         <div class="row mb-2" v-for="module in modules">
             <div class="col">
                 <div>{{ module.name }}</div>
