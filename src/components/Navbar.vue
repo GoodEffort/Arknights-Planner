@@ -2,15 +2,12 @@
 import Modal from './Modal.vue';
 import NewFeatures from './NewFeatures.vue';
 import NightModeToggle from './NightModeToggle.vue';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
-import { storeToRefs } from 'pinia';
-import { IsOldSaveRecord, OldSaveRecord, SaveRecord } from '../types/planner-types';
-import { OperatorPlans } from '../types/plans';
+import GoogleDriveAPI from './GoogleDriveAPI.vue';
 
 const store = usePlannerStore();
-const { exportSavedRecords, loadSavedRecords, getBlankInventory } = store;
-const { exportString, inventory, selectedOperators } = storeToRefs(store);
+const { exportSavedRecords, importSavedRecords } = store;
 
 const lastUse = new Date(localStorage.getItem('last-use-timestamp') ?? 0);
 
@@ -19,9 +16,22 @@ const showExportModal = ref(false);
 const showImportModal = ref(false);
 const importString = ref('');
 const showNewFeaturesModal = ref(lastUse < new Date(BUILD_DATE));
+const exportString = ref('');
+const showGoogleButton = ref(false);
+
+const importData = () => {
+  if (importString.value) {
+    importSavedRecords(importString.value);
+    showImportModal.value = false;
+    importString.value = '';
+  }
+  else {
+    alert('No data to import');
+  }
+}
 
 const exportData = () => {
-  exportSavedRecords();
+  exportString.value = JSON.stringify(exportSavedRecords());
   showExportModal.value = true;
 };
 
@@ -35,98 +45,11 @@ const pasteFromClipboard = async () => {
   importString.value = text;
 };
 
-const importData = () => {
-  if (importString.value === '' || importString.value == null) {
-    alert('Please paste data to import');
-    return;
-  }
 
-  let dataold: {
-    p: OldSaveRecord[] | SaveRecord[];
-    s: string[];
-    i: { [key: string]: number };
-  };
 
-  let data: {
-    p: SaveRecord[];
-    s: string[];
-    i: { [key: string]: number };
-  } | null = null;
-
-  try {
-    dataold = JSON.parse(importString.value);
-    data = {
-      p: [],
-      s: dataold.s,
-      i: dataold.i
-    };
-
-    data.p = dataold.p.map((record): SaveRecord => {
-      if (IsOldSaveRecord(record)) {
-        const oldPlans = record.plans;
-        const newPlans: OperatorPlans = {
-          ...oldPlans,
-          targetModules: [],
-          currentModules: []
-        };
-
-        if ((oldPlans.currentModules.x ?? 0) > 0) {
-          newPlans.currentModules.push({ type: 'X', level: oldPlans.currentModules.x });
-        }
-        if ((oldPlans.currentModules.y ?? 0) > 0) {
-          newPlans.currentModules.push({ type: 'Y', level: oldPlans.currentModules.y });
-        }
-        if ((oldPlans.currentModules.d ?? 0) > 0) {
-          newPlans.currentModules.push({ type: 'D', level: oldPlans.currentModules.d });
-        }
-
-        if ((oldPlans.targetModules.x ?? 0) > 0) {
-          newPlans.targetModules.push({ type: 'X', level: oldPlans.targetModules.x });
-        }
-        if ((oldPlans.targetModules.y ?? 0) > 0) {
-          newPlans.targetModules.push({ type: 'Y', level: oldPlans.targetModules.y });
-        }
-        if ((oldPlans.targetModules.d ?? 0) > 0) {
-          newPlans.targetModules.push({ type: 'D', level: oldPlans.targetModules.d });
-        }
-
-        return {
-          ...record,
-          plans: newPlans
-        };
-      }
-      else {
-        return record;
-      }
-    });
-  }
-  catch (e) {
-    alert('Invalid data format');
-    return;
-  }
-
-  if (data == null || !Array.isArray(data.p) || !Array.isArray(data.s) || data.i == null) {
-    alert('Invalid data format');
-    return;
-  }
-
-  localStorage.setItem('selectedCharacters', JSON.stringify(data.s));
-  localStorage.setItem('inventory', JSON.stringify(data.i));
-
-  const saveRecords = data.p;
-  for (const op of saveRecords) {
-    const saveString = `plans-${op.operatorId}`;
-    localStorage.setItem(saveString, JSON.stringify(op));
-  }
-
-  selectedOperators.value = [];
-
-  inventory.value = { ...getBlankInventory(), ...data.i };
-  loadSavedRecords();
-
-  showImportModal.value = false;
-  importString.value = '';
-}
+onMounted(() => {
+  showGoogleButton.value = true;
+});
 </script>
 
 <template>
@@ -134,6 +57,7 @@ const importData = () => {
     <div>
       <a class="navbar-brand" href="#" @click="showNewFeaturesModal = true">Arknights Planner</a>
     </div>
+    <div></div>
     <div>
     </div>
     <div>
@@ -154,6 +78,9 @@ const importData = () => {
         <button class="btn btn-secondary" @click="showCreditsmodal = !showCreditsmodal">
           <font-awesome-icon icon="info-circle" />
         </button>
+      </div>
+      <div class="google-login">
+        <GoogleDriveAPI />
       </div>
     </div>
   </nav>
@@ -301,7 +228,13 @@ nav.navbar {
 html.dark nav.navbar a.navbar-brand {
   color: rgb(231, 231, 231);
 }
+
 html.dark nav.navbar a.navbar-brand:hover {
   color: rgb(179, 179, 179);
+}
+
+.google-login {
+  display: inline-block;
+  vertical-align: middle;
 }
 </style>

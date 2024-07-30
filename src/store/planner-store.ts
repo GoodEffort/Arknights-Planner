@@ -1,12 +1,14 @@
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { SelectedOperator, OldSaveRecord, LevelUpNeeds, LevelUpNeedsKey, SaveRecord } from '../types/planner-types';
+import { SelectedOperator, OldSaveRecord, LevelUpNeeds, LevelUpNeedsKey, SaveRecord, IsOldSaveRecord } from '../types/planner-types';
 import { debounce } from 'lodash';
 import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
 import { efficientToFarmItemIds, stages } from '../data/farmingdata';
 import getArknightsData from '../data/arknightsdata';
 import type { Item, Operator } from '../types/outputdata';
+import { OperatorPlans } from '../types/plans';
+import { clientId, scope } from '../data/authInfo';
 
 export const usePlannerStore = defineStore('planner', () => {
     const operators = ref<Operator[]>([]);
@@ -19,7 +21,11 @@ export const usePlannerStore = defineStore('planner', () => {
     const reserveTier4 = ref<number>(0);
     const reserveTier5 = ref<number>(0);
     const reserveTier6 = ref<number>(0);
-    const exportString = ref<string>('');
+    const initialized = ref<boolean>(false);
+    const accessToken = ref<string | null>(localStorage.getItem('accessToken'));
+    const configId = ref<string>();
+    const tokenClient = ref<google.accounts.oauth2.TokenClient>();
+    const cloudData = ref<string>();
 
     const getEXPValue = (inventory: { [key: string]: number; }) => {
         let exp = 0;
@@ -51,6 +57,10 @@ export const usePlannerStore = defineStore('planner', () => {
 
         const currentInventory = JSON.parse(JSON.stringify(inventory.value)); // don't modify the original inventory
         inventory.value = { ...getBlankInventory(), ...currentInventory };
+
+        setTimeout(() => {
+            initialized.value = true;
+        }, 500);
     }
 
     function exportSavedRecords() {
@@ -74,7 +84,92 @@ export const usePlannerStore = defineStore('planner', () => {
         };
 
         console.log(exportData);
-        exportString.value = JSON.stringify(exportData);
+        return exportData;
+    }
+
+    function importSavedRecords(importString: string) {
+        let dataold: {
+            p: OldSaveRecord[] | SaveRecord[];
+            s: string[];
+            i: { [key: string]: number };
+        };
+
+        let data: {
+            p: SaveRecord[];
+            s: string[];
+            i: { [key: string]: number };
+        } | null = null;
+
+        try {
+            dataold = JSON.parse(importString);
+            data = {
+                p: [],
+                s: dataold.s,
+                i: dataold.i
+            };
+
+            data.p = dataold.p.map((record): SaveRecord => {
+                if (IsOldSaveRecord(record)) {
+                    const oldPlans = record.plans;
+                    const newPlans: OperatorPlans = {
+                        ...oldPlans,
+                        targetModules: [],
+                        currentModules: []
+                    };
+
+                    if ((oldPlans.currentModules.x ?? 0) > 0) {
+                        newPlans.currentModules.push({ type: 'X', level: oldPlans.currentModules.x });
+                    }
+                    if ((oldPlans.currentModules.y ?? 0) > 0) {
+                        newPlans.currentModules.push({ type: 'Y', level: oldPlans.currentModules.y });
+                    }
+                    if ((oldPlans.currentModules.d ?? 0) > 0) {
+                        newPlans.currentModules.push({ type: 'D', level: oldPlans.currentModules.d });
+                    }
+
+                    if ((oldPlans.targetModules.x ?? 0) > 0) {
+                        newPlans.targetModules.push({ type: 'X', level: oldPlans.targetModules.x });
+                    }
+                    if ((oldPlans.targetModules.y ?? 0) > 0) {
+                        newPlans.targetModules.push({ type: 'Y', level: oldPlans.targetModules.y });
+                    }
+                    if ((oldPlans.targetModules.d ?? 0) > 0) {
+                        newPlans.targetModules.push({ type: 'D', level: oldPlans.targetModules.d });
+                    }
+
+                    return {
+                        ...record,
+                        plans: newPlans
+                    };
+                }
+                else {
+                    return record;
+                }
+            });
+        }
+        catch (e) {
+            alert('Invalid data format');
+            return;
+        }
+
+        if (data == null || !Array.isArray(data.p) || !Array.isArray(data.s) || data.i == null) {
+            alert('Invalid data format');
+            return;
+        }
+
+        localStorage.setItem('selectedCharacters', JSON.stringify(data.s));
+        localStorage.setItem('inventory', JSON.stringify(data.i));
+
+        const saveRecords = data.p;
+        for (const op of saveRecords) {
+            const saveString = `plans-${op.operatorId}`;
+            localStorage.setItem(saveString, JSON.stringify(op));
+        }
+
+        selectedOperators.value = [];
+
+        inventory.value = { ...getBlankInventory(), ...data.i };
+        loadSavedRecords();
     }
 
     function loadSavedRecords() {
@@ -323,10 +418,10 @@ export const usePlannerStore = defineStore('planner', () => {
 
                 for (let masteryIndex = currentSkillMastery; masteryIndex < targetSkillMastery; masteryIndex++) {
 
-                    const skillMasteryName = `s${skillIndex+1}m${masteryIndex+1}` as 's1m1' | 's1m2' | 's1m3' | 's2m1' | 's2m2' | 's2m3' | 's3m1' | 's3m2' | 's3m3';
+                    const skillMasteryName = `s${skillIndex + 1}m${masteryIndex + 1}` as 's1m1' | 's1m2' | 's1m3' | 's2m1' | 's2m2' | 's2m3' | 's3m1' | 's3m2' | 's3m3';
                     const cost = masteryCosts[masteryIndex];
 
-                    for (const {id: itemId, count } of cost) {
+                    for (const { id: itemId, count } of cost) {
                         if (neededItems[skillMasteryName][itemId] === undefined) {
                             neededItems[skillMasteryName][itemId] = 0;
                         }
@@ -339,7 +434,7 @@ export const usePlannerStore = defineStore('planner', () => {
             // module costs
             for (const module of selectedOperator.operator.modules) {
                 const moduleType = module.type.toLowerCase();
-                
+
                 const currentModuleLevel = currentModules.find(m => m.type.toLowerCase() === moduleType)?.level ?? 0;
                 const targetModuleLevel = targetModules.find(m => m.type.toLowerCase() === moduleType)?.level ?? 0;
 
@@ -444,7 +539,7 @@ export const usePlannerStore = defineStore('planner', () => {
             alert(`Item ${item.name} cannot be crafted.`);
             return;
         }
-        
+
         const { itemId } = item;
         const { count: outputCount, costs } = item.recipe;
 
@@ -468,7 +563,9 @@ export const usePlannerStore = defineStore('planner', () => {
     watch(inventory, debounce((value: {
         [key: string]: number;
     }) => {
-        localStorage.setItem('inventory', JSON.stringify(value));
+        if (initialized.value) {
+            localStorage.setItem('inventory', JSON.stringify(value));
+        }
     }, 250), { deep: true });
 
     // Needed Items
@@ -548,7 +645,7 @@ export const usePlannerStore = defineStore('planner', () => {
                 const item = items.value[itemId];
                 // and we should not breakdown the item
                 if (
-                    stopItems.indexOf(itemId) >= 0 || 
+                    stopItems.indexOf(itemId) >= 0 ||
                     item.recipe === undefined
                 ) {
                     if (breakdownCosts[itemId] === undefined) {
@@ -594,6 +691,114 @@ export const usePlannerStore = defineStore('planner', () => {
                     efficientToFarmItemIds.indexOf(b.item.itemId) - efficientToFarmItemIds.indexOf(a.item.itemId))
             .map(({ item }) => ({ stage: stages[item.itemId], item })));
 
+    const getConfigId = async () => {
+        const queryParams = new URLSearchParams({
+            spaces: 'appDataFolder',
+            fields: 'files(id, name)'
+        });
+
+        const headers = {
+            Authorization: `Bearer ${accessToken.value}`
+        };
+
+        const searchResponse = await fetch(`https://www.googleapis.com/drive/v3/files?${queryParams}`, {
+            headers
+        });
+
+        if (searchResponse.status === 401) {
+            return 401;
+        }
+
+        const searchJson: { files: { id: string; name: string }[] } = await searchResponse.json();
+
+        configId.value = searchJson.files.find((file) => file.name === 'config.json')?.id || undefined;
+
+        return configId.value;
+    }
+
+    const upload = async () => {
+        if (!accessToken) {
+            console.log("No access token");
+            return;
+        }
+
+        const data = exportSavedRecords();
+
+        const fileMetadata = {
+            name: 'config.json',
+            mimeType: 'application/json',
+            parents: ['appDataFolder'],
+        };
+
+        const file = new Blob([JSON.stringify(data)], { type: 'application/json' });
+
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(fileMetadata)], { type: 'application/json' }));
+        form.append('file', file);
+
+        const uploadResponse = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${accessToken.value}`,
+            },
+            body: form,
+        });
+
+        console.log(uploadResponse);
+
+        if (uploadResponse.ok) {
+            cloudData.value = JSON.stringify(data);
+        }
+    };
+
+    const getTokenClient = () =>
+        google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: scope,
+            callback: (response) => {
+                accessToken.value = response.access_token;
+                localStorage.setItem('accessToken', response.access_token);
+                getConfigId();
+            }
+        });
+
+    const download = async () => {
+        console.log("download");
+        if (!accessToken) {
+            console.log("No access token");
+            if (!tokenClient.value) {
+                tokenClient.value = getTokenClient();
+            }
+            tokenClient.value.requestAccessToken();
+            return;
+        }
+
+        const headers = {
+            Authorization: `Bearer ${accessToken.value}`
+        };
+
+        if (!configId.value) {
+            await getConfigId();
+        }
+
+        if (!configId.value) {
+            console.log("No config id");
+            return;
+        }
+
+        const downloadResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${configId.value}?alt=media`, {
+            headers
+        });
+
+        console.log(downloadResponse);
+        const configData: ReturnType<typeof exportSavedRecords> = await downloadResponse.json();
+        console.log(configData);
+
+        cloudData.value = JSON.stringify({ s: configData.s, i: configData.i, p: configData.p });
+
+        importSavedRecords(JSON.stringify(configData));
+    };
+
     return {
         items,
         operators,
@@ -619,6 +824,11 @@ export const usePlannerStore = defineStore('planner', () => {
         craftItem,
         exportSavedRecords,
         getBlankInventory,
-        exportString,
+        importSavedRecords,
+        getConfigId,
+        upload,
+        download,
+        accessToken,
+        cloudData,
     }
 });
