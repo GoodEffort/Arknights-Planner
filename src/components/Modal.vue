@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onUnmounted, watch } from 'vue';
 
 const props = defineProps<{
     modelValue: boolean;
@@ -47,6 +47,22 @@ const show = computed({
 });
 
 const close = () => show.value = false;
+
+watch(show, val => {
+    if (val) {
+        document.body.style.overflowY = 'clip';
+    } else {
+        document.body.style.overflowY = '';
+    }
+});
+
+if (props.modelValue) {
+    document.body.style.overflowY = 'clip';
+}
+
+onUnmounted(() => {
+    document.body.style.overflowY = '';
+});
 </script>
 
 <style scoped>

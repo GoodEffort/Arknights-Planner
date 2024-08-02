@@ -16,34 +16,74 @@ const operatorFilter = ref('');
 const pageSize = ref(6); // make it divisible by 12 for bootstrap grids
 const showAll = ref(false);
 
-const localeContains = function (main: string, sub: string): boolean {
+const getLocaleComparableString = (s: string) =>
+    s.normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^0-9a-z\s]/gi, "")
+        .toLowerCase();
+
+const localeStringSearch = (
+    fn: typeof String.prototype.startsWith | typeof String.prototype.includes | typeof String.prototype.endsWith,
+    main: string,
+    sub: string
+) => {
+    // ensure sub is a string and not empty
     if (sub === "") return true;
     if (!sub || !main.length) return false;
     sub = "" + sub;
+
+    // if sub is longer than main, it can't be contained
     if (sub.length > main.length) return false;
-    let ascii = (s: string) => s.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    return ascii(main).includes(ascii(sub));
-}
 
-const filteredCharacters = computed(() =>
-    operators.value
-        .filter(character =>
-            localeContains(
-                character.name.toLowerCase(),
-                operatorFilter.value.toLowerCase()
-            ) ||
-            localeContains(
-                character.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^0-9a-z\s]/gi, ''),
-                operatorFilter.value.toLowerCase()
-            )
-        ));
+    return fn.call(
+        getLocaleComparableString(main), 
+        getLocaleComparableString(sub)
+    );
+};
 
-const sortedCharacters = computed(() => filteredCharacters.value.sort(characterSort));
+const localeContains = (main: string, sub: string) =>
+    localeStringSearch(String.prototype.includes, main, sub);
+
+const localeStartsWith = (main: string, sub: string) =>
+    localeStringSearch(String.prototype.startsWith, main, sub);
+
+const localeEndsWith = (main: string, sub: string) =>
+    localeStringSearch(String.prototype.endsWith, main, sub);
+
+const filteredCharacters = computed(() => {
+    const ops = operators.value;
+
+    const startsWith = ops.filter(character =>
+        localeStartsWith(
+            character.name.toLowerCase(),
+            operatorFilter.value.toLowerCase()
+        )
+    ).sort(characterSort);
+
+    const endsWith = ops.filter(character =>
+        !startsWith.includes(character) &&
+        localeEndsWith(
+            character.name.toLowerCase(),
+            operatorFilter.value.toLowerCase()
+        )
+    ).sort(characterSort);
+
+    const contains = ops.filter(character =>
+        !startsWith.includes(character) &&
+        !endsWith.includes(character) &&
+        localeContains(
+            character.name.toLowerCase(),
+            operatorFilter.value.toLowerCase()
+        )
+    )
+
+    return [...startsWith, ...contains, ...endsWith];
+});
 
 const pagedOperators = computed(() => {
     const pages = Array.from({ length: pageCount.value }, (_, index) => {
         const start = index * pageSize.value;
-        return sortedCharacters.value.slice(start, start + pageSize.value);
+        return filteredCharacters.value.slice(start, start + pageSize.value);
     });
     return pages;
 });
@@ -85,7 +125,8 @@ function characterSort(a: Operator, b: Operator) {
         <hr />
 
         <div v-if="filteredCharacters.length > 36" class="mb-3">
-            <button @click="showAll = !showAll" class="btn btn-primary">{{ showAll ? 'Limit Selection' : 'Show All' }}</button>
+            <button @click="showAll = !showAll" class="btn btn-primary">{{ showAll ? 'Limit Selection' : 'Show All'
+                }}</button>
             <p v-if="!showAll" class="mt-2">
                 Filter more to display different operators, currently showing 36 of {{ filteredCharacters.length }}
                 operators
@@ -96,7 +137,8 @@ function characterSort(a: Operator, b: Operator) {
         </div>
 
         <div class="container">
-            <div class="row" v-for="(row, index) in (showAll ? pagedOperators : pagedOperators.slice(0, 6))" :key="index">
+            <div class="row" v-for="(row, index) in (showAll ? pagedOperators : pagedOperators.slice(0, 6))"
+                :key="index">
                 <AddOperatorsCell v-for="operator in row" :operator="operator" :key="operator.id" />
             </div>
         </div>
