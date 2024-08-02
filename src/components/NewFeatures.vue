@@ -3,16 +3,16 @@ import { computed, ref, watch } from 'vue';
 import Modal from './Modal.vue';
 
 const props = defineProps<{
-    modelValue: boolean;
+  modelValue: boolean;
 }>();
 
 const emit = defineEmits<{
-    (e: 'update:modelValue', value: boolean): void;
+  (e: 'update:modelValue', value: boolean): void;
 }>();
 
 const show = computed({
-    get: () => props.modelValue,
-    set: (value) => emit('update:modelValue', value)
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value)
 });
 
 const closeNewFeaturesModal = () => {
@@ -36,21 +36,29 @@ watch(doNotShowAgain, (val) => {
       <div>
         <h2>New Features</h2>
         <div>
+          <h3>8/2/2024</h3>
+          <p>
+            Updated module display to show the modules icon and a more detailed type.
+
+            Added a popup on the module icon to show the module story. Eventually this will show the module stats and effect as well.
+          </p>
           <h3>7/28/2024</h3>
           <p>
             Updated Modules to support future module types (hopefully).
 
-            This is for the new IS only modules for Phantom and Kal'tsit in CN. Hopefully these changes will automatically pick those up when they are added to the game.
+            This is for the new IS only modules for Phantom and Kal'tsit in CN. Hopefully these changes will
+            automatically pick those up when they are added to the game.
 
             I had to update the underlying data structures for plans so if you run into any issues please let me know.
-            I had to change how imports/exports worked to support as well but I believe you shouldn't even be able to notice anything.
+            I had to change how imports/exports worked to support as well but I believe you shouldn't even be able to
+            notice anything.
           </p>
           <p>
             Also updated module and skill display to show the name of the skills and modules.
             And Skill Icons
           </p>
         </div>
-        <div>
+        <!-- <div>
           <h3>7/26/2024</h3>
           <p>
             Changed how data was being fetched, let me know if you run into any issues as this was a larger change.
@@ -58,7 +66,7 @@ watch(doNotShowAgain, (val) => {
           <p>
             Added an Item BOM crafting modal, clicking the Hammer Icon will open it.
           </p>
-        </div>
+        </div> -->
         <!-- <div>
           <h3>7/24/2024</h3>
           <ul>
