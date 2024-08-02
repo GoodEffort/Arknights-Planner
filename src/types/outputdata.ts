@@ -31,6 +31,7 @@ type Skill = {
 }
 
 type Module = {
+    typeName1: string;
     type: string;
     name: string;
     icon: string;
