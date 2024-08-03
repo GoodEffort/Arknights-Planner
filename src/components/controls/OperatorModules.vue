@@ -108,7 +108,7 @@ const moduleImageLink = 'https://goodeffort.github.io/Arknights-Planner-Data/ima
                 <img :src="`${moduleImageLink}${selectedModule?.icon}.webp`" :alt="selectedModule?.name" class="" />
             </div>
             <p class="text-start mx-4 module-text">
-                {{ selectedModule?.description.replace('\n', '\n\n') }}
+                {{ selectedModule?.description.replaceAll('\n', '\n\n') }}
             </p>
         </template>
         <template #footer>
