@@ -55,7 +55,7 @@ function toggleCollapse() {
 
 <template>
     <div class="planner-section mt-1 mb-3 pb-2 pt-2" :class="{ open: collapsed }" @click="toggleCollapse">
-        <span>{{ title }}</span>
+        <span class="no-text-select">{{ title }}</span>
     </div>
 
     <Collapse :when="collapsed" :class="{ 'fast-collapse': fastCollapse }">
@@ -100,5 +100,9 @@ html.dark > body div.planner-section {
 
 .fast-collapse {
     transition: height 300ms ease-in-out;
+}
+
+.no-text-select {
+    user-select: none;
 }
 </style>
