@@ -33,6 +33,7 @@ const enableCraftButton = computed(() => {
             :class="buttonClass"
             :disabled="!enableCraftButton"
             @click="craftItem(item)"
+            tabindex="30000"
         >Craft</button>
     </div>
 </template>
