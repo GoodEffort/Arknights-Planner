@@ -58,7 +58,7 @@ const changeItemAmount = (item: Item, amount: number) => {
     if (inventory.value[item.itemId] === undefined) {
         inventory.value[item.itemId] = 0;
     }
-    
+
     inventory.value[item.itemId] += amount;
 };
 
@@ -79,7 +79,7 @@ const showItem = ref<Item>();
                         <ImageFinder :subject="item" class="item-image" />
                         <CraftButton v-if="controls" :item="item" />
                         <div class="bom" v-if="item.recipe?.costs.length ?? 0 > 0">
-                            <button @click="showItem=item" class="btn btn-primary">
+                            <button @click="showItem = item" class="btn btn-primary" tabindex="30000">
                                 <font-awesome-icon icon="hammer" />
                             </button>
                         </div>
@@ -126,7 +126,7 @@ const showItem = ref<Item>();
     background-color: rgb(197, 197, 197);
 }
 
-html.dark > body .item-col {
+html.dark>body .item-col {
     background-color: rgb(31, 31, 31);
     border: 1px solid rgb(172, 172, 172);
 }
