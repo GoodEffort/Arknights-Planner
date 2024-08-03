@@ -18,6 +18,7 @@ const importString = ref('');
 const showNewFeaturesModal = ref(lastUse < new Date(BUILD_DATE));
 const exportString = ref('');
 const showGoogleButton = ref(false);
+const showSideMenu = ref(false);
 
 const importData = () => {
   if (importString.value) {
@@ -45,7 +46,9 @@ const pasteFromClipboard = async () => {
   importString.value = text;
 };
 
-
+const openUpcomingEvents = () => {
+  window.open('https://arknights.wiki.gg/wiki/Event', '_blank');
+};
 
 onMounted(() => {
   showGoogleButton.value = true;
@@ -54,36 +57,44 @@ onMounted(() => {
 
 <template>
   <nav class="navbar navbar-expand-lg fixed-top">
-    <div>
-      <a class="navbar-brand" href="#" @click="showNewFeaturesModal = true">Arknights Planner</a>
-    </div>
-    <div></div>
-    <div>
-    </div>
-    <div>
-      <div class="btn-group" role="group">
-        <button class="btn btn-primary" @click="exportData">
-          <font-awesome-icon icon="download" />
-          <span class="d-none d-md-inline"> Export</span>
-        </button>
-        <button class="btn btn-primary" @click="showImportModal = !showImportModal">
-          <font-awesome-icon icon="upload" />
-          <span class="d-none d-md-inline"> Import</span>
-        </button>
-        <a href="https://arknights.wiki.gg/wiki/Event" target="_blank" class="btn btn-primary text-light">
-          <font-awesome-icon icon="calendar-day" />
-          <span class="d-none d-md-inline"> Upcoming Events</span>
-        </a>
-        <night-mode-toggle />
-        <button class="btn btn-secondary" @click="showCreditsmodal = !showCreditsmodal">
-          <font-awesome-icon icon="info-circle" />
-        </button>
-      </div>
-      <div class="google-login">
-        <GoogleDriveAPI />
+    <div class="side-menu-button" @click="showSideMenu = !showSideMenu">
+      <div>
+        <a class="navbar-brand" href="#"><font-awesome-icon icon="bars" /> Arknights Planner</a>
       </div>
     </div>
   </nav>
+
+  <Transition>
+    <div class="side-menu" v-show="showSideMenu">
+      <div class="list-group">
+        <div class="list-group-item no-hover">
+          <div class="google-login">
+            <GoogleDriveAPI />
+          </div>
+        </div>
+        <div class="list-group-item separator"></div>
+        <div class="list-group-item" @click="exportData">
+          <div><font-awesome-icon icon="download" /> Export</div>
+        </div>
+        <div class="list-group-item" @click="showImportModal = !showImportModal">
+          <div><font-awesome-icon icon="upload" /> Import</div>
+        </div>
+        <div class="list-group-item separator"></div>
+        <div class="list-group-item" @click="showCreditsmodal = !showCreditsmodal">
+          <div><font-awesome-icon icon="info-circle" /> Credits</div>
+        </div>
+        <div class="list-group-item" @click="showNewFeaturesModal = true">
+          <div><font-awesome-icon icon="lightbulb" /> New Features</div>
+        </div>
+        <div class="list-group-item separator"></div>
+        <div class="list-group-item" @click="openUpcomingEvents">
+          <div><font-awesome-icon icon="calendar-day" /> Upcoming Events</div>
+        </div>
+        <div class="list-group-item separator"></div>
+        <night-mode-toggle />
+      </div>
+    </div>
+  </Transition>
 
   <modal v-model="showCreditsmodal">
     <template #header>
@@ -166,27 +177,16 @@ a:link {
   text-decoration: none;
 }
 
-.sidebar {
-  box-shadow: 0 2px 5px 0 #0000000d, 0 2px 10px 0 #0000000d;
-}
-
-.sidebar .active {
-  box-shadow: 0 2px 5px 0 #00000029, 0 2px 10px 0 #0000001f;
-}
-
-.sidebar-sticky {
-  position: relative;
-  top: 0;
-  height: calc(100vh - 48px);
-  padding-top: 0.5rem;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
 nav.navbar {
   justify-content: space-between;
   padding-left: 1em;
   padding-right: 1em;
+  -webkit-user-select: none;
+  /* Safari */
+  -ms-user-select: none;
+  /* IE 10 and IE 11 */
+  user-select: none;
+  /* Standard syntax */
 }
 
 nav.navbar li.nav-item:last-child {
@@ -236,5 +236,79 @@ html.dark nav.navbar a.navbar-brand:hover {
 .google-login {
   display: inline-block;
   vertical-align: middle;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.side-menu .list-group {
+  position: fixed;
+  padding-top: 0.5rem;
+  overflow-x: hidden;
+  top: 60px;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  background-color: white;
+  z-index: 1001;
+}
+
+.side-menu .list-group-item {
+  border-right: 0px;
+  border-left: 0px;
+  border-top: 0px;
+  border-radius: 0px;
+  margin-left: 5px;
+  margin-right: 5px;
+  /* Safari */
+  -ms-user-select: none;
+  /* IE 10 and IE 11 */
+  user-select: none;
+  /* Standard syntax */
+  cursor: pointer;
+}
+
+.side-menu .list-group-item.separator {
+  cursor: default;
+}
+
+html.dark .side-menu .list-group {
+  background-color: rgb(31, 31, 31);
+}
+
+html.dark .side-menu .list-group-item {
+  color: rgb(231, 231, 231);
+  background-color: rgb(31, 31, 31);
+  border-color: rgb(71, 71, 71);
+}
+
+html.dark .side-menu .list-group-item:hover {
+  background-color: rgb(0, 0, 0);
+}
+
+html.dark .side-menu .list-group-item.no-hover:hover,
+html.dark .side-menu .list-group-item.separator:hover {
+  background-color: inherit;
+}
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+
+.side-menu-button {
+  cursor: pointer;
 }
 </style>
