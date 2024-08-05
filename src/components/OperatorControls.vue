@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, watch, ref } from 'vue';
+import { computed, ref } from 'vue';
 import OperatorSkillMasteries from './controls/OperatorSkillMasteries.vue';
-import type { SaveRecord, SelectedOperator } from '../types/planner-types';
+import type { SelectedOperator } from '../types/planner-types';
 import OperatorCosts from './OperatorCosts.vue';
 import ImageFinder from './ImageFinder.vue';
 import { usePlannerStore } from '../store/planner-store';
@@ -17,16 +17,6 @@ const props = defineProps<{
 const section = ref<'' | 'Plan' | 'Items'>('');
 
 const { selectCharacter } = usePlannerStore();
-
-watch(props.selectedOperator, ({ operator, plans }) => {
-    const saveString = `plans-${operator.id}`;
-    const saveRecord: SaveRecord = {
-        operatorId: operator.id,
-        plans,
-        active: props.selectedOperator.active
-    };
-    localStorage.setItem(saveString, JSON.stringify(saveRecord));
-}, { deep: true });
 
 const operator = computed(() => props.selectedOperator.operator);
 

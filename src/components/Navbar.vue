@@ -4,13 +4,12 @@ import NewFeatures from './NewFeatures.vue';
 import NightModeToggle from './NightModeToggle.vue';
 import { ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
+import GoogleDriveAPI from './GoogleDriveAPI.vue';
 import { storeToRefs } from 'pinia';
-import { IsOldSaveRecord, OldSaveRecord, SaveRecord } from '../types/planner-types';
-import { OperatorPlans } from '../types/plans';
 
 const store = usePlannerStore();
-const { exportSavedRecords, loadSavedRecords, getBlankInventory } = store;
-const { exportString, inventory, selectedOperators } = storeToRefs(store);
+const { exportSavedRecords, importSavedRecords } = store;
+const { googleDriveTest } = storeToRefs(store);
 
 const lastUse = new Date(localStorage.getItem('last-use-timestamp') ?? 0);
 
@@ -19,9 +18,35 @@ const showExportModal = ref(false);
 const showImportModal = ref(false);
 const importString = ref('');
 const showNewFeaturesModal = ref(lastUse < new Date(BUILD_DATE));
+const exportString = ref('');
+const showSideMenu = ref(false);
+const showSettings = ref(false);
+
+const joinGoogleDriveTest = () => {
+  localStorage.setItem('GoogleDriveTest', '1');
+  googleDriveTest.value = true;
+  window.location.reload(); // reload the page to get the auth flow correct
+};
+
+const leaveGoogleDriveTest = () => {
+  localStorage.removeItem('GoogleDriveTest');
+  googleDriveTest.value = false;
+  window.location.reload();
+};
+
+const importData = () => {
+  if (importString.value) {
+    importSavedRecords(importString.value);
+    showImportModal.value = false;
+    importString.value = '';
+  }
+  else {
+    alert('No data to import');
+  }
+}
 
 const exportData = () => {
-  exportSavedRecords();
+  exportString.value = JSON.stringify(exportSavedRecords());
   showExportModal.value = true;
 };
 
@@ -35,106 +60,17 @@ const pasteFromClipboard = async () => {
   importString.value = text;
 };
 
-const importData = () => {
-  if (importString.value === '' || importString.value == null) {
-    alert('Please paste data to import');
-    return;
-  }
-
-  let dataold: {
-    p: OldSaveRecord[] | SaveRecord[];
-    s: string[];
-    i: { [key: string]: number };
-  };
-
-  let data: {
-    p: SaveRecord[];
-    s: string[];
-    i: { [key: string]: number };
-  } | null = null;
-
-  try {
-    dataold = JSON.parse(importString.value);
-    data = {
-      p: [],
-      s: dataold.s,
-      i: dataold.i
-    };
-
-    data.p = dataold.p.map((record): SaveRecord => {
-      if (IsOldSaveRecord(record)) {
-        const oldPlans = record.plans;
-        const newPlans: OperatorPlans = {
-          ...oldPlans,
-          targetModules: [],
-          currentModules: []
-        };
-
-        if ((oldPlans.currentModules.x ?? 0) > 0) {
-          newPlans.currentModules.push({ type: 'X', level: oldPlans.currentModules.x });
-        }
-        if ((oldPlans.currentModules.y ?? 0) > 0) {
-          newPlans.currentModules.push({ type: 'Y', level: oldPlans.currentModules.y });
-        }
-        if ((oldPlans.currentModules.d ?? 0) > 0) {
-          newPlans.currentModules.push({ type: 'D', level: oldPlans.currentModules.d });
-        }
-
-        if ((oldPlans.targetModules.x ?? 0) > 0) {
-          newPlans.targetModules.push({ type: 'X', level: oldPlans.targetModules.x });
-        }
-        if ((oldPlans.targetModules.y ?? 0) > 0) {
-          newPlans.targetModules.push({ type: 'Y', level: oldPlans.targetModules.y });
-        }
-        if ((oldPlans.targetModules.d ?? 0) > 0) {
-          newPlans.targetModules.push({ type: 'D', level: oldPlans.targetModules.d });
-        }
-
-        return {
-          ...record,
-          plans: newPlans
-        };
-      }
-      else {
-        return record;
-      }
-    });
-  }
-  catch (e) {
-    alert('Invalid data format');
-    return;
-  }
-
-  if (data == null || !Array.isArray(data.p) || !Array.isArray(data.s) || data.i == null) {
-    alert('Invalid data format');
-    return;
-  }
-
-  localStorage.setItem('selectedCharacters', JSON.stringify(data.s));
-  localStorage.setItem('inventory', JSON.stringify(data.i));
-
-  const saveRecords = data.p;
-  for (const op of saveRecords) {
-    const saveString = `plans-${op.operatorId}`;
-    localStorage.setItem(saveString, JSON.stringify(op));
-  }
-
-  selectedOperators.value = [];
-
-  inventory.value = { ...getBlankInventory(), ...data.i };
-  loadSavedRecords();
-
-  showImportModal.value = false;
-  importString.value = '';
-}
+const openUpcomingEvents = () => {
+  window.open('https://arknights.wiki.gg/wiki/Event', '_blank');
+};
 </script>
 
 <template>
   <nav class="navbar navbar-expand-lg fixed-top">
-    <div>
-      <a class="navbar-brand" href="#" @click="showNewFeaturesModal = true">Arknights Planner</a>
-    </div>
-    <div>
+    <div class="side-menu-button" @click="showSideMenu = !showSideMenu">
+      <div>
+        <a class="navbar-brand"><font-awesome-icon icon="bars" /> Arknights Planner</a>
+      </div>
     </div>
     <div>
       <div class="btn-group" role="group">
@@ -150,13 +86,63 @@ const importData = () => {
           <font-awesome-icon icon="calendar-day" />
           <span class="d-none d-md-inline"> Upcoming Events</span>
         </a>
-        <night-mode-toggle />
-        <button class="btn btn-secondary" @click="showCreditsmodal = !showCreditsmodal">
-          <font-awesome-icon icon="info-circle" />
-        </button>
       </div>
     </div>
   </nav>
+
+  <Transition>
+    <div class="side-menu" v-show="showSideMenu" @click.self="showSideMenu = false">
+      <div class="list-group">
+        <div class="list-group-item no-hover" v-if="googleDriveTest">
+          <div class="google-login">
+            <GoogleDriveAPI />
+          </div>
+        </div>
+        <div class="list-group-item separator"></div>
+        <div class="list-group-item" @click="exportData">
+          <div><font-awesome-icon icon="download" /> Export</div>
+        </div>
+        <div class="list-group-item" @click="showImportModal = !showImportModal">
+          <div><font-awesome-icon icon="upload" /> Import</div>
+        </div>
+        <div class="list-group-item separator"></div>
+        <div class="list-group-item" @click="showCreditsmodal = !showCreditsmodal">
+          <div><font-awesome-icon icon="info-circle" /> Credits</div>
+        </div>
+        <div class="list-group-item" @click="showNewFeaturesModal = true">
+          <div><font-awesome-icon icon="lightbulb" /> New Features</div>
+        </div>
+        <div class="list-group-item separator"></div>
+        <div class="list-group-item" @click="openUpcomingEvents">
+          <div><font-awesome-icon icon="calendar-day" /> Upcoming Events</div>
+        </div>
+        <div class="list-group-item separator"></div>
+        <night-mode-toggle />
+        <div class="list-group-item separator"></div>
+        <div class="list-group-item" @click="showSettings = true">
+          <div><font-awesome-icon icon="gear" /> Settings</div>
+        </div>
+      </div>
+    </div>
+  </Transition>
+
+  <modal v-model="showSettings">
+    <template #header>
+      Settings (not much here yet, more to come)
+    </template>
+    <template #body>
+      <div>
+        <div>
+          <button class="btn btn-primary" @click="joinGoogleDriveTest">Try Google Drive Sync Test</button>
+          <hr />
+          <button class="btn btn-danger" @click="leaveGoogleDriveTest">Leave Google Drive Sync Test</button>
+        </div>
+      </div>
+    </template>
+    <template #footer>
+      <button class="btn btn-danger" @click="showSettings = false">Close</button>
+    </template>
+  </modal>
 
   <modal v-model="showCreditsmodal">
     <template #header>
@@ -239,27 +225,16 @@ a:link {
   text-decoration: none;
 }
 
-.sidebar {
-  box-shadow: 0 2px 5px 0 #0000000d, 0 2px 10px 0 #0000000d;
-}
-
-.sidebar .active {
-  box-shadow: 0 2px 5px 0 #00000029, 0 2px 10px 0 #0000001f;
-}
-
-.sidebar-sticky {
-  position: relative;
-  top: 0;
-  height: calc(100vh - 48px);
-  padding-top: 0.5rem;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
 nav.navbar {
   justify-content: space-between;
   padding-left: 1em;
   padding-right: 1em;
+  -webkit-user-select: none;
+  /* Safari */
+  -ms-user-select: none;
+  /* IE 10 and IE 11 */
+  user-select: none;
+  /* Standard syntax */
 }
 
 nav.navbar li.nav-item:last-child {
@@ -301,7 +276,89 @@ nav.navbar {
 html.dark nav.navbar a.navbar-brand {
   color: rgb(231, 231, 231);
 }
+
 html.dark nav.navbar a.navbar-brand:hover {
   color: rgb(179, 179, 179);
+}
+
+.google-login {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.side-menu .list-group {
+  position: fixed;
+  padding-top: 0.5rem;
+  overflow-x: hidden;
+  top: 60px;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  background-color: white;
+  z-index: 1001;
+}
+
+.side-menu .list-group-item {
+  border-right: 0px;
+  border-left: 0px;
+  border-top: 0px;
+  border-radius: 0px;
+  margin-left: 5px;
+  margin-right: 5px;
+  /* Safari */
+  -ms-user-select: none;
+  /* IE 10 and IE 11 */
+  user-select: none;
+  /* Standard syntax */
+  cursor: pointer;
+  /* don't allow click through */
+  pointer-events: auto;
+}
+
+.side-menu .list-group-item.separator {
+  cursor: default;
+}
+
+html.dark .side-menu .list-group {
+  background-color: rgb(31, 31, 31);
+}
+
+html.dark .side-menu .list-group-item {
+  color: rgb(231, 231, 231);
+  background-color: rgb(31, 31, 31);
+  border-color: rgb(71, 71, 71);
+}
+
+html.dark .side-menu .list-group-item:hover {
+  background-color: rgb(0, 0, 0);
+}
+
+html.dark .side-menu .list-group-item.no-hover:hover,
+html.dark .side-menu .list-group-item.separator:hover {
+  background-color: inherit;
+}
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+
+.side-menu-button {
+  cursor: pointer;
 }
 </style>

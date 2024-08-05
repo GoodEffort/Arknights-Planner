@@ -1,12 +1,15 @@
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { SelectedOperator, OldSaveRecord, LevelUpNeeds, LevelUpNeedsKey, SaveRecord } from '../types/planner-types';
+import { SelectedOperator, OldSaveRecord, LevelUpNeeds, LevelUpNeedsKey, SaveRecord, IsOldSaveRecord } from '../types/planner-types';
 import { debounce } from 'lodash';
 import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
 import { efficientToFarmItemIds, stages } from '../data/farmingdata';
 import getArknightsData from '../data/arknightsdata';
 import type { Item, Operator } from '../types/outputdata';
+import { OperatorPlans } from '../types/plans';
+import DriveClient from '../api/google-drive-api';
+import { clientId, scope } from '../data/authInfo';
 
 export const usePlannerStore = defineStore('planner', () => {
     const operators = ref<Operator[]>([]);
@@ -19,7 +22,11 @@ export const usePlannerStore = defineStore('planner', () => {
     const reserveTier4 = ref<number>(0);
     const reserveTier5 = ref<number>(0);
     const reserveTier6 = ref<number>(0);
-    const exportString = ref<string>('');
+
+    let driveClient: DriveClient;
+
+    const googleDriveTest = ref<boolean>(false);
+    googleDriveTest.value = localStorage.getItem("GoogleDriveTest") === "1";
 
     const getEXPValue = (inventory: { [key: string]: number; }) => {
         let exp = 0;
@@ -73,8 +80,93 @@ export const usePlannerStore = defineStore('planner', () => {
             p: operatorPlans
         };
 
-        console.log(exportData);
-        exportString.value = JSON.stringify(exportData);
+        //console.log(exportData);
+        return exportData;
+    }
+
+    function importSavedRecords(importString: string) {
+        let dataold: {
+            p: OldSaveRecord[] | SaveRecord[];
+            s: string[];
+            i: { [key: string]: number };
+        };
+
+        let data: {
+            p: SaveRecord[];
+            s: string[];
+            i: { [key: string]: number };
+        } | null = null;
+
+        try {
+            dataold = JSON.parse(importString);
+            data = {
+                p: [],
+                s: dataold.s,
+                i: dataold.i
+            };
+
+            data.p = dataold.p.map((record): SaveRecord => {
+                if (IsOldSaveRecord(record)) {
+                    const oldPlans = record.plans;
+                    const newPlans: OperatorPlans = {
+                        ...oldPlans,
+                        targetModules: [],
+                        currentModules: []
+                    };
+
+                    if ((oldPlans.currentModules.x ?? 0) > 0) {
+                        newPlans.currentModules.push({ type: 'X', level: oldPlans.currentModules.x });
+                    }
+                    if ((oldPlans.currentModules.y ?? 0) > 0) {
+                        newPlans.currentModules.push({ type: 'Y', level: oldPlans.currentModules.y });
+                    }
+                    if ((oldPlans.currentModules.d ?? 0) > 0) {
+                        newPlans.currentModules.push({ type: 'D', level: oldPlans.currentModules.d });
+                    }
+
+                    if ((oldPlans.targetModules.x ?? 0) > 0) {
+                        newPlans.targetModules.push({ type: 'X', level: oldPlans.targetModules.x });
+                    }
+                    if ((oldPlans.targetModules.y ?? 0) > 0) {
+                        newPlans.targetModules.push({ type: 'Y', level: oldPlans.targetModules.y });
+                    }
+                    if ((oldPlans.targetModules.d ?? 0) > 0) {
+                        newPlans.targetModules.push({ type: 'D', level: oldPlans.targetModules.d });
+                    }
+
+                    return {
+                        ...record,
+                        plans: newPlans
+                    };
+                }
+                else {
+                    return record;
+                }
+            });
+        }
+        catch (e) {
+            alert('Invalid data format');
+            return;
+        }
+
+        if (data == null || !Array.isArray(data.p) || !Array.isArray(data.s) || data.i == null) {
+            alert('Invalid data format');
+            return;
+        }
+
+        localStorage.setItem('selectedCharacters', JSON.stringify(data.s));
+        localStorage.setItem('inventory', JSON.stringify(data.i));
+
+        const saveRecords = data.p;
+        for (const op of saveRecords) {
+            const saveString = `plans-${op.operatorId}`;
+            localStorage.setItem(saveString, JSON.stringify(op));
+        }
+
+        selectedOperators.value = [];
+
+        inventory.value = { ...getBlankInventory(), ...data.i };
+        loadSavedRecords();
     }
 
     function loadSavedRecords() {
@@ -90,7 +182,9 @@ export const usePlannerStore = defineStore('planner', () => {
                 }
 
                 const saveRecord = getSavedOperatorData(operatorId) || new SelectedOperator(operator);
-                selectedOperators.value.push(saveRecord);
+                //console.log(saveRecord);
+                if (selectedOperators.value.find(c => c.operator.id === operatorId) === undefined)
+                    selectedOperators.value.push(saveRecord); // only add if it doesn't already exist, Vite is duplicating entries in dev mode
             }
         }
     }
@@ -130,7 +224,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
         localStorage.setItem('selectedCharacters', JSON.stringify(selectedOperators.value.map(c => c.operator.id)));
 
-        console.log(character);
+        //console.log(character);
     }
 
     // Costs
@@ -323,10 +417,10 @@ export const usePlannerStore = defineStore('planner', () => {
 
                 for (let masteryIndex = currentSkillMastery; masteryIndex < targetSkillMastery; masteryIndex++) {
 
-                    const skillMasteryName = `s${skillIndex+1}m${masteryIndex+1}` as 's1m1' | 's1m2' | 's1m3' | 's2m1' | 's2m2' | 's2m3' | 's3m1' | 's3m2' | 's3m3';
+                    const skillMasteryName = `s${skillIndex + 1}m${masteryIndex + 1}` as 's1m1' | 's1m2' | 's1m3' | 's2m1' | 's2m2' | 's2m3' | 's3m1' | 's3m2' | 's3m3';
                     const cost = masteryCosts[masteryIndex];
 
-                    for (const {id: itemId, count } of cost) {
+                    for (const { id: itemId, count } of cost) {
                         if (neededItems[skillMasteryName][itemId] === undefined) {
                             neededItems[skillMasteryName][itemId] = 0;
                         }
@@ -465,12 +559,6 @@ export const usePlannerStore = defineStore('planner', () => {
         inventory.value[itemId] += outputCount;
     }
 
-    watch(inventory, debounce((value: {
-        [key: string]: number;
-    }) => {
-        localStorage.setItem('inventory', JSON.stringify(value));
-    }, 250), { deep: true });
-
     // Needed Items
     const neededEXPItems = computed(() => {
         const needed: { item: Item, count: number }[] = [];
@@ -593,6 +681,66 @@ export const usePlannerStore = defineStore('planner', () => {
                     b.item.sortId - a.item.sortId :
                     efficientToFarmItemIds.indexOf(b.item.itemId) - efficientToFarmItemIds.indexOf(a.item.itemId))
             .map(({ item }) => ({ stage: stages[item.itemId], item })));
+    
+    // Drive API
+    const getDriveClient = async () => {
+        if (!driveClient) {
+            driveClient = new DriveClient(clientId, scope);
+        }
+
+        await driveClient.initializationPromise;
+        return driveClient; 
+    }
+
+    const renderButton = async (button: HTMLElement) => {
+        const client = await getDriveClient();
+        client.renderButton(button);
+    }
+
+    const updateFile = async () => {
+        const client = await getDriveClient();
+        const data = exportSavedRecords();
+        await client.updateFile(data);
+    }
+
+    const downloadFile = async () => {
+        const client = await getDriveClient();
+        const data = await client.downloadFile();
+        importSavedRecords(JSON.stringify(data));
+    }
+
+    // Watchers
+    const writeOperators = debounce((value: SelectedOperator[]) => {
+        const onlyUnique = (value: string, index: number, array: string[]) => array.indexOf(value) === index;
+
+        // the filter is because of an odd bug with Vite in dev duplicating entries
+        const selectedCharacters = value.map(c => c.operator.id).filter(onlyUnique);
+
+        localStorage.setItem('selectedCharacters', JSON.stringify(selectedCharacters));
+        for (const selectedOperator of value) {
+            const saveString = `plans-${selectedOperator.operator.id}`;
+            localStorage.setItem(saveString, JSON.stringify(new SaveRecord(selectedOperator)));
+        }
+
+        if (driveClient && driveClient.credentials) {
+            console.log('updating operators in drive');
+            updateFile();
+        }
+    }, 1000);
+    watch(selectedOperators, writeOperators, { deep: true });
+    
+
+    const writeInventory = debounce((value: {
+        [key: string]: number;
+    }) => {
+        localStorage.setItem('inventory', JSON.stringify(value));
+
+        if (driveClient && driveClient.credentials) {
+            console.log('updating inventory in drive');
+            updateFile();
+        }
+    }, 1000);
+    watch(inventory, writeInventory, { deep: true });
 
     return {
         items,
@@ -619,6 +767,11 @@ export const usePlannerStore = defineStore('planner', () => {
         craftItem,
         exportSavedRecords,
         getBlankInventory,
-        exportString,
+        importSavedRecords,
+        renderButton,
+        downloadFile,
+        updateFile,
+        getDriveClient,
+        googleDriveTest,
     }
 });

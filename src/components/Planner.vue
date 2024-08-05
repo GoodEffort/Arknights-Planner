@@ -9,16 +9,24 @@ import TotalCostOfPlan from './TotalCostOfPlan.vue';
 import MissingItems from './MissingItems.vue';
 import Farming from './Farming.vue';
 
-const { loadCharacters, loadSavedRecords } = usePlannerStore();
+const { loadCharacters, loadSavedRecords, getDriveClient, downloadFile } = usePlannerStore();
 
 const isLoading = ref(true);
 
 onMounted(async () => {
     await loadCharacters();
-    loadSavedRecords();
+    loadSavedRecords(); // loads saved records from local storage
+
+    if (localStorage.getItem("GoogleDriveTest") === "1") {
+        const { credentials } = await getDriveClient();
+
+        if (credentials !== null) {
+            await downloadFile();
+        }
+    }
+
     isLoading.value = false;
 });
-
 </script>
 
 <template>
