@@ -2,6 +2,7 @@ import { SaveRecord } from "../types/planner-types";
 
 type CredentialResponse = google.accounts.id.CredentialResponse;
 type TokenResponse = google.accounts.oauth2.TokenResponse;
+type IdConfiguration = google.accounts.id.IdConfiguration;
 
 type DriveJSON = {
     s: string[];
@@ -16,27 +17,49 @@ class DriveClient {
     public clientId: string;
     public scope: string;
     public fileId: string | undefined;
+    public initializationPromise: Promise<CredentialResponse | void>;
+    public data: DriveJSON | null = null;
 
     constructor(clientId: string, scope: string) {
         this.clientId = clientId;
         this.scope = scope;
         this.credentials = null;
 
-        this.initialize().then((r) => {
-            this.credentials = r;
+        this.initializationPromise = this.initialize();
+
+        this.initializationPromise.then((r) => {
+            if (r) {
+                this.credentials = r;
+                localStorage.setItem('drive-credentials', r.credential);
+            }
         });
     }
 
-    public initialize = () =>
-        new Promise<CredentialResponse>((resolve) => {
-            google.accounts.id.prompt();
-            google.accounts.id.initialize({
+    private initialize = () => {
+        const client_id = this.clientId;
+
+        return new Promise<CredentialResponse | void>((resolve) => {
+            const login_hint = 'lukehsurvey@gmail.com'; //localStorage.getItem('drive-credentials');
+            const config: IdConfiguration = {
                 use_fedcm_for_prompt: true,
-                client_id: this.clientId,
+                client_id,
                 callback: r => resolve(r),
-                auto_select: true
+                auto_select: true,
+                cancel_on_tap_outside: false,
+            };
+
+            if (login_hint) {
+                config.login_hint = login_hint;
+            }
+
+            google.accounts.id.initialize(config);
+            google.accounts.id.prompt(notification => {
+                if (notification.isNotDisplayed() || notification.isSkippedMoment() || notification.isDismissedMoment() && notification.getDismissedReason() != 'credential_returned') {
+                    resolve();
+                }
             });
-        });
+        })
+    };
 
     public renderButton = (googleLoginBtn: HTMLElement) => {
         google.accounts.id.renderButton(
@@ -58,17 +81,22 @@ class DriveClient {
                     expirationTime: Date.now() + (+expires_in * 1000)
                 });
             };
-
-        google.accounts.oauth2.initTokenClient({
+        const tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: this.clientId,
             scope: this.scope,
-            callback
+            callback,
+            prompt: ''
         });
+
+        tokenClient.requestAccessToken();
     })
 
     private getAccessToken = async () => {
         let accessToken = localStorage.getItem('accessToken');
-        let expirationTime = +(localStorage.getItem('accessToken_expiration_time') ?? 0)
+        accessToken = accessToken === 'undefined' || accessToken === 'null' || accessToken === '' ? null : accessToken;
+
+        let expirationTime = +(localStorage.getItem('accessToken_expiration_time') ?? 0);
+        expirationTime = isNaN(expirationTime) ? 0 : expirationTime;
 
         if (!accessToken || expirationTime < Date.now()) {
             const { accessToken: newAccessToken, expirationTime: newExpirationTime } = await this.getAccessTokenFromClient();
@@ -110,7 +138,7 @@ class DriveClient {
         return this.fileId;
     }
 
-    public upload = async (data: DriveJSON) => {
+    private uploadFile = async (data: DriveJSON) => {
         const fileMetadata = {
             name: 'config.json',
             mimeType: 'application/json',
@@ -139,7 +167,7 @@ class DriveClient {
         }
     }
 
-    public download = async () => {
+    public downloadFile = async () => {
         console.log("download");
         const fileId = await this.getFileId();
 
@@ -155,34 +183,50 @@ class DriveClient {
         const configData: DriveJSON = await downloadResponse.json();
         console.log(configData);
 
+        this.data = configData;
+
         return configData;
     }
 
-    public watchFile = async () => {
-        const fileId = await this.getFileId();
-
-        const headers = await this.getHeaders();
-
-        const watchResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?supportsAllDrives=true`, {
-            headers
-        });
-
-        console.log(watchResponse);
-    }
-
     public updateFile = async (data: DriveJSON) => {
+        if (JSON.stringify(data) === JSON.stringify(this.data)) {
+            return this.fileId;
+        }
+
         const fileId = await this.getFileId();
 
-        const headers = await this.getHeaders();
+        if (!fileId) {
+            return this.uploadFile(data);
+        }
+        else {
+            const headers = await this.getHeaders();
 
-        const updateResponse = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
-            method: 'PATCH',
-            headers,
-            body: JSON.stringify(data)
-        });
+            const fileMetadata = {
+                name: 'config.json',
+                mimeType: 'application/json',
+            };
 
-        console.log(updateResponse);
+            const file = new Blob([JSON.stringify(data)], { type: 'application/json' });
+
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(fileMetadata)], { type: 'application/json' }));
+            form.append('file', file);
+
+            const updateResponse = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`, {
+                method: 'PATCH',
+                headers,
+                body: form,
+            });
+
+            console.log(updateResponse);
+
+            if (updateResponse.ok) {
+                this.data = data;
+                return fileId;
+            }
+        }
     }
 }
 
 export default DriveClient;
+export type { DriveClient, DriveJSON };

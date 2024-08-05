@@ -2,7 +2,7 @@
 import Modal from './Modal.vue';
 import NewFeatures from './NewFeatures.vue';
 import NightModeToggle from './NightModeToggle.vue';
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import GoogleDriveAPI from './GoogleDriveAPI.vue';
 
@@ -17,7 +17,6 @@ const showImportModal = ref(false);
 const importString = ref('');
 const showNewFeaturesModal = ref(lastUse < new Date(BUILD_DATE));
 const exportString = ref('');
-const showGoogleButton = ref(false);
 const showSideMenu = ref(false);
 
 const importData = () => {
@@ -49,10 +48,6 @@ const pasteFromClipboard = async () => {
 const openUpcomingEvents = () => {
   window.open('https://arknights.wiki.gg/wiki/Event', '_blank');
 };
-
-onMounted(() => {
-  showGoogleButton.value = true;
-});
 </script>
 
 <template>
@@ -65,7 +60,7 @@ onMounted(() => {
   </nav>
 
   <Transition>
-    <div class="side-menu" v-show="showSideMenu">
+    <div class="side-menu" v-show="showSideMenu" @click.self="showSideMenu = false">
       <div class="list-group">
         <div class="list-group-item no-hover">
           <div class="google-login">
@@ -273,6 +268,8 @@ html.dark nav.navbar a.navbar-brand:hover {
   user-select: none;
   /* Standard syntax */
   cursor: pointer;
+  /* don't allow click through */
+  pointer-events: auto;
 }
 
 .side-menu .list-group-item.separator {

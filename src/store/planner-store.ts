@@ -8,6 +8,7 @@ import { efficientToFarmItemIds, stages } from '../data/farmingdata';
 import getArknightsData from '../data/arknightsdata';
 import type { Item, Operator } from '../types/outputdata';
 import { OperatorPlans } from '../types/plans';
+import DriveClient from '../api/google-drive-api';
 import { clientId, scope } from '../data/authInfo';
 
 export const usePlannerStore = defineStore('planner', () => {
@@ -21,11 +22,8 @@ export const usePlannerStore = defineStore('planner', () => {
     const reserveTier4 = ref<number>(0);
     const reserveTier5 = ref<number>(0);
     const reserveTier6 = ref<number>(0);
-    const initialized = ref<boolean>(false);
-    const accessToken = ref<string | null>(localStorage.getItem('accessToken'));
-    const configId = ref<string>();
-    const tokenClient = ref<google.accounts.oauth2.TokenClient>();
-    const cloudData = ref<string>();
+
+    let driveClient: DriveClient;
 
     const getEXPValue = (inventory: { [key: string]: number; }) => {
         let exp = 0;
@@ -57,10 +55,6 @@ export const usePlannerStore = defineStore('planner', () => {
 
         const currentInventory = JSON.parse(JSON.stringify(inventory.value)); // don't modify the original inventory
         inventory.value = { ...getBlankInventory(), ...currentInventory };
-
-        setTimeout(() => {
-            initialized.value = true;
-        }, 500);
     }
 
     function exportSavedRecords() {
@@ -185,7 +179,9 @@ export const usePlannerStore = defineStore('planner', () => {
                 }
 
                 const saveRecord = getSavedOperatorData(operatorId) || new SelectedOperator(operator);
-                selectedOperators.value.push(saveRecord);
+                console.log(saveRecord);
+                if (selectedOperators.value.find(c => c.operator.id === operatorId) === undefined)
+                    selectedOperators.value.push(saveRecord); // only add if it doesn't already exist, Vite is duplicating entries in dev mode
             }
         }
     }
@@ -434,7 +430,7 @@ export const usePlannerStore = defineStore('planner', () => {
             // module costs
             for (const module of selectedOperator.operator.modules) {
                 const moduleType = module.type.toLowerCase();
-
+                
                 const currentModuleLevel = currentModules.find(m => m.type.toLowerCase() === moduleType)?.level ?? 0;
                 const targetModuleLevel = targetModules.find(m => m.type.toLowerCase() === moduleType)?.level ?? 0;
 
@@ -539,7 +535,7 @@ export const usePlannerStore = defineStore('planner', () => {
             alert(`Item ${item.name} cannot be crafted.`);
             return;
         }
-
+        
         const { itemId } = item;
         const { count: outputCount, costs } = item.recipe;
 
@@ -559,14 +555,6 @@ export const usePlannerStore = defineStore('planner', () => {
         // add crafted item to inventory
         inventory.value[itemId] += outputCount;
     }
-
-    watch(inventory, debounce((value: {
-        [key: string]: number;
-    }) => {
-        if (initialized.value) {
-            localStorage.setItem('inventory', JSON.stringify(value));
-        }
-    }, 250), { deep: true });
 
     // Needed Items
     const neededEXPItems = computed(() => {
@@ -645,7 +633,7 @@ export const usePlannerStore = defineStore('planner', () => {
                 const item = items.value[itemId];
                 // and we should not breakdown the item
                 if (
-                    stopItems.indexOf(itemId) >= 0 ||
+                    stopItems.indexOf(itemId) >= 0 || 
                     item.recipe === undefined
                 ) {
                     if (breakdownCosts[itemId] === undefined) {
@@ -690,114 +678,60 @@ export const usePlannerStore = defineStore('planner', () => {
                     b.item.sortId - a.item.sortId :
                     efficientToFarmItemIds.indexOf(b.item.itemId) - efficientToFarmItemIds.indexOf(a.item.itemId))
             .map(({ item }) => ({ stage: stages[item.itemId], item })));
-
-    const getConfigId = async () => {
-        const queryParams = new URLSearchParams({
-            spaces: 'appDataFolder',
-            fields: 'files(id, name)'
-        });
-
-        const headers = {
-            Authorization: `Bearer ${accessToken.value}`
-        };
-
-        const searchResponse = await fetch(`https://www.googleapis.com/drive/v3/files?${queryParams}`, {
-            headers
-        });
-
-        if (searchResponse.status === 401) {
-            return 401;
+    
+    // Drive API
+    const getDriveClient = async () => {
+        if (!driveClient) {
+            driveClient = new DriveClient(clientId, scope);
         }
 
-        const searchJson: { files: { id: string; name: string }[] } = await searchResponse.json();
-
-        configId.value = searchJson.files.find((file) => file.name === 'config.json')?.id || undefined;
-
-        return configId.value;
+        await driveClient.initializationPromise;
+        return driveClient; 
     }
 
-    const upload = async () => {
-        if (!accessToken) {
-            console.log("No access token");
-            return;
-        }
+    const renderButton = async (button: HTMLElement) => {
+        const client = await getDriveClient();
+        client.renderButton(button);
+    }
 
+    const updateFile = async () => {
+        const client = await getDriveClient();
         const data = exportSavedRecords();
+        await client.updateFile(data);
+    }
 
-        const fileMetadata = {
-            name: 'config.json',
-            mimeType: 'application/json',
-            parents: ['appDataFolder'],
-        };
+    const downloadFile = async () => {
+        const client = await getDriveClient();
+        const data = await client.downloadFile();
+        importSavedRecords(JSON.stringify(data));
+    }
 
-        const file = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    // Watchers
+    const writeOperators = debounce((value: SelectedOperator[]) => {
+        const onlyUnique = (value: string, index: number, array: string[]) => array.indexOf(value) === index;
 
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(fileMetadata)], { type: 'application/json' }));
-        form.append('file', file);
+        // the filter is because of an odd bug with Vite in dev duplicating entries
+        const selectedCharacters = value.map(c => c.operator.id).filter(onlyUnique);
 
-        const uploadResponse = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${accessToken.value}`,
-            },
-            body: form,
-        });
-
-        console.log(uploadResponse);
-
-        if (uploadResponse.ok) {
-            cloudData.value = JSON.stringify(data);
-        }
-    };
-
-    const getTokenClient = () =>
-        google.accounts.oauth2.initTokenClient({
-            client_id: clientId,
-            scope: scope,
-            callback: (response) => {
-                accessToken.value = response.access_token;
-                localStorage.setItem('accessToken', response.access_token);
-                getConfigId();
-            }
-        });
-
-    const download = async () => {
-        console.log("download");
-        if (!accessToken) {
-            console.log("No access token");
-            if (!tokenClient.value) {
-                tokenClient.value = getTokenClient();
-            }
-            tokenClient.value.requestAccessToken();
-            return;
+        localStorage.setItem('selectedCharacters', JSON.stringify(selectedCharacters));
+        for (const selectedOperator of value) {
+            const saveString = `plans-${selectedOperator.operator.id}`;
+            localStorage.setItem(saveString, JSON.stringify(new SaveRecord(selectedOperator)));
         }
 
-        const headers = {
-            Authorization: `Bearer ${accessToken.value}`
-        };
-
-        if (!configId.value) {
-            await getConfigId();
+        if (driveClient && driveClient.credentials) {
+            updateFile();
         }
+    }, 1000);
+    watch(selectedOperators, writeOperators, { deep: true });
+    
 
-        if (!configId.value) {
-            console.log("No config id");
-            return;
-        }
-
-        const downloadResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${configId.value}?alt=media`, {
-            headers
-        });
-
-        console.log(downloadResponse);
-        const configData: ReturnType<typeof exportSavedRecords> = await downloadResponse.json();
-        console.log(configData);
-
-        cloudData.value = JSON.stringify({ s: configData.s, i: configData.i, p: configData.p });
-
-        importSavedRecords(JSON.stringify(configData));
-    };
+    const writeInventory = debounce((value: {
+        [key: string]: number;
+    }) => {
+        localStorage.setItem('inventory', JSON.stringify(value));
+    }, 1000);
+    watch(inventory, writeInventory, { deep: true });
 
     return {
         items,
@@ -825,10 +759,9 @@ export const usePlannerStore = defineStore('planner', () => {
         exportSavedRecords,
         getBlankInventory,
         importSavedRecords,
-        getConfigId,
-        upload,
-        download,
-        accessToken,
-        cloudData,
+        renderButton,
+        downloadFile,
+        updateFile,
+        getDriveClient
     }
 });
