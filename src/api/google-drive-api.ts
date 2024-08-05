@@ -226,6 +226,20 @@ class DriveClient {
             }
         }
     }
+
+    public signOut = () => {
+        google.accounts.id.disableAutoSelect();
+        google.accounts.id.prompt(notification => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment() || notification.isDismissedMoment() && notification.getDismissedReason() != 'credential_returned') {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('accessToken_expiration_time');
+                localStorage.removeItem('drive-credentials');
+                this.credentials = null;
+                this.fileId = undefined;
+                this.data = null;
+            }
+        });
+    }
 }
 
 export default DriveClient;
