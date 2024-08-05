@@ -36,13 +36,17 @@ watch(doNotShowAgain, (val) => {
       <div>
         <h2>New Features</h2>
         <div>
+          <h3>8/5/2024</h3>
+          <p>
+            Bug fix, 2 and 3 Star Operators had the Skill Masteries tab showing up. This has been fixed.
+          </p>
           <h3>8/2/2024</h3>
           <p>
             Updated module display to show the modules icon and a more detailed type.
 
             Added a popup on the module icon to show the module story. Eventually this will show the module stats and effect as well.
           </p>
-          <h3>7/28/2024</h3>
+          <!-- <h3>7/28/2024</h3>
           <p>
             Updated Modules to support future module types (hopefully).
 
@@ -56,7 +60,7 @@ watch(doNotShowAgain, (val) => {
           <p>
             Also updated module and skill display to show the name of the skills and modules.
             And Skill Icons
-          </p>
+          </p> -->
         </div>
         <!-- <div>
           <h3>7/26/2024</h3>
