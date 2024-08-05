@@ -25,6 +25,9 @@ export const usePlannerStore = defineStore('planner', () => {
 
     let driveClient: DriveClient;
 
+    const googleDriveTest = ref<boolean>(false);
+    googleDriveTest.value = localStorage.getItem("GoogleDriveTest") === "1";
+
     const getEXPValue = (inventory: { [key: string]: number; }) => {
         let exp = 0;
         for (const itemId in inventory) {
@@ -77,7 +80,7 @@ export const usePlannerStore = defineStore('planner', () => {
             p: operatorPlans
         };
 
-        console.log(exportData);
+        //console.log(exportData);
         return exportData;
     }
 
@@ -179,7 +182,7 @@ export const usePlannerStore = defineStore('planner', () => {
                 }
 
                 const saveRecord = getSavedOperatorData(operatorId) || new SelectedOperator(operator);
-                console.log(saveRecord);
+                //console.log(saveRecord);
                 if (selectedOperators.value.find(c => c.operator.id === operatorId) === undefined)
                     selectedOperators.value.push(saveRecord); // only add if it doesn't already exist, Vite is duplicating entries in dev mode
             }
@@ -221,7 +224,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
         localStorage.setItem('selectedCharacters', JSON.stringify(selectedOperators.value.map(c => c.operator.id)));
 
-        console.log(character);
+        //console.log(character);
     }
 
     // Costs
@@ -720,6 +723,7 @@ export const usePlannerStore = defineStore('planner', () => {
         }
 
         if (driveClient && driveClient.credentials) {
+            console.log('updating operators in drive');
             updateFile();
         }
     }, 1000);
@@ -730,6 +734,11 @@ export const usePlannerStore = defineStore('planner', () => {
         [key: string]: number;
     }) => {
         localStorage.setItem('inventory', JSON.stringify(value));
+
+        if (driveClient && driveClient.credentials) {
+            console.log('updating inventory in drive');
+            updateFile();
+        }
     }, 1000);
     watch(inventory, writeInventory, { deep: true });
 
@@ -762,6 +771,7 @@ export const usePlannerStore = defineStore('planner', () => {
         renderButton,
         downloadFile,
         updateFile,
-        getDriveClient
+        getDriveClient,
+        googleDriveTest,
     }
 });
