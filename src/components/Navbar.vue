@@ -5,9 +5,11 @@ import NightModeToggle from './NightModeToggle.vue';
 import { ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import GoogleDriveAPI from './GoogleDriveAPI.vue';
+import { storeToRefs } from 'pinia';
 
 const store = usePlannerStore();
 const { exportSavedRecords, importSavedRecords } = store;
+const { googleDriveTest } = storeToRefs(store);
 
 const lastUse = new Date(localStorage.getItem('last-use-timestamp') ?? 0);
 
@@ -18,6 +20,19 @@ const importString = ref('');
 const showNewFeaturesModal = ref(lastUse < new Date(BUILD_DATE));
 const exportString = ref('');
 const showSideMenu = ref(false);
+const showSettings = ref(false);
+
+const joinGoogleDriveTest = () => {
+  localStorage.setItem('GoogleDriveTest', '1');
+  googleDriveTest.value = true;
+  window.location.reload(); // reload the page to get the auth flow correct
+};
+
+const leaveGoogleDriveTest = () => {
+  localStorage.removeItem('GoogleDriveTest');
+  googleDriveTest.value = false;
+  window.location.reload();
+};
 
 const importData = () => {
   if (importString.value) {
@@ -78,7 +93,7 @@ const openUpcomingEvents = () => {
   <Transition>
     <div class="side-menu" v-show="showSideMenu" @click.self="showSideMenu = false">
       <div class="list-group">
-        <div class="list-group-item no-hover">
+        <div class="list-group-item no-hover" v-if="googleDriveTest">
           <div class="google-login">
             <GoogleDriveAPI />
           </div>
@@ -103,9 +118,31 @@ const openUpcomingEvents = () => {
         </div>
         <div class="list-group-item separator"></div>
         <night-mode-toggle />
+        <div class="list-group-item separator"></div>
+        <div class="list-group-item" @click="showSettings = true">
+          <div><font-awesome-icon icon="gear" /> Settings</div>
+        </div>
       </div>
     </div>
   </Transition>
+
+  <modal v-model="showSettings">
+    <template #header>
+      Settings (not much here yet, more to come)
+    </template>
+    <template #body>
+      <div>
+        <div>
+          <button class="btn btn-primary" @click="joinGoogleDriveTest">Try Google Drive Sync Test</button>
+          <hr />
+          <button class="btn btn-danger" @click="leaveGoogleDriveTest">Leave Google Drive Sync Test</button>
+        </div>
+      </div>
+    </template>
+    <template #footer>
+      <button class="btn btn-danger" @click="showSettings = false">Close</button>
+    </template>
+  </modal>
 
   <modal v-model="showCreditsmodal">
     <template #header>
