@@ -2,18 +2,29 @@
 import { onMounted, ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 
-const { renderButton, downloadFile, updateFile } = usePlannerStore();
+const { renderButton, getDriveClient } = usePlannerStore();
 const googleLoginBtn = ref<HTMLElement | null>(null);
+const isLoggedIn = ref(false);
 
-onMounted(() => {
+const rerenderButton = async () => {
     if (googleLoginBtn.value) {
         renderButton(googleLoginBtn.value);
+        const { credentials } = await getDriveClient();
+        if (credentials !== null) {
+            isLoggedIn.value = true;
+        }
+        renderButton(googleLoginBtn.value);
     }
+};
+
+onMounted(() => {
+    rerenderButton();
 });
 </script>
 
 <template>
     <div ref="googleLoginBtn" style="color-scheme: light;" data-use_fedcm_for_prompt="true" />
-    <div @click="downloadFile" style="cursor: pointer;">Download Drive Data</div>
-    <div @click="updateFile" style="cursor: pointer;">Update Drive Data</div>
+    <div v-if="isLoggedIn">
+        <div>Syncing to Drive</div>
+    </div>
 </template>
