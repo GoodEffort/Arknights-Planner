@@ -17,10 +17,12 @@ onMounted(async () => {
     await loadCharacters();
     loadSavedRecords(); // loads saved records from local storage
 
-    const { credentials } = await getDriveClient();
+    if (localStorage.getItem("GoogleDriveTest") === "1") {
+        const { credentials } = await getDriveClient();
 
-    if (credentials !== null) {
-        await downloadFile();
+        if (credentials !== null) {
+            await downloadFile();
+        }
     }
 
     isLoading.value = false;
