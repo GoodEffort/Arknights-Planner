@@ -38,7 +38,13 @@ watch(doNotShowAgain, (val) => {
         <div>
           <h3>8/5/2024</h3>
           <p>
-            Bug fix, 2 and 3 Star Operators had the Skill Masteries tab showing up. This has been fixed.
+            - Redesigned UI to allow for more buttons and features in the future. Like the one in testing below.
+
+            - Added a test for syncing to Google Drive.
+            - I believe I am the only one with access to the API, but if you click the button in settings it may ask you to login after reloading the pag, but I'm 99% sure it only works for me as of right now.
+            - If you do click that there is a button right underneath it to disable it until I can get it working for everyone after a bit of testing.
+
+            - Bug fix: 2 and 3 Star Operators had the Skill Masteries tab showing up. This has been fixed.
           </p>
           <h3>8/2/2024</h3>
           <p>
