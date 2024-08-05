@@ -68,7 +68,7 @@ const active = computed({
                 <OperatorLevelPromotion :selectedOperator="selectedOperator" type="current" />
                 <OperatorSkillLevels v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
                     type="current" />
-                <OperatorSkillMasteries v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
+                <OperatorSkillMasteries v-if="operator.skills.length > 0 && operator.rarity !== 'TIER_2' && operator.rarity !== 'TIER_3'" :selected-operator="selectedOperator"
                     type="current" />
                 <OperatorModules v-if="operator.modules.length > 0" :selected-operator="selectedOperator"
                     type="current" />
@@ -79,7 +79,7 @@ const active = computed({
                 <OperatorLevelPromotion :selectedOperator="selectedOperator" type="target" />
                 <OperatorSkillLevels v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
                     type="target" />
-                <OperatorSkillMasteries v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
+                <OperatorSkillMasteries v-if="operator.skills.length > 0 && operator.rarity !== 'TIER_2' && operator.rarity !== 'TIER_3'" :selected-operator="selectedOperator"
                     type="target" />
                 <OperatorModules v-if="operator.modules.length > 0" :selected-operator="selectedOperator"
                     type="target" />
