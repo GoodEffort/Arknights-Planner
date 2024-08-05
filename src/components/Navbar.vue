@@ -23,9 +23,11 @@ const showSideMenu = ref(false);
 const showSettings = ref(false);
 
 const joinGoogleDriveTest = () => {
-  localStorage.setItem('GoogleDriveTest', '1');
-  googleDriveTest.value = true;
-  window.location.reload(); // reload the page to get the auth flow correct
+  if (confirm('Make sure you export your data before trying this. Are you sure you want to try Google Drive Sync Test?')) {
+    localStorage.setItem('GoogleDriveTest', '1');
+    googleDriveTest.value = true;
+    window.location.reload(); // reload the page to get the auth flow correct
+  }
 };
 
 const leaveGoogleDriveTest = () => {
