@@ -31,7 +31,7 @@ onMounted(async () => {
 
 <template>
     <div style="height: 100%;">
-        <div v-if="!isLoading" class="mt-4">
+        <div v-if="!isLoading" class="mt-5">
             <SelectedOperators />
             <TotalCostOfPlan />
             <MissingItems />
