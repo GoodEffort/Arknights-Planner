@@ -54,7 +54,23 @@ const openUpcomingEvents = () => {
   <nav class="navbar navbar-expand-lg fixed-top">
     <div class="side-menu-button" @click="showSideMenu = !showSideMenu">
       <div>
-        <a class="navbar-brand" href="#"><font-awesome-icon icon="bars" /> Arknights Planner</a>
+        <a class="navbar-brand"><font-awesome-icon icon="bars" /> Arknights Planner</a>
+      </div>
+    </div>
+    <div>
+      <div class="btn-group" role="group">
+        <button class="btn btn-primary" @click="exportData">
+          <font-awesome-icon icon="download" />
+          <span class="d-none d-md-inline"> Export</span>
+        </button>
+        <button class="btn btn-primary" @click="showImportModal = !showImportModal">
+          <font-awesome-icon icon="upload" />
+          <span class="d-none d-md-inline"> Import</span>
+        </button>
+        <a href="https://arknights.wiki.gg/wiki/Event" target="_blank" class="btn btn-primary text-light">
+          <font-awesome-icon icon="calendar-day" />
+          <span class="d-none d-md-inline"> Upcoming Events</span>
+        </a>
       </div>
     </div>
   </nav>
