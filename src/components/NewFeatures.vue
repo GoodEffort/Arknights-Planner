@@ -33,24 +33,34 @@ watch(doNotShowAgain, (val) => {
       New Features
     </template>
     <template #body>
+      <div class="text-start">
       <div>
         <h2>New Features</h2>
         <div>
           <h3>8/5/2024</h3>
-          <p>
-            - Redesigned UI to allow for more buttons and features in the future. Like the one in testing below.
-
-            - Added a test for syncing to Google Drive.
-            - I believe I am the only one with access to the API, but if you click the button in settings it may ask you to login after reloading the pag, but I'm 99% sure it only works for me as of right now.
-            - If you do click that there is a button right underneath it to disable it until I can get it working for everyone after a bit of testing.
-
-            - Bug fix: 2 and 3 Star Operators had the Skill Masteries tab showing up. This has been fixed.
-          </p>
+          <ul>
+            <li>
+              - Redesigned UI to allow for more buttons and features in the future. Like the one in testing below.
+            </li>
+            <li>
+              - Added a test for syncing to Google Drive.
+            </li>
+            <li>
+              - I believe I am the only one with access to the API, but if you click the button in settings it may ask you to login after reloading the pag, but I'm 99% sure it only works for me as of right now.
+            </li>
+            <li>
+              - If you do click that there is a button right underneath it to disable it until I can get it working for everyone after a bit of testing.
+            </li>
+            <li>
+              - Bug fix: 2 and 3 Star Operators had the Skill Masteries tab showing up. This has been fixed.
+            </li>
+          </ul>
           <h3>8/2/2024</h3>
           <p>
             Updated module display to show the modules icon and a more detailed type.
 
-            Added a popup on the module icon to show the module story. Eventually this will show the module stats and effect as well.
+            Added a popup on the module icon to show the module story. Eventually this will show the module stats and
+            effect as well.
           </p>
           <!-- <h3>7/28/2024</h3>
           <p>
@@ -101,16 +111,7 @@ watch(doNotShowAgain, (val) => {
         </p>
       </div>
 
-      <div>
-        <h2>Potential Features</h2>
-        <div>
-          <ul>
-            <li>Optional Google Account sign in (for the feature below)</li>
-            <li>Ability to save plans to your Google Drive so that you can use your plans between different devices and
-              browsers</li>
-          </ul>
-        </div>
-      </div>
+      
       <div>
         <p>
           This is shown only once when new features are added, if you refresh after closing it (without the checkbox) it
@@ -120,6 +121,7 @@ watch(doNotShowAgain, (val) => {
         <input type="checkbox" class="formControl" v-model="doNotShowAgain" id="noshowagain" />
         <label for="noshowagain">Do not show this message again</label>
       </div>
+    </div>
     </template>
     <template #footer>
       <button class="btn btn-danger" @click="closeNewFeaturesModal">Close</button>
