@@ -24,16 +24,16 @@ defineProps({
             <button type="button" class="btn btn-danger" @click="$emit('remove')">Remove</button>
         </div>
     </div>
-    <div class="row d-flex d-md-none">
-        <div class="row">
-            <div class="btn-group" role="group">
+    <div class="row d-flex d-md-none px-0 test">
+        <div class="row px-0">
+            <div class="btn-group pe-0" role="group">
                 <button type="button" class="btn" :class="`${active ? 'btn-success' : 'btn-secondary'}`"
                     @click="$emit('active')">{{ active ? 'Active' : 'Inactive' }}</button>
                 <button type="button" class="btn btn-danger" @click="$emit('remove')">Remove</button>
             </div>
         </div>
-        <div class="row mt-1">
-            <div class="btn-group" role="group">
+        <div class="row mt-1 px-0">
+            <div class="btn-group pe-0" role="group">
                 <button type="button" class="btn btn-secondary" @click="$emit('plan')" :class="{ active: section === 'Plan' }
                     ">Plan</button>
                 <button type="button" class="btn btn-secondary" @click="$emit('items')"
@@ -53,5 +53,9 @@ div.btn-group :first-child {
 }
 div.btn-group :last-child {
     border-left: 1px solid #000;
+}
+
+.test{
+    margin-right: -1.5em;
 }
 </style>

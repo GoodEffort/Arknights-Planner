@@ -97,7 +97,7 @@ const goalsCount = computed(() => {
     const plans = props.selectedOperator.plans;
 
     let count = 0;
-    
+
     if (plans.currentElite < plans.targetElite) {
         count += plans.targetElite - plans.currentElite;
     }
@@ -116,7 +116,7 @@ const goalsCount = computed(() => {
     if (plans.currentSkillMasteries.skill3 < plans.targetSkillMasteries.skill3) {
         count += plans.targetSkillMasteries.skill3 - plans.currentSkillMasteries.skill3;
     }
-    
+
     const currentModGoal = plans.currentModules.reduce((acc, mod) => acc + mod.level, 0);
     const targetModGoal = plans.targetModules.reduce((acc, mod) => acc + mod.level, 0);
 
@@ -131,10 +131,11 @@ const goalsCount = computed(() => {
 
 <template>
     <div class="row mb-3">
-        <div class="col-8 col-md">
+        <div class="col-75 col-md">
             <div class="row">
                 <div class="col-1 text-center">
-                    <span class="badge rounded-pill bg-primary translate-up" v-if="goalsCount > 0">{{ goalsCount }}</span>
+                    <span class="badge rounded-pill bg-primary translate-up" v-if="goalsCount > 0">{{ goalsCount
+                        }}</span>
                 </div>
                 <div class="col center-vert">
                     <h4>
@@ -150,15 +151,17 @@ const goalsCount = computed(() => {
                     @remove="selectCharacter(operator)" />
             </div>
         </div>
-        <div class="col-auto mt-md-0 mt-4" v-if="enableMove">
-            <div>
-                <button @click="moveOperator('up')" class="btn btn-primary btn-up" :disabled="sortedList[0] === props.selectedOperator">▲</button>
+        <div class="col-auto mt-md-0 mt-4 pe-0" v-if="enableMove">
+            <div class="mt-2">
+                <button @click="moveOperator('up')" class="btn btn-primary btn-up"
+                    :disabled="sortedList[0] === props.selectedOperator">▲</button>
             </div>
             <div>
-                <button @click="moveOperator('down')" class="btn btn-primary btn-dn" :disabled="sortedList[sortedList.length - 1] === props.selectedOperator">▼</button>
+                <button @click="moveOperator('down')" class="btn btn-primary btn-dn"
+                    :disabled="sortedList[sortedList.length - 1] === props.selectedOperator">▼</button>
             </div>
-        </div>  
-        <div class="col-md-auto col-2 center-vert p-0 px-md-2">
+        </div>
+        <div class="col-md-auto col center-vert pe-0 pt-0 pb-0 px-md-2">
             <div class="operator-image">
                 <ImageFinder :subject="operator" />
             </div>
@@ -172,8 +175,9 @@ const goalsCount = computed(() => {
                 <OperatorLevelPromotion :selectedOperator="selectedOperator" type="current" />
                 <OperatorSkillLevels v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
                     type="current" />
-                <OperatorSkillMasteries v-if="operator.skills.length > 0 && operator.rarity !== 'TIER_2' && operator.rarity !== 'TIER_3'" :selected-operator="selectedOperator"
-                    type="current" />
+                <OperatorSkillMasteries
+                    v-if="operator.skills.length > 0 && operator.rarity !== 'TIER_2' && operator.rarity !== 'TIER_3'"
+                    :selected-operator="selectedOperator" type="current" />
                 <OperatorModules v-if="operator.modules.length > 0" :selected-operator="selectedOperator"
                     type="current" />
             </div>
@@ -183,8 +187,9 @@ const goalsCount = computed(() => {
                 <OperatorLevelPromotion :selectedOperator="selectedOperator" type="target" />
                 <OperatorSkillLevels v-if="operator.skills.length > 0" :selected-operator="selectedOperator"
                     type="target" />
-                <OperatorSkillMasteries v-if="operator.skills.length > 0 && operator.rarity !== 'TIER_2' && operator.rarity !== 'TIER_3'" :selected-operator="selectedOperator"
-                    type="target" />
+                <OperatorSkillMasteries
+                    v-if="operator.skills.length > 0 && operator.rarity !== 'TIER_2' && operator.rarity !== 'TIER_3'"
+                    :selected-operator="selectedOperator" type="target" />
                 <OperatorModules v-if="operator.modules.length > 0" :selected-operator="selectedOperator"
                     type="target" />
             </div>
@@ -198,6 +203,13 @@ const goalsCount = computed(() => {
 </template>
 
 <style scoped>
+.col-75 {
+    @media screen and (max-width: 768px) {
+        flex: 0 0 auto;
+        width: 60%
+    }
+}
+
 .btn-up {
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
