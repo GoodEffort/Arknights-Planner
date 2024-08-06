@@ -22,10 +22,8 @@ If you run into an issue where the page stops working due to some invalid state 
  - press Enter and refresh the page
 
 things I want to add
- - a way to sync your saved plans across devices
+ - a way to sync your saved plans across devices (In progress)
  - crafting recommendation
- - reordering operators
- - Phone app?
  - share link to move it to another device/browser (new Import/Export feature kind of does this, I want it easier still)
 
  Data Sources

@@ -127,6 +127,10 @@ const goalsCount = computed(() => {
     return count;
 })
 
+const openWiki = () =>
+    window.open(`https://arknights.wiki.gg/wiki/${operator.value.name.replace(' - ','/').replace(' ', '_')}`, '_blank');
+
+
 </script>
 
 <template>
@@ -162,7 +166,7 @@ const goalsCount = computed(() => {
             </div>
         </div>
         <div class="col-md-auto col center-vert pe-0 pt-0 pb-0 px-md-2">
-            <div class="operator-image">
+            <div class="operator-image" @click="openWiki">
                 <ImageFinder :subject="operator" />
             </div>
         </div>
@@ -242,6 +246,7 @@ const goalsCount = computed(() => {
 }
 
 .operator-image img {
+    cursor: pointer;
     @media screen and (min-width: 768px) {
         max-height: 75px;
         width: 75px;
