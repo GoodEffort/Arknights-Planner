@@ -10,6 +10,7 @@ import type { Item, Operator } from '../types/outputdata';
 import { OperatorPlans } from '../types/plans';
 import DriveClient from '../api/google-drive-api';
 import { clientId, scope } from '../data/authInfo';
+//import { clientId, scope } from '../data/devauthinfo';
 
 export const usePlannerStore = defineStore('planner', () => {
     const operators = ref<Operator[]>([]);
@@ -32,7 +33,8 @@ export const usePlannerStore = defineStore('planner', () => {
         let exp = 0;
         for (const itemId in inventory) {
             const gainExp = items.value[itemId]?.gainExp ?? 0;
-            exp += inventory[itemId] * gainExp;
+            const qty = isNaN(inventory[itemId]) ? 0 : inventory[itemId];
+            exp += qty * gainExp;
         }
         return exp;
     }
