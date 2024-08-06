@@ -6,8 +6,9 @@ import { usePlannerStore } from '../store/planner-store';
 import type { Operator } from '../types/outputdata';
 import PlannerSection from './PlannerSection.vue';
 import AddOperatorsCell from './AddOperatorsCell.vue';
+import { localeContains, localeStartsWith } from '../data/operatorNameCompare';
 
-const { operators } = storeToRefs(usePlannerStore());
+const { operators, selectedOperators } = storeToRefs(usePlannerStore());
 
 const pageCount = computed(() => Math.ceil(operators.value.length / pageSize.value));
 
@@ -15,43 +16,10 @@ const selectedSort = ref<'Name' | 'Rarity' | 'Class'>('Name');
 const operatorFilter = ref('');
 const pageSize = ref(6); // make it divisible by 12 for bootstrap grids
 const showAll = ref(false);
-
-const getLocaleComparableString = (s: string) =>
-    s.normalize("NFKD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^0-9a-z\s]/gi, "")
-        .toLowerCase();
-
-const localeStringSearch = (
-    fn: typeof String.prototype.startsWith | typeof String.prototype.includes | typeof String.prototype.endsWith,
-    main: string,
-    sub: string
-) => {
-    // ensure sub is a string and not empty
-    if (sub === "") return true;
-    if (!sub || !main.length) return false;
-    sub = "" + sub;
-
-    // if sub is longer than main, it can't be contained
-    if (sub.length > main.length) return false;
-
-    return fn.call(
-        getLocaleComparableString(main), 
-        getLocaleComparableString(sub)
-    );
-};
-
-const localeContains = (main: string, sub: string) =>
-    localeStringSearch(String.prototype.includes, main, sub);
-
-const localeStartsWith = (main: string, sub: string) =>
-    localeStringSearch(String.prototype.startsWith, main, sub);
-
-const localeEndsWith = (main: string, sub: string) =>
-    localeStringSearch(String.prototype.endsWith, main, sub);
+const showSelected = ref(false);
 
 const filteredCharacters = computed(() => {
-    const ops = operators.value;
+    const ops = operators.value.filter(op => showSelected.value || !selectedOperators.value.find(c => c.operator.id === op.id));
 
     const startsWith = ops.filter(character =>
         localeStartsWith(
@@ -60,24 +28,15 @@ const filteredCharacters = computed(() => {
         )
     ).sort(characterSort);
 
-    const endsWith = ops.filter(character =>
-        !startsWith.includes(character) &&
-        localeEndsWith(
-            character.name.toLowerCase(),
-            operatorFilter.value.toLowerCase()
-        )
-    ).sort(characterSort);
-
     const contains = ops.filter(character =>
         !startsWith.includes(character) &&
-        !endsWith.includes(character) &&
         localeContains(
             character.name.toLowerCase(),
             operatorFilter.value.toLowerCase()
         )
     )
 
-    return [...startsWith, ...contains, ...endsWith];
+    return [...startsWith, ...contains];
 });
 
 const pagedOperators = computed(() => {
@@ -125,8 +84,11 @@ function characterSort(a: Operator, b: Operator) {
         <hr />
 
         <div v-if="filteredCharacters.length > 36" class="mb-3">
-            <button @click="showAll = !showAll" class="btn btn-primary">{{ showAll ? 'Limit Selection' : 'Show All'
-                }}</button>
+            <div class="btn-group">
+                <button @click="showAll = !showAll" class="btn btn-primary">{{ showAll ? 'Limit Selection' : 'Show All'
+                    }}</button>
+                <button @click="showSelected = !showSelected" class="btn btn-primary">{{ showSelected ? 'Show Unselected Only' : 'Show Selected and Unselected' }}</button>
+            </div>
             <p v-if="!showAll" class="mt-2">
                 Filter more to display different operators, currently showing 36 of {{ filteredCharacters.length }}
                 operators

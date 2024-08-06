@@ -9,14 +9,18 @@ import OperatorControlsTabs from './OperatorControlsTabs.vue';
 import OperatorModules from './controls/OperatorModules.vue';
 import OperatorLevelPromotion from './controls/OperatorLevelPromotion.vue';
 import OperatorSkillLevels from './controls/OperatorSkillLevels.vue';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
     selectedOperator: SelectedOperator;
+    sortedList: SelectedOperator[];
+    enableMove: boolean;
 }>();
 
 const section = ref<'' | 'Plan' | 'Items'>('');
-
-const { selectCharacter } = usePlannerStore();
+const store = usePlannerStore();
+const { selectCharacter } = store;
+const { selectedOperators } = storeToRefs(store);
 
 const operator = computed(() => props.selectedOperator.operator);
 
@@ -25,17 +29,119 @@ const active = computed({
     set: value => props.selectedOperator.active = value
 });
 
+const moveOperator = (direction: 'up' | 'down') => {
+    const sortedList = props.sortedList.slice();
+    const operators = selectedOperators.value.slice();
+
+    // doing this made it a little faster as all the computed properties were being recalculated when the array was being modified
+    selectedOperators.value = [];
+
+    let index = sortedList.findIndex(op => op === props.selectedOperator);
+
+    if (direction === 'up') {
+        if (index === 0) {
+            return;
+        }
+
+        const currentId = props.selectedOperator.operator.id;
+        const current = operators.find(op => op.operator.id === currentId);
+
+        const targetid = sortedList[index - 1].operator.id;
+        const target = operators.find(op => op.operator.id === targetid);
+
+        if (!target || !current) {
+            return;
+        }
+
+        if (target.sort === current.sort) {
+            current.sort--;
+        }
+        else {
+            const temp = target.sort;
+
+            target.sort = current.sort;
+            current.sort = temp;
+
+        }
+    } else {
+        if (index === sortedList.length - 1) {
+            return;
+        }
+
+        const currentId = props.selectedOperator.operator.id;
+        const current = operators.find(op => op.operator.id === currentId);
+
+        const targetid = sortedList[index + 1].operator.id;
+        const target = operators.find(op => op.operator.id === targetid);
+
+        if (!target || !current) {
+            return;
+        }
+
+        if (target.sort === current.sort) {
+            props.selectedOperator.sort++;
+        }
+        else {
+            const temp = target.sort;
+
+            target.sort = current.sort;
+            current.sort = temp;
+        }
+    }
+
+    // put the array back in the store
+    selectedOperators.value = operators;
+};
+
+const goalsCount = computed(() => {
+    const plans = props.selectedOperator.plans;
+
+    let count = 0;
+    
+    if (plans.currentElite < plans.targetElite) {
+        count += plans.targetElite - plans.currentElite;
+    }
+    if (plans.currentLevel < plans.targetLevel || plans.currentElite < plans.targetElite) {
+        count++;
+    }
+    if (plans.currentSkillLevels < plans.targetSkillLevels) {
+        count += plans.targetSkillLevels - plans.currentSkillLevels;
+    }
+    if (plans.currentSkillMasteries.skill1 < plans.targetSkillMasteries.skill1) {
+        count += plans.targetSkillMasteries.skill1 - plans.currentSkillMasteries.skill1;
+    }
+    if (plans.currentSkillMasteries.skill2 < plans.targetSkillMasteries.skill2) {
+        count += plans.targetSkillMasteries.skill2 - plans.currentSkillMasteries.skill2;
+    }
+    if (plans.currentSkillMasteries.skill3 < plans.targetSkillMasteries.skill3) {
+        count += plans.targetSkillMasteries.skill3 - plans.currentSkillMasteries.skill3;
+    }
+    
+    const currentModGoal = plans.currentModules.reduce((acc, mod) => acc + mod.level, 0);
+    const targetModGoal = plans.targetModules.reduce((acc, mod) => acc + mod.level, 0);
+
+    if (currentModGoal < targetModGoal) {
+        count += targetModGoal - currentModGoal;
+    }
+
+    return count;
+})
+
 </script>
 
 <template>
     <div class="row mb-3">
-        <div class="col-9 col-md">
+        <div class="col-8 col-md">
             <div class="row">
+                <div class="col-1 text-center">
+                    <span class="badge rounded-pill bg-primary translate-up" v-if="goalsCount > 0">{{ goalsCount }}</span>
+                </div>
                 <div class="col center-vert">
                     <h4>
                         {{ operator.name }}
                     </h4>
                 </div>
+                <div class="col-1"></div>
             </div>
             <div class="col-auto">
                 <OperatorControlsTabs :active="active" :section="section" @active="active = !active"
@@ -44,7 +150,15 @@ const active = computed({
                     @remove="selectCharacter(operator)" />
             </div>
         </div>
-        <div class="col-md-auto col-3 center-vert p-0 px-md-2">
+        <div class="col-auto mt-md-0 mt-4" v-if="enableMove">
+            <div>
+                <button @click="moveOperator('up')" class="btn btn-primary" :disabled="sortedList[0] === props.selectedOperator">▲</button>
+            </div>
+            <div>
+                <button @click="moveOperator('down')" class="btn btn-primary" :disabled="sortedList[sortedList.length - 1] === props.selectedOperator">▼</button>
+            </div>
+        </div>  
+        <div class="col-md-auto col-2 center-vert p-0 px-md-2">
             <div class="operator-image">
                 <ImageFinder :subject="operator" />
             </div>
