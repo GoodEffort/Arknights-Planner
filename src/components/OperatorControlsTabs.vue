@@ -9,7 +9,7 @@ defineProps({
 <template>
     <div class="row text-start d-none d-md-flex">
         <div class="col-2">
-            <button type="button" class="btn" :class="`${active ? 'btn-success' : 'btn-secondary'}`"
+            <button type="button" class="btn" :class="`${active ? 'btn-primary' : 'btn-secondary'}`"
                 @click="$emit('active')">{{ active ? 'Active' : 'Inactive' }}</button>
         </div>
         <div class="col-8 text-center">

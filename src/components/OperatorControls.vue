@@ -152,10 +152,10 @@ const goalsCount = computed(() => {
         </div>
         <div class="col-auto mt-md-0 mt-4" v-if="enableMove">
             <div>
-                <button @click="moveOperator('up')" class="btn btn-primary" :disabled="sortedList[0] === props.selectedOperator">▲</button>
+                <button @click="moveOperator('up')" class="btn btn-primary btn-up" :disabled="sortedList[0] === props.selectedOperator">▲</button>
             </div>
             <div>
-                <button @click="moveOperator('down')" class="btn btn-primary" :disabled="sortedList[sortedList.length - 1] === props.selectedOperator">▼</button>
+                <button @click="moveOperator('down')" class="btn btn-primary btn-dn" :disabled="sortedList[sortedList.length - 1] === props.selectedOperator">▼</button>
             </div>
         </div>  
         <div class="col-md-auto col-2 center-vert p-0 px-md-2">
@@ -198,6 +198,16 @@ const goalsCount = computed(() => {
 </template>
 
 <style scoped>
+.btn-up {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.btn-dn {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+}
+
 .center-vert {
     margin-top: auto;
     margin-bottom: auto;
