@@ -493,7 +493,7 @@ export const usePlannerStore = defineStore('planner', () => {
                             addNeededItems(skillCosts);
                     }
                 }
-                if (key === 'modules') {
+                else if (key === 'modules') {
                     for (const moduleType in levelUpNeeds.modules) {
                         for (let levelIndex = 0; levelIndex < levelUpNeeds.modules[moduleType].length; levelIndex++) {
                             addNeededItems(levelUpNeeds.modules[moduleType][levelIndex]);
