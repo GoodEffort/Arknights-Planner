@@ -2,6 +2,7 @@
 import Modal from './Modal.vue';
 import NewFeatures from './NewFeatures.vue';
 import NightModeToggle from './NightModeToggle.vue';
+import ArkPRTSImportModal from './ArkPRTSImportModal.vue';
 import { ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import GoogleDriveAPI from './GoogleDriveAPI.vue';
@@ -21,6 +22,7 @@ const showNewFeaturesModal = ref(lastUse < new Date(BUILD_DATE));
 const exportString = ref('');
 const showSideMenu = ref(false);
 const showSettings = ref(false);
+const showArkPRTSImportModal = ref(false);
 
 const joinGoogleDriveTest = () => {
   if (confirm('Make sure you export your data before trying this. Are you sure you want to try Google Drive Sync Test?')) {
@@ -106,6 +108,9 @@ const openUpcomingEvents = () => {
         </div>
         <div class="list-group-item" @click="showImportModal = !showImportModal">
           <div><font-awesome-icon icon="upload" /> Import</div>
+        </div>
+        <div class="list-group-item" @click="showArkPRTSImportModal = !showArkPRTSImportModal">
+          <div><font-awesome-icon icon="upload" /> Import from ArkPRTS</div>
         </div>
         <div class="list-group-item separator"></div>
         <div class="list-group-item" @click="showCreditsmodal = !showCreditsmodal">
@@ -220,6 +225,7 @@ const openUpcomingEvents = () => {
   </modal>
 
   <NewFeatures v-model="showNewFeaturesModal" />
+  <ArkPRTSImportModal v-model="showArkPRTSImportModal" />
 </template>
 
 <style scoped>
