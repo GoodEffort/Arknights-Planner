@@ -5,10 +5,12 @@ class SelectedOperator {
     operator: Operator;
     plans: OperatorPlans;
     active: boolean;
+    sort: number;
 
-    constructor(operator: Operator, plans?: OldOperatorPlans | OperatorPlans, active: boolean = true) {
+    constructor(operator: Operator, plans?: OldOperatorPlans | OperatorPlans, active: boolean = true, sort: number = 9999999999999) {
         this.operator = operator;
         this.active = active;
+        this.sort = sort;
         
         if (!plans) {
             this.plans = new OperatorPlans();
@@ -29,12 +31,14 @@ type OldSaveRecord = {
 class SaveRecord {
     operatorId: string;
     active: boolean;
+    sort: number;
     plans: OperatorPlans;
 
     constructor(operator: SelectedOperator) {
         this.operatorId = operator.operator.id;
         this.plans = operator.plans;
         this.active = !!operator.active;
+        this.sort = operator.sort ?? 9999999999999;
     }
 }
 

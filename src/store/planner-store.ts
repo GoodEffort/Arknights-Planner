@@ -10,6 +10,7 @@ import type { Item, Operator } from '../types/outputdata';
 import { OperatorPlans } from '../types/plans';
 import DriveClient from '../api/google-drive-api';
 import { clientId, scope } from '../data/authInfo';
+import { localeCompare } from '../data/operatorNameCompare';
 //import { clientId, scope } from '../data/devauthinfo';
 
 export const usePlannerStore = defineStore('planner', () => {
@@ -67,11 +68,12 @@ export const usePlannerStore = defineStore('planner', () => {
         const currentInventory = Object.fromEntries(Object.entries(inventory.value).filter(b => b[1] > 0));
         const operatorPlans: SaveRecord[] = [];
 
-        for (const { operator, plans, active } of selectedOperators.value) {
+        for (const { operator, plans, active, sort } of selectedOperators.value) {
             const saveRecord: SaveRecord = {
                 operatorId: operator.id,
                 plans,
-                active
+                active,
+                sort
             };
             operatorPlans.push(saveRecord);
         }
@@ -138,7 +140,8 @@ export const usePlannerStore = defineStore('planner', () => {
 
                     return {
                         ...record,
-                        plans: newPlans
+                        plans: newPlans,
+                        sort: 9999999999999
                     };
                 }
                 else {
@@ -188,6 +191,21 @@ export const usePlannerStore = defineStore('planner', () => {
                 if (selectedOperators.value.find(c => c.operator.id === operatorId) === undefined)
                     selectedOperators.value.push(saveRecord); // only add if it doesn't already exist, Vite is duplicating entries in dev mode
             }
+
+            let sortVal = null;
+            for (const op of selectedOperators.value) {
+                if (sortVal === null) {
+                    sortVal = op.sort;
+                }
+                else if (sortVal !== op.sort) {
+                    sortVal = null;
+                    break;
+                }
+            }
+            
+            if (sortVal !== null) {
+                bringActiveToTop();
+            }
         }
     }
 
@@ -204,7 +222,10 @@ export const usePlannerStore = defineStore('planner', () => {
 
         if (saveData) {
             const SaveRecord: OldSaveRecord | SaveRecord = JSON.parse(saveData);
-            selectedOperator = new SelectedOperator(operator, SaveRecord.plans, SaveRecord.active);
+            let sort = 9999999999999;
+            if (!IsOldSaveRecord(SaveRecord))
+                sort = SaveRecord.sort;
+            selectedOperator = new SelectedOperator(operator, SaveRecord.plans, SaveRecord.active, sort);
         }
         else {
             selectedOperator = new SelectedOperator(operator);
@@ -227,6 +248,27 @@ export const usePlannerStore = defineStore('planner', () => {
         localStorage.setItem('selectedCharacters', JSON.stringify(selectedOperators.value.map(c => c.operator.id)));
 
         //console.log(character);
+    }
+    
+    const bringActiveToTop = () => {
+        const bringInactiveToTopSort = (a: SelectedOperator, b: SelectedOperator) => {
+            if (a.active === b.active) {
+                return localeCompare(a.operator.name, b.operator.name);
+            }
+            return a.active ? -1 : 1;
+        };
+
+        const ops = selectedOperators.value
+            .slice()
+            .sort(bringInactiveToTopSort);
+
+        selectedOperators.value = [];
+        
+        for (const op of ops) {
+            op.sort = ops.indexOf(op);
+        }
+
+        selectedOperators.value = ops;
     }
 
     // Costs
@@ -731,7 +773,6 @@ export const usePlannerStore = defineStore('planner', () => {
     }, 1000);
     watch(selectedOperators, writeOperators, { deep: true });
     
-
     const writeInventory = debounce((value: {
         [key: string]: number;
     }) => {
@@ -775,5 +816,6 @@ export const usePlannerStore = defineStore('planner', () => {
         updateFile,
         getDriveClient,
         googleDriveTest,
+        bringActiveToTop,
     }
 });
