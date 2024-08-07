@@ -112,10 +112,12 @@ const applyUpgrade = (costs: { [key: string]: number }, type: 'SkillLevel' | 'Sk
             currentPlan.currentSkillMasteries.skill3 = rank;
             break;
         case 'E1':
+            currentPlan.currentLevel = 1;
             currentPlan.currentElite = 1;
             break;
         case 'E2':
-            currentPlan.currentElite = 2;
+            currentPlan.currentLevel = 1;
+            currentPlan.currentElite = 2;        
             break;
     }
 
