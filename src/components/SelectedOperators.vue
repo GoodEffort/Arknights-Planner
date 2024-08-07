@@ -3,14 +3,14 @@ import PlannerSection from './PlannerSection.vue';
 import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
 import OperatorControls from './OperatorControls.vue';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { localeCompare, localeContains, localeStartsWith } from '../data/operatorNameCompare';
 import { SelectedOperator } from '../types/planner-types';
 
 const { selectedOperators } = storeToRefs(usePlannerStore());
 const { bringActiveToTop } = usePlannerStore();
 
-const showInactive = ref(false);
+const showInactive = ref((localStorage.getItem('showInactive') ?? 'true') === 'true');
 const operatorFilter = ref('');
 const sectionTitle = computed(() => 
     showInactive.value ? `Selected Operators (${selectedOperatorsSorted.value.length})` : 
@@ -44,6 +44,8 @@ const selectedOperatorsSorted = computed(() => {
 
     return [...startsWith, ...contains];
 });
+
+watch(showInactive, () => localStorage.setItem('showInactive', showInactive.value.toString()));
 </script>
 
 <template>
