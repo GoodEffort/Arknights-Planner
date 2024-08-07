@@ -16,7 +16,7 @@ const selectedSort = ref<'Name' | 'Rarity' | 'Class'>('Name');
 const operatorFilter = ref('');
 const pageSize = ref(6); // make it divisible by 12 for bootstrap grids
 const showAll = ref(false);
-const showSelected = ref(false);
+const showSelected = ref(true);
 
 const filteredCharacters = computed(() => {
     const ops = operators.value.filter(op => showSelected.value || !selectedOperators.value.find(c => c.operator.id === op.id));
