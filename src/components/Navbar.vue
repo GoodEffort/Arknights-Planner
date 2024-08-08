@@ -1,68 +1,27 @@
 <script setup lang="ts">
-import Modal from './Modal.vue';
 import NewFeatures from './NewFeatures.vue';
 import NightModeToggle from './NightModeToggle.vue';
 import ArkPRTSImportModal from './ArkPRTSImportModal.vue';
 import { ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import GoogleDriveAPI from './GoogleDriveAPI.vue';
+import SettingsModal from './SettingsModal.vue';
+import CreditsModal from './CreditsModal.vue';
+import ExportModal from './ExportModal.vue';
+import ImportModal from './ImportModal.vue';
 import { storeToRefs } from 'pinia';
 
-const store = usePlannerStore();
-const { exportSavedRecords, importSavedRecords } = store;
-const { googleDriveTest } = storeToRefs(store);
+const { googleDriveTest } = storeToRefs(usePlannerStore());
 
 const lastUse = new Date(localStorage.getItem('last-use-timestamp') ?? 0);
 
 const showCreditsmodal = ref(false);
 const showExportModal = ref(false);
 const showImportModal = ref(false);
-const importString = ref('');
-const showNewFeaturesModal = ref(lastUse < new Date(BUILD_DATE));
-const exportString = ref('');
+const showNewFeaturesModal = ref(lastUse < new Date('8/7/2024')); // can use BUILD_DATE but if I push a quick bug fix, I don't want to show it again
 const showSideMenu = ref(false);
 const showSettings = ref(false);
 const showArkPRTSImportModal = ref(false);
-
-const joinGoogleDriveTest = () => {
-  if (confirm('Make sure you export your data before trying this. Are you sure you want to try Google Drive Sync Test?')) {
-    localStorage.setItem('GoogleDriveTest', '1');
-    googleDriveTest.value = true;
-    window.location.reload(); // reload the page to get the auth flow correct
-  }
-};
-
-const leaveGoogleDriveTest = () => {
-  localStorage.removeItem('GoogleDriveTest');
-  googleDriveTest.value = false;
-  window.location.reload();
-};
-
-const importData = () => {
-  if (importString.value) {
-    importSavedRecords(importString.value);
-    showImportModal.value = false;
-    importString.value = '';
-  }
-  else {
-    alert('No data to import');
-  }
-}
-
-const exportData = () => {
-  exportString.value = JSON.stringify(exportSavedRecords());
-  showExportModal.value = true;
-};
-
-const copyToClipboard = () => {
-  navigator.clipboard.writeText(exportString.value);
-  showExportModal.value = false;
-};
-
-const pasteFromClipboard = async () => {
-  const text = await navigator.clipboard.readText();
-  importString.value = text;
-};
 
 const openUpcomingEvents = () => {
   window.open('https://arknights.wiki.gg/wiki/Event', '_blank');
@@ -78,7 +37,7 @@ const openUpcomingEvents = () => {
     </div>
     <div>
       <div class="btn-group" role="group">
-        <button class="btn btn-primary" @click="exportData">
+        <button class="btn btn-primary" @click="showExportModal = !showExportModal">
           <font-awesome-icon icon="download" />
           <span class="d-none d-md-inline"> Export</span>
         </button>
@@ -103,7 +62,7 @@ const openUpcomingEvents = () => {
           </div>
         </div>
         <div class="list-group-item separator"></div>
-        <div class="list-group-item" @click="exportData">
+        <div class="list-group-item" @click="showExportModal = !showExportModal">
           <div><font-awesome-icon icon="download" /> Export</div>
         </div>
         <div class="list-group-item" @click="showImportModal = !showImportModal">
@@ -133,98 +92,16 @@ const openUpcomingEvents = () => {
     </div>
   </Transition>
 
-  <modal v-model="showSettings">
-    <template #header>
-      Settings (not much here yet, more to come)
-    </template>
-    <template #body>
-      <div>
-        <div>
-          <button class="btn btn-primary" @click="joinGoogleDriveTest">Try Google Drive Sync Test</button>
-          <hr />
-          <button class="btn btn-danger" @click="leaveGoogleDriveTest">Leave Google Drive Sync Test</button>
-        </div>
-      </div>
-    </template>
-    <template #footer>
-      <button class="btn btn-danger" @click="showSettings = false">Close</button>
-    </template>
-  </modal>
+  <SettingsModal v-model="showSettings" />
 
-  <modal v-model="showCreditsmodal">
-    <template #header>
-      Data Source Credits
-    </template>
-    <template #body>
-      <div>
-        <div>This calculator was made by Luke Hovarter</div>
-        <div>Find me on <a href="https://github.com/GoodEffort">GitHub</a>!</div>
-        <div>Repository here: <a href="https://github.com/GoodEffort/Arknights-Planner">Arknights-Planner</a></div>
+  <CreditsModal v-model="showCreditsmodal" />
 
-        <div class="mt-4">Thanks to the following sources for data:</div>
-        <div>
-          <a href="https://github.com/Kengxxiao/ArknightsGameData_YoStar">Kengxxiao's Yostar info</a>
-        </div>
+  <ExportModal v-model="showExportModal" />
 
-        <div>
-          <a href="https://github.com/Kengxxiao/ArknightsGameData">Kengxxiao's CN client info</a>
-        </div>
-        <div>
-          <a href="https://github.com/Aceship/Arknight-Images">Aceship for images</a>
-        </div>
-        <div>
-          <a href="https://github.com/ArknightsAssets/ArknightsAssets">ArknightsAssets for images</a>
-        </div>
-        <div>
-          <a href="https://docs.google.com/spreadsheets/d/12X0uBQaN7MuuMWWDTiUjIni_MOP015GnulggmBJgBaQ/">This super
-            impressive Google Sheet of most efficient maps by momo.moe / u/elmoe0715</a>
-        </div>
-      </div>
-      <div>
-        <a href="https://ak.gamepress.gg/news/arknights-material-farming-efficiency-best-stages-farm">Gamepress for
-          material farming efficiency quick reference</a>
-      </div>
-    </template>
-    <template #footer>
-      <button class="btn btn-danger" @click="showCreditsmodal = false">Close</button>
-    </template>
-  </modal>
-
-  <modal v-model="showExportModal">
-    <template #header>
-      Export Data
-    </template>
-    <template #body>
-      <div>
-        <textarea rows="10" cols="50" readonly>{{ exportString }}</textarea>
-      </div>
-    </template>
-    <template #footer>
-      <button class="btn btn-danger" @click="showExportModal = false">Cancel</button>
-      <button class="btn btn-success" @click="copyToClipboard">Copy To Clipboard</button>
-    </template>
-  </modal>
-
-  <modal v-model="showImportModal">
-    <template #header>
-      Import Data
-    </template>
-    <template #body>
-      <div class="mb-2">
-        <h2>This will overwrite all data currently on the page with what you paste below!</h2>
-      </div>
-      <div>
-        <textarea rows="10" cols="50" v-model="importString"></textarea>
-      </div>
-      <button class="btn btn-primary" @click="pasteFromClipboard">Paste from Clipboard</button>
-    </template>
-    <template #footer>
-      <button class="btn btn-danger" @click="showImportModal = false">Cancel</button>
-      <button class="btn btn-success" @click="importData">Import Data</button>
-    </template>
-  </modal>
+  <ImportModal v-model="showImportModal" />
 
   <NewFeatures v-model="showNewFeaturesModal" />
+
   <ArkPRTSImportModal v-model="showArkPRTSImportModal" />
 </template>
 
