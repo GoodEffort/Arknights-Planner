@@ -18,12 +18,6 @@ export const usePlannerStore = defineStore('planner', () => {
     const selectedOperators = ref<SelectedOperator[]>([]);
     const items = ref<{ [key: string]: Item }>({});
     const lmdId = ref<string>('4001'); // this should be constant
-    const reserveTier1 = ref<number>(0);
-    const reserveTier2 = ref<number>(0);
-    const reserveTier3 = ref<number>(0);
-    const reserveTier4 = ref<number>(0);
-    const reserveTier5 = ref<number>(0);
-    const reserveTier6 = ref<number>(0);
 
     let driveClient: DriveClient;
 
@@ -202,7 +196,7 @@ export const usePlannerStore = defineStore('planner', () => {
                     break;
                 }
             }
-            
+
             if (sortVal !== null) {
                 bringActiveToTop();
             }
@@ -249,7 +243,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
         //console.log(character);
     }
-    
+
     const bringActiveToTop = () => {
         const bringInactiveToTopSort = (a: SelectedOperator, b: SelectedOperator) => {
             if (a.active === b.active) {
@@ -263,7 +257,7 @@ export const usePlannerStore = defineStore('planner', () => {
             .sort(bringInactiveToTopSort);
 
         selectedOperators.value = [];
-        
+
         for (const op of ops) {
             op.sort = ops.indexOf(op);
         }
@@ -477,7 +471,7 @@ export const usePlannerStore = defineStore('planner', () => {
             // module costs
             for (const module of selectedOperator.operator.modules) {
                 const moduleType = module.type.toLowerCase();
-                
+
                 const currentModuleLevel = currentModules.find(m => m.type.toLowerCase() === moduleType)?.level ?? 0;
                 const targetModuleLevel = targetModules.find(m => m.type.toLowerCase() === moduleType)?.level ?? 0;
 
@@ -582,7 +576,7 @@ export const usePlannerStore = defineStore('planner', () => {
             alert(`Item ${item.name} cannot be crafted.`);
             return;
         }
-        
+
         const { itemId } = item;
         const { count: outputCount, costs } = item.recipe;
 
@@ -680,7 +674,7 @@ export const usePlannerStore = defineStore('planner', () => {
                 const item = items.value[itemId];
                 // and we should not breakdown the item
                 if (
-                    stopItems.indexOf(itemId) >= 0 || 
+                    stopItems.indexOf(itemId) >= 0 ||
                     item.recipe === undefined
                 ) {
                     if (breakdownCosts[itemId] === undefined) {
@@ -725,7 +719,7 @@ export const usePlannerStore = defineStore('planner', () => {
                     b.item.sortId - a.item.sortId :
                     efficientToFarmItemIds.indexOf(b.item.itemId) - efficientToFarmItemIds.indexOf(a.item.itemId))
             .map(({ item }) => ({ stage: stages[item.itemId], item })));
-    
+
     // Drive API
     const getDriveClient = async () => {
         if (!driveClient) {
@@ -733,7 +727,7 @@ export const usePlannerStore = defineStore('planner', () => {
         }
 
         await driveClient.initializationPromise;
-        return driveClient; 
+        return driveClient;
     }
 
     const renderButton = async (button: HTMLElement) => {
@@ -751,6 +745,31 @@ export const usePlannerStore = defineStore('planner', () => {
         const client = await getDriveClient();
         const data = await client.downloadFile();
         importSavedRecords(JSON.stringify(data));
+    }
+
+    // Crafting
+    const reservedItems = ref(getBlankInventory());
+
+    const loadReservedItems = () => {
+        const reservedItemsString = localStorage.getItem('reservedItems');
+        // if we have previously saved reserved items, load them
+        if (reservedItemsString) {
+            reservedItems.value = JSON.parse(reservedItemsString);
+        }
+        // else set the reserved items to the default values
+        else {
+            for (const [itemId, item] of Object.entries(items.value)) {
+                switch (item.rarity) {
+                    case 'TIER_1':
+                    case 'TIER_2':
+                        reservedItems.value[itemId] = 20;
+                        break;
+                    default:
+                        reservedItems.value[itemId] = 0;
+                        break;
+                }
+            }
+        }
     }
 
     // Watchers
@@ -772,7 +791,7 @@ export const usePlannerStore = defineStore('planner', () => {
         }
     }, 1000);
     watch(selectedOperators, writeOperators, { deep: true });
-    
+
     const writeInventory = debounce((value: {
         [key: string]: number;
     }) => {
@@ -784,6 +803,18 @@ export const usePlannerStore = defineStore('planner', () => {
         }
     }, 1000);
     watch(inventory, writeInventory, { deep: true });
+
+    const writeReservedItems = debounce((value: {
+        [key: string]: number;
+    }) => {
+        localStorage.setItem('reservedItems', JSON.stringify(value));
+
+        if (driveClient && driveClient.credentials) {
+            console.log('updating reserved items in drive');
+            updateFile();
+        }
+    }, 1000);
+    watch(reservedItems, writeReservedItems, { deep: true });
 
     return {
         items,
@@ -797,12 +828,6 @@ export const usePlannerStore = defineStore('planner', () => {
         battleRecords,
         neededItems,
         neededItemsBreakdown,
-        reserveTier1,
-        reserveTier2,
-        reserveTier3,
-        reserveTier4,
-        reserveTier5,
-        reserveTier6,
         recomendedStages,
         loadCharacters,
         loadSavedRecords,
@@ -817,5 +842,7 @@ export const usePlannerStore = defineStore('planner', () => {
         getDriveClient,
         googleDriveTest,
         bringActiveToTop,
+        loadReservedItems,
+        reservedItems,
     }
 });
