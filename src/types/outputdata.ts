@@ -11,6 +11,7 @@ type Operator = {
     promotions: Promotion[];
 
     modules: Module[];
+    cnOnly: boolean;
 }
 
 type Promotion = {
@@ -37,6 +38,7 @@ type Module = {
     icon: string;
     description: string;
     cost: LevelUpCost[][];
+    cnOnly: boolean;
 }
 
 type Item = {
