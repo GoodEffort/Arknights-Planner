@@ -92,7 +92,7 @@ const moduleImageLink = 'https://goodeffort.github.io/Arknights-Planner-Data/ima
                     @error="imageErrors.push(index)" />
             </div>
             <div class="col text-start">
-                <div>{{ module.name }}</div>
+                <div>{{ module.name }} <font-awesome-icon v-if="module.cnOnly" icon="clock" /></div>
                 <OperatorInputGroup :model-value="getModule(module.type) ?? 0"
                     @update:model-value="value => setModule({ type: module.type, value })"
                     :label="getModuleTypeDisplay(module)" :key="`1${operatorId}-mx`" :min="getMin(module.type)" />
