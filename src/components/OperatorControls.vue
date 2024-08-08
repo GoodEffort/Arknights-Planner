@@ -143,7 +143,7 @@ const openWiki = () =>
                 </div>
                 <div class="col center-vert">
                     <h4>
-                        {{ operator.name }}
+                        {{ operator.name }} <font-awesome-icon v-if="operator.cnOnly" icon="clock" />
                     </h4>
                 </div>
                 <div class="col-1"></div>
