@@ -9,6 +9,7 @@ import OperatorControlsTabs from './OperatorControlsTabs.vue';
 import OperatorModules from './controls/OperatorModules.vue';
 import OperatorLevelPromotion from './controls/OperatorLevelPromotion.vue';
 import OperatorSkillLevels from './controls/OperatorSkillLevels.vue';
+import Tooltip from './Tooltip.vue';
 import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
@@ -143,7 +144,13 @@ const openWiki = () =>
                 </div>
                 <div class="col center-vert">
                     <h4>
-                        {{ operator.name }} <font-awesome-icon v-if="operator.cnOnly" icon="clock" />
+                        <span>{{ operator.name }}</span>
+                        <span v-if="operator.cnOnly">
+                            <span>&nbsp;</span>
+                            <Tooltip tooltipText="CN Server only Operator for now">
+                                <font-awesome-icon icon="clock" />
+                            </Tooltip>
+                        </span>
                     </h4>
                 </div>
                 <div class="col-1"></div>
