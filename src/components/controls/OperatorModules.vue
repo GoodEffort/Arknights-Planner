@@ -6,6 +6,7 @@ import { usePlannerStore } from '../../store/planner-store';
 import { storeToRefs } from 'pinia';
 import { Module } from '../../types/outputdata';
 import Modal from '../Modal.vue';
+import Tooltip from '../Tooltip.vue';
 
 const { selectedOperators } = storeToRefs(usePlannerStore());
 
@@ -92,7 +93,15 @@ const moduleImageLink = 'https://goodeffort.github.io/Arknights-Planner-Data/ima
                     @error="imageErrors.push(index)" />
             </div>
             <div class="col text-start">
-                <div>{{ module.name }} <font-awesome-icon v-if="module.cnOnly" icon="clock" /></div>
+                <div>
+                    <span>{{ module.name }}</span>
+                    <span v-if="module.cnOnly">
+                        <span>&nbsp;</span>
+                        <Tooltip tooltipText="CN server only Module for now">
+                            <font-awesome-icon icon="clock" />
+                        </Tooltip>
+                    </span>
+                </div>
                 <OperatorInputGroup :model-value="getModule(module.type) ?? 0"
                     @update:model-value="value => setModule({ type: module.type, value })"
                     :label="getModuleTypeDisplay(module)" :key="`1${operatorId}-mx`" :min="getMin(module.type)" />
