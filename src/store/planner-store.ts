@@ -4,7 +4,7 @@ import { SelectedOperator, OldSaveRecord, LevelUpNeeds, LevelUpNeedsKey, SaveRec
 import { debounce } from 'lodash';
 import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
-import { efficientToFarmItemIds, stages } from '../data/farmingdata';
+import { efficientToFarmItemIds, farmingChips, stages } from '../data/farmingdata';
 import getArknightsData from '../data/arknightsdata';
 import type { Item, Operator } from '../types/outputdata';
 import { OperatorPlans } from '../types/plans';
@@ -750,6 +750,177 @@ export const usePlannerStore = defineStore('planner', () => {
     // Crafting
     const reservedItems = ref(getBlankInventory());
 
+    const availableItems = computed(() => {
+        const aItems: { [key: string]: number } = JSON.parse(JSON.stringify(inventory.value));
+
+        for (const [itemId, count] of Object.entries(reservedItems.value)) {
+            aItems[itemId] -= count;
+        }
+
+        for (const key in aItems) {
+            if (key !== lmdId.value && (aItems[key] <= 0 || isNaN(aItems[key]))) {
+                delete aItems[key];
+            }
+        }
+
+        return aItems;
+    });
+
+    const commitDictionaryTransaction = (dict: { [key: string]: number; }, transaction: { [key: string]: number; }) => {
+        for (const key in dict) {
+            delete dict[key];
+        }
+
+        for (const key in transaction) {
+            dict[key] = transaction[key];
+        }
+    }
+
+    const handleItem = (
+        item: Item,
+        available: { [key: string]: number; },
+        itemsToFarm: { [key: string]: number; },
+        itemsToCraft: { [key: string]: number; },
+        hasEfficientParent: boolean = false // skip checking if a parent is efficient to farm
+    ): number => {
+
+        const { itemId } = item;
+        let output = 0;
+
+        const shouldFarm = !hasEfficientParent && efficientToFarmItemIds.indexOf(itemId) >= 0;
+
+        // if available take it from there
+        if (available[itemId] > 0) {
+            available[itemId]--;
+            output = 1;
+        }
+        // else if check if we can craft it with or without farming children
+        // skip chips as they infinitely recurse
+        else if (item.recipe && farmingChips.indexOf(itemId) < 0) {
+            // setup a transaction style edit of our states
+            const availableUpdate = JSON.parse(JSON.stringify(available));
+            const itemsToFarmUpdate = JSON.parse(JSON.stringify(itemsToFarm));
+            const itemsToCraftUpdate = JSON.parse(JSON.stringify(itemsToCraft));
+
+            let canResolve = true;
+
+            for (const childNode of item.recipe.costs) {
+                let childCount = childNode.count;
+                const childItem = items.value[childNode.id];
+
+                if (childItem.itemId === lmdId.value) {
+                    const availableLMD = availableUpdate[lmdId.value] ?? 0;
+                    const subtractamount = Math.min(childCount, availableLMD);
+                    
+                    childCount -= subtractamount;
+                    availableUpdate[lmdId.value] -= subtractamount;
+
+                    if (childCount > 0) {
+                        if (itemsToFarmUpdate[lmdId.value] === undefined) {
+                            itemsToFarmUpdate[lmdId.value] = 0;
+                        }
+
+                        itemsToFarmUpdate[lmdId.value] += childCount;
+                    }
+
+                    continue;
+                }
+
+                while (childCount > 0) {
+                    const amountProduced = handleItem(
+                        childItem,
+                        availableUpdate,
+                        itemsToFarmUpdate,
+                        itemsToCraftUpdate,
+                        shouldFarm || hasEfficientParent
+                    );
+
+                    if (amountProduced <= 0) {
+                        canResolve = false;
+                        break;
+                    }
+                    else {
+                        childCount -= amountProduced;
+                    }
+                }
+
+                if (!canResolve) {
+                    break;
+                }
+            }
+
+            if (canResolve) {
+                if (itemsToCraftUpdate[itemId] === undefined) {
+                    itemsToCraftUpdate[itemId] = 0;
+                }
+
+                itemsToCraftUpdate[itemId] += item.recipe.count;
+
+                commitDictionaryTransaction(available, availableUpdate);
+                commitDictionaryTransaction(itemsToFarm, itemsToFarmUpdate);
+                commitDictionaryTransaction(itemsToCraft, itemsToCraftUpdate);
+                output = item.recipe.count;
+            }
+        }
+
+        // else check if the item is efficient to farm
+        if (
+            !hasEfficientParent &&
+            output === 0 &&
+            shouldFarm
+        ) {
+            if (itemsToFarm[itemId] === undefined) {
+                itemsToFarm[itemId] = 0;
+            }
+            itemsToFarm[itemId]++;
+            output = 1;
+        }
+
+        return output;
+    }
+
+    const testingNeededItems = ref<{ item: Item; count: number; }[]>([]);
+
+    const missingItems = computed(() => {
+        const itemsToFarm: { [key: string]: number; } = {};
+        const itemsToCraft: { [key: string]: number; } = {};
+
+        const available: { [key: string]: number; } = JSON.parse(JSON.stringify(availableItems.value));
+        const needed: { [key: string]: number; } = {};
+
+        const n: { item: Item; count: number; }[] =testingNeededItems.value;//neededItems.value;
+
+        for (const { item, count } of n) {
+            if (needed[item.itemId] === undefined) {
+                needed[item.itemId] = 0;
+            }
+            needed[item.itemId] += count;
+        }
+
+        const returnNeeded: { [key: string]: number; } = JSON.parse(JSON.stringify(needed));
+
+        for (const itemId in needed) {
+            const item = items.value[itemId];
+
+            while (needed[itemId] > 0) {
+                let created = handleItem(item, available, itemsToFarm, itemsToCraft);
+                if (created > 0) {
+                    needed[itemId] -= created;
+                }
+                else {
+                    break;
+                }
+            }
+        }
+
+        return {
+            itemsToFarm,
+            itemsToCraft,
+            startingItems: returnNeeded,
+            leftoverItems: needed
+        }
+    });
+
     const loadReservedItems = () => {
         const reservedItemsString = localStorage.getItem('reservedItems');
         // if we have previously saved reserved items, load them
@@ -759,14 +930,14 @@ export const usePlannerStore = defineStore('planner', () => {
         // else set the reserved items to the default values
         else {
             for (const [itemId, item] of Object.entries(items.value)) {
-                switch (item.rarity) {
-                    case 'TIER_1':
-                    case 'TIER_2':
-                        reservedItems.value[itemId] = 20;
-                        break;
-                    default:
-                        reservedItems.value[itemId] = 0;
-                        break;
+                if (
+                    (item.rarity === 'TIER_1' || item.rarity === 'TIER_2') &&
+                    efficientToFarmItemIds.indexOf(itemId) < 0
+                ) {
+                    reservedItems.value[itemId] = 20;
+                }
+                else {
+                    reservedItems.value[itemId] = 0;
                 }
             }
         }
@@ -844,5 +1015,8 @@ export const usePlannerStore = defineStore('planner', () => {
         bringActiveToTop,
         loadReservedItems,
         reservedItems,
+        availableItems,
+        missingItems,
+        testingNeededItems,
     }
 });
