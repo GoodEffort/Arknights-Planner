@@ -11,10 +11,11 @@ const { recomendedStages } = storeToRefs(usePlannerStore());
     <PlannerSection title="Farming" local-storage-id="farming-collapsed">
         <div class="container">
             <div class="row">
-                <div v-for="{ stage, item } in recomendedStages" :key="stage" class="col-md-2 col-6">
+                <div v-for="{ stage, item, count } in recomendedStages" :key="stage" class="col-md-2 col-6">
                     <div>
                         <ImageFinder :subject="item" class="img-thumbnail" />
                     </div>
+                    <div>{{  count  }}</div>
                     <div class="mb-3">{{ stage }}</div>
                 </div>
             </div>
