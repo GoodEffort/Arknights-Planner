@@ -7,6 +7,7 @@ import InventoryControls from './InventoryControls.vue';
 import TotalCostOfPlan from './TotalCostOfPlan.vue';
 import MissingItems from './MissingItems.vue';
 import Farming from './Farming.vue';
+import CraftingRec from './CraftingRec.vue';
 
 const { loadCharacters, loadSavedRecords, getDriveClient, downloadFile, loadReservedItems } = usePlannerStore();
 
@@ -36,6 +37,7 @@ onMounted(async () => {
             <TotalCostOfPlan />
             <MissingItems />
             <Farming />
+            <CraftingRec />
             <InventoryControls />
             <AddOperators />
         </div>
@@ -54,7 +56,11 @@ onMounted(async () => {
     transform: scale(1) rotate(0deg);
     opacity: .8;
 	animation: pulse 2s infinite;
+    overflow: hidden;
+}
 
+.loading-penguin {
+    width: 80vh;
 }
 
 @keyframes pulse {
