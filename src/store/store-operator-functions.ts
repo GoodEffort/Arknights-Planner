@@ -54,7 +54,7 @@ const getExportData = (selectedOperators: SelectedOperator[], inventory: Invento
         Object.entries(inventory)
             .filter(b => b[1] > 0)
     );
-    
+
     const operatorPlans: SaveRecord[] = [];
 
     for (const { operator, plans, active, sort } of selectedOperators) {
@@ -77,58 +77,58 @@ const getExportData = (selectedOperators: SelectedOperator[], inventory: Invento
     return exportData;
 }
 
+const mapOldRecordToNew = (record: SaveRecord | OldSaveRecord): SaveRecord => {
+    if (IsOldSaveRecord(record)) {
+        const oldPlans = record.plans;
+        const newPlans: OperatorPlans = {
+            ...oldPlans,
+            targetModules: [],
+            currentModules: []
+        };
+
+        if ((oldPlans.currentModules.x ?? 0) > 0) {
+            newPlans.currentModules.push({ type: 'X', level: oldPlans.currentModules.x });
+        }
+        if ((oldPlans.currentModules.y ?? 0) > 0) {
+            newPlans.currentModules.push({ type: 'Y', level: oldPlans.currentModules.y });
+        }
+        if ((oldPlans.currentModules.d ?? 0) > 0) {
+            newPlans.currentModules.push({ type: 'D', level: oldPlans.currentModules.d });
+        }
+
+        if ((oldPlans.targetModules.x ?? 0) > 0) {
+            newPlans.targetModules.push({ type: 'X', level: oldPlans.targetModules.x });
+        }
+        if ((oldPlans.targetModules.y ?? 0) > 0) {
+            newPlans.targetModules.push({ type: 'Y', level: oldPlans.targetModules.y });
+        }
+        if ((oldPlans.targetModules.d ?? 0) > 0) {
+            newPlans.targetModules.push({ type: 'D', level: oldPlans.targetModules.d });
+        }
+
+        return {
+            ...record,
+            plans: newPlans,
+            sort: 9999999999999
+        };
+    }
+    else {
+        return record;
+    }
+}
+
+const mapOldExportDataToNew = (data: ExportData | OldExportData): ExportData => {
+    data.p = data.p.map(mapOldRecordToNew);
+    return data as ExportData;
+}
+
 // puts the imported data into the local storage so it can be loaded
 const setImportData = (importString: string) => {
-    let dataold: OldExportData;
     let data: ExportData | null = null;
 
     try {
-        dataold = JSON.parse(importString);
-        data = {
-            p: [],
-            s: dataold.s,
-            i: dataold.i
-        };
-
-        data.p = dataold.p.map((record): SaveRecord => {
-            if (IsOldSaveRecord(record)) {
-                const oldPlans = record.plans;
-                const newPlans: OperatorPlans = {
-                    ...oldPlans,
-                    targetModules: [],
-                    currentModules: []
-                };
-
-                if ((oldPlans.currentModules.x ?? 0) > 0) {
-                    newPlans.currentModules.push({ type: 'X', level: oldPlans.currentModules.x });
-                }
-                if ((oldPlans.currentModules.y ?? 0) > 0) {
-                    newPlans.currentModules.push({ type: 'Y', level: oldPlans.currentModules.y });
-                }
-                if ((oldPlans.currentModules.d ?? 0) > 0) {
-                    newPlans.currentModules.push({ type: 'D', level: oldPlans.currentModules.d });
-                }
-
-                if ((oldPlans.targetModules.x ?? 0) > 0) {
-                    newPlans.targetModules.push({ type: 'X', level: oldPlans.targetModules.x });
-                }
-                if ((oldPlans.targetModules.y ?? 0) > 0) {
-                    newPlans.targetModules.push({ type: 'Y', level: oldPlans.targetModules.y });
-                }
-                if ((oldPlans.targetModules.d ?? 0) > 0) {
-                    newPlans.targetModules.push({ type: 'D', level: oldPlans.targetModules.d });
-                }
-
-                return {
-                    ...record,
-                    plans: newPlans,
-                    sort: 9999999999999
-                };
-            }
-            else {
-                return record;
-            }
-        });
+        const importData: ExportData | OldExportData = JSON.parse(importString);
+        data = mapOldExportDataToNew(importData);
     }
     catch (e) {
         alert('Invalid data format');
