@@ -11,7 +11,7 @@ import { OperatorPlans } from '../types/plans';
 import DriveClient from '../api/google-drive-api';
 import { clientId, scope } from '../data/authInfo';
 import { localeCompare } from '../data/operatorNameCompare';
-import { getBlankInventoryFromItems, getCharacterData } from './store-operator-functions';
+import { getBlankInventoryFromItems, getCharacterData, getExportData } from './store-operator-functions';
 //import { clientId, scope } from '../data/devauthinfo';
 
 export const usePlannerStore = defineStore('planner', () => {
@@ -27,6 +27,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
     // Getters
     const getBlankInventory = () => getBlankInventoryFromItems(items.value);
+    const exportSavedRecords = () => getExportData(selectedOperators.value, inventory.value);
 
     // Operators
     async function loadCharacters() {
@@ -36,32 +37,10 @@ export const usePlannerStore = defineStore('planner', () => {
         items.value = data.items;
 
         const currentInventory = JSON.parse(JSON.stringify(inventory.value)); // don't modify the original inventory
-        inventory.value = { ...getBlankInventory(), ...currentInventory };
-    }
-
-    function exportSavedRecords() {
-        const selectedCharacters = selectedOperators.value.map(c => c.operator.id);
-        const currentInventory = Object.fromEntries(Object.entries(inventory.value).filter(b => b[1] > 0));
-        const operatorPlans: SaveRecord[] = [];
-
-        for (const { operator, plans, active, sort } of selectedOperators.value) {
-            const saveRecord: SaveRecord = {
-                operatorId: operator.id,
-                plans,
-                active,
-                sort
-            };
-            operatorPlans.push(saveRecord);
-        }
-
-        const exportData = {
-            s: selectedCharacters,
-            i: currentInventory,
-            p: operatorPlans
+        inventory.value = {
+            ...getBlankInventory(),
+            ...currentInventory
         };
-
-        //console.log(exportData);
-        return exportData;
     }
 
     function importSavedRecords(importString: string) {
@@ -685,13 +664,13 @@ export const usePlannerStore = defineStore('planner', () => {
 
     const recomendedStages = computed(() =>
         Object.entries(missingItems.value.itemsToFarm)
-        .map(([itemId, count]) => (
-            {
-                item: items.value[itemId],
-                count,
-                stage: stages[itemId]
-            }))
-        .sort((a, b) => a.item.sortId - b.item.sortId)
+            .map(([itemId, count]) => (
+                {
+                    item: items.value[itemId],
+                    count,
+                    stage: stages[itemId]
+                }))
+            .sort((a, b) => a.item.sortId - b.item.sortId)
     );
 
     // Drive API
@@ -785,7 +764,7 @@ export const usePlannerStore = defineStore('planner', () => {
                 if (childItem.itemId === lmdId.value) {
                     const availableLMD = availableUpdate[lmdId.value] ?? 0;
                     const subtractamount = Math.min(childCount, availableLMD);
-                    
+
                     childCount -= subtractamount;
                     availableUpdate[lmdId.value] -= subtractamount;
 
@@ -865,7 +844,7 @@ export const usePlannerStore = defineStore('planner', () => {
         const needed: { [key: string]: number; } = {};
 
         // TODO: fix this when done testing
-        const n: { item: Item; count: number; }[] =testingNeededItems.value;//neededItems.value;
+        const n: { item: Item; count: number; }[] = testingNeededItems.value;//neededItems.value;
 
         for (const { item, count } of n) {
             if (needed[item.itemId] === undefined) {
