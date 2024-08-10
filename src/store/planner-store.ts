@@ -1,3 +1,4 @@
+import { getEXPValue } from './store-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { SelectedOperator, OldSaveRecord, LevelUpNeeds, LevelUpNeedsKey, SaveRecord, IsOldSaveRecord } from '../types/planner-types';
@@ -5,12 +6,12 @@ import { debounce } from 'lodash';
 import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
 import { efficientToFarmItemIds, farmingChips, stages } from '../data/farmingdata';
-import getArknightsData from '../data/arknightsdata';
 import type { Item, Operator } from '../types/outputdata';
 import { OperatorPlans } from '../types/plans';
 import DriveClient from '../api/google-drive-api';
 import { clientId, scope } from '../data/authInfo';
 import { localeCompare } from '../data/operatorNameCompare';
+import { getBlankInventoryFromItems, getCharacterData } from './store-operator-functions';
 //import { clientId, scope } from '../data/devauthinfo';
 
 export const usePlannerStore = defineStore('planner', () => {
@@ -24,33 +25,14 @@ export const usePlannerStore = defineStore('planner', () => {
     const googleDriveTest = ref<boolean>(false);
     googleDriveTest.value = localStorage.getItem("GoogleDriveTest") === "1";
 
-    const getEXPValue = (inventory: { [key: string]: number; }) => {
-        let exp = 0;
-        for (const itemId in inventory) {
-            const gainExp = items.value[itemId]?.gainExp ?? 0;
-            const qty = isNaN(inventory[itemId]) ? 0 : inventory[itemId];
-            exp += qty * gainExp;
-        }
-        return exp;
-    }
+    // Getters
+    const getBlankInventory = () => getBlankInventoryFromItems(items.value);
 
     // Operators
     async function loadCharacters() {
-        const data = await getArknightsData();
+        const data = await getCharacterData();
 
-        const opsval: {
-            [key: string]: Operator;
-        } = data.operators as {
-            [key: string]: Operator;
-        };
-
-        for (const operatorId in opsval) {
-            const opVal = opsval[operatorId];
-            opVal.id = operatorId;
-
-            operators.value.push(opVal);
-        }
-
+        operators.value = data.operators;
         items.value = data.items;
 
         const currentInventory = JSON.parse(JSON.stringify(inventory.value)); // don't modify the original inventory
@@ -274,16 +256,6 @@ export const usePlannerStore = defineStore('planner', () => {
         }
         return br.sort((a, b) => b.gainExp - a.gainExp);
     });
-
-    const getBlankInventory = () => {
-        const neededItems: { [key: string]: number } = {};
-
-        for (const itemId in items.value) {
-            neededItems[itemId] = 0;
-        }
-
-        return neededItems;
-    }
 
     const totalCostsByOperatorCategorized = computed(() => {
         const neededItemsByOperator: { [key: string]: LevelUpNeeds } = {};
@@ -712,13 +684,15 @@ export const usePlannerStore = defineStore('planner', () => {
     });
 
     const recomendedStages = computed(() =>
-        neededItemsBreakdown.value
-            .filter(({ item: { itemId } }) => stages[itemId])
-            .sort((a, b) =>
-                ((efficientToFarmItemIds.indexOf(a.item.itemId) >= 0) === (efficientToFarmItemIds.indexOf(b.item.itemId) >= 0)) ?
-                    b.item.sortId - a.item.sortId :
-                    efficientToFarmItemIds.indexOf(b.item.itemId) - efficientToFarmItemIds.indexOf(a.item.itemId))
-            .map(({ item }) => ({ stage: stages[item.itemId], item })));
+        Object.entries(missingItems.value.itemsToFarm)
+        .map(([itemId, count]) => (
+            {
+                item: items.value[itemId],
+                count,
+                stage: stages[itemId]
+            }))
+        .sort((a, b) => a.item.sortId - b.item.sortId)
+    );
 
     // Drive API
     const getDriveClient = async () => {
@@ -882,12 +856,15 @@ export const usePlannerStore = defineStore('planner', () => {
     const testingNeededItems = ref<{ item: Item; count: number; }[]>([]);
 
     const missingItems = computed(() => {
+        // setup our states, we split our needed items and subcomponents into items to farm and items to craft
         const itemsToFarm: { [key: string]: number; } = {};
         const itemsToCraft: { [key: string]: number; } = {};
 
+        // copy the available items and needed items so we can modify it
         const available: { [key: string]: number; } = JSON.parse(JSON.stringify(availableItems.value));
         const needed: { [key: string]: number; } = {};
 
+        // TODO: fix this when done testing
         const n: { item: Item; count: number; }[] =testingNeededItems.value;//neededItems.value;
 
         for (const { item, count } of n) {
@@ -897,8 +874,10 @@ export const usePlannerStore = defineStore('planner', () => {
             needed[item.itemId] += count;
         }
 
+        // TODO: remove this when done testing
         const returnNeeded: { [key: string]: number; } = JSON.parse(JSON.stringify(needed));
 
+        // for each item we need, see if we can craft and or farm it and do the same for its children
         for (const itemId in needed) {
             const item = items.value[itemId];
 
@@ -910,6 +889,16 @@ export const usePlannerStore = defineStore('planner', () => {
                 else {
                     break;
                 }
+            }
+        }
+
+        // handle leftover items that we couldn't resolve by adding them to items to farm
+        for (const itemId in needed) {
+            if (needed[itemId] > 0) {
+                if (itemsToFarm[itemId] === undefined) {
+                    itemsToFarm[itemId] = 0;
+                }
+                itemsToFarm[itemId] += needed[itemId];
             }
         }
 
