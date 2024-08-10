@@ -5,11 +5,11 @@ const jsonLink = //import.meta.env.PROD ?
 //: "/Arknights-Planner/arknights-data.json"
 ;
 
-const getArknightsData = async () => {
+const fetchArknightsData = async () => {
     const response = await fetch(jsonLink);
     const data: JSONData = await response.json();
 
     return data;
 };
 
-export default getArknightsData;
+export default fetchArknightsData;

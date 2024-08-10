@@ -11,7 +11,7 @@ const emit = defineEmits<{
     (e: 'update:modelValue', value: boolean): void;
 }>();
 
-const { importSavedRecords } = usePlannerStore();
+const { importSavedRecords, loadSavedRecords } = usePlannerStore();
 
 const importString = ref('');
 
@@ -23,6 +23,7 @@ const show = computed({
 const importData = () => {
   if (importString.value) {
     importSavedRecords(importString.value);
+    loadSavedRecords();
     show.value = false;
     importString.value = '';
   }

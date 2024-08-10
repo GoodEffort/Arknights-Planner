@@ -20,7 +20,7 @@ const show = computed({
 });
 
 const { operators } = storeToRefs(usePlannerStore());
-const { exportSavedRecords, getBlankInventory, importSavedRecords } = usePlannerStore();
+const { exportSavedRecords, getBlankInventory, importSavedRecords, loadSavedRecords } = usePlannerStore();
 
 const characters = ref('');
 const items = ref('');
@@ -76,6 +76,7 @@ const importData = () => {
         const arkprtsimport = importArkPRTSData(arkprtsCharacters, operators.value, existingRecords.p, itemscsv, blankInventory);
 
         importSavedRecords(JSON.stringify(arkprtsimport));
+        loadSavedRecords();
 
         show.value = false;
     }

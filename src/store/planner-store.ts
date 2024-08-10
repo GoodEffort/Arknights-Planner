@@ -1,4 +1,4 @@
-import { getEXPValue } from './store-functions';
+import { getEXPValue, Inventory } from './store-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { SelectedOperator, OldSaveRecord, LevelUpNeeds, LevelUpNeedsKey, SaveRecord, IsOldSaveRecord } from '../types/planner-types';
@@ -7,36 +7,44 @@ import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
 import { efficientToFarmItemIds, farmingChips, stages } from '../data/farmingdata';
 import type { Item, Operator } from '../types/outputdata';
-import { OperatorPlans } from '../types/plans';
 import DriveClient from '../api/google-drive-api';
 import { clientId, scope } from '../data/authInfo';
 import { localeCompare } from '../data/operatorNameCompare';
-import { getBlankInventoryFromItems, getCharacterData, getExportData } from './store-operator-functions';
+import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData } from './store-operator-functions';
 //import { clientId, scope } from '../data/devauthinfo';
 
 export const usePlannerStore = defineStore('planner', () => {
+    // Getters
+    const getBlankInventory = () => getBlankInventoryFromItems(items.value);
+    const exportSavedRecords = () => getExportData(selectedOperators.value, inventory.value);
+    const getInventoryCopy = () => JSON.parse(JSON.stringify(inventory.value)); // don't modify the original inventory
+
+    // State
+    let driveClient: DriveClient;
+
     const operators = ref<Operator[]>([]);
     const selectedOperators = ref<SelectedOperator[]>([]);
     const items = ref<{ [key: string]: Item }>({});
     const lmdId = ref<string>('4001'); // this should be constant
 
-    let driveClient: DriveClient;
-
-    const googleDriveTest = ref<boolean>(false);
-    googleDriveTest.value = localStorage.getItem("GoogleDriveTest") === "1";
-
-    // Getters
-    const getBlankInventory = () => getBlankInventoryFromItems(items.value);
-    const exportSavedRecords = () => getExportData(selectedOperators.value, inventory.value);
+    const googleDriveTest = ref<boolean>(localStorage.getItem("GoogleDriveTest") === "1");
+    
+    const inventory = ref<Inventory>(
+        {
+            ...getBlankInventory(),
+            ...(JSON.parse(localStorage.getItem('inventory') || '{}'))
+        }
+    );
 
     // Operators
     async function loadCharacters() {
-        const data = await getCharacterData();
+        const data = await getArknightsData();
 
         operators.value = data.operators;
         items.value = data.items;
 
-        const currentInventory = JSON.parse(JSON.stringify(inventory.value)); // don't modify the original inventory
+        const currentInventory = getInventoryCopy();
+
         inventory.value = {
             ...getBlankInventory(),
             ...currentInventory
@@ -44,92 +52,17 @@ export const usePlannerStore = defineStore('planner', () => {
     }
 
     function importSavedRecords(importString: string) {
-        let dataold: {
-            p: OldSaveRecord[] | SaveRecord[];
-            s: string[];
-            i: { [key: string]: number };
-        };
-
-        let data: {
-            p: SaveRecord[];
-            s: string[];
-            i: { [key: string]: number };
-        } | null = null;
-
-        try {
-            dataold = JSON.parse(importString);
-            data = {
-                p: [],
-                s: dataold.s,
-                i: dataold.i
-            };
-
-            data.p = dataold.p.map((record): SaveRecord => {
-                if (IsOldSaveRecord(record)) {
-                    const oldPlans = record.plans;
-                    const newPlans: OperatorPlans = {
-                        ...oldPlans,
-                        targetModules: [],
-                        currentModules: []
-                    };
-
-                    if ((oldPlans.currentModules.x ?? 0) > 0) {
-                        newPlans.currentModules.push({ type: 'X', level: oldPlans.currentModules.x });
-                    }
-                    if ((oldPlans.currentModules.y ?? 0) > 0) {
-                        newPlans.currentModules.push({ type: 'Y', level: oldPlans.currentModules.y });
-                    }
-                    if ((oldPlans.currentModules.d ?? 0) > 0) {
-                        newPlans.currentModules.push({ type: 'D', level: oldPlans.currentModules.d });
-                    }
-
-                    if ((oldPlans.targetModules.x ?? 0) > 0) {
-                        newPlans.targetModules.push({ type: 'X', level: oldPlans.targetModules.x });
-                    }
-                    if ((oldPlans.targetModules.y ?? 0) > 0) {
-                        newPlans.targetModules.push({ type: 'Y', level: oldPlans.targetModules.y });
-                    }
-                    if ((oldPlans.targetModules.d ?? 0) > 0) {
-                        newPlans.targetModules.push({ type: 'D', level: oldPlans.targetModules.d });
-                    }
-
-                    return {
-                        ...record,
-                        plans: newPlans,
-                        sort: 9999999999999
-                    };
-                }
-                else {
-                    return record;
-                }
-            });
-        }
-        catch (e) {
-            alert('Invalid data format');
-            return;
-        }
-
-        if (data == null || !Array.isArray(data.p) || !Array.isArray(data.s) || data.i == null) {
-            alert('Invalid data format');
-            return;
-        }
-
-        localStorage.setItem('selectedCharacters', JSON.stringify(data.s));
-        localStorage.setItem('inventory', JSON.stringify(data.i));
-
-        const saveRecords = data.p;
-        for (const op of saveRecords) {
-            const saveString = `plans-${op.operatorId}`;
-            localStorage.setItem(saveString, JSON.stringify(op));
-        }
-
-        selectedOperators.value = [];
-
-        inventory.value = { ...getBlankInventory(), ...data.i };
-        loadSavedRecords();
+        setImportData(importString);
     }
 
     function loadSavedRecords() {
+
+        const inventoryData: Inventory = JSON.parse(localStorage.getItem('inventory') || '{}');
+
+        inventory.value = { ...getBlankInventory(), ...inventoryData };
+
+        selectedOperators.value = [];
+
         const saveData: string | null = localStorage.getItem('selectedCharacters');
         if (saveData) {
             const operatorIds: string[] = JSON.parse(saveData);
@@ -513,12 +446,6 @@ export const usePlannerStore = defineStore('planner', () => {
     const totalEXPValueCost = computed(() => getEXPValue(totalCosts.value));
 
     // Inventory
-    const inventory = ref<{ [key: string]: number }>(
-        {
-            ...getBlankInventory(),
-            ...(JSON.parse(localStorage.getItem('inventory') || '{}'))
-        }
-    );
 
     const inventoryEXPValue = computed(() => getEXPValue(inventory.value));
 
@@ -597,7 +524,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
     const neededItemsBreakdown = computed(() => {
         const totalCostDict = totalCosts.value;
-        const currentInventory = JSON.parse(JSON.stringify(inventory.value)); // don't modify the original inventory
+        const currentInventory = getInventoryCopy();
         const breakdownCosts: { [key: string]: number } = {};
 
         const stopItems = efficientToFarmItemIds;
@@ -704,7 +631,7 @@ export const usePlannerStore = defineStore('planner', () => {
     const reservedItems = ref(getBlankInventory());
 
     const availableItems = computed(() => {
-        const aItems: { [key: string]: number } = JSON.parse(JSON.stringify(inventory.value));
+        const aItems: { [key: string]: number } = getInventoryCopy();
 
         for (const [itemId, count] of Object.entries(reservedItems.value)) {
             aItems[itemId] -= count;
