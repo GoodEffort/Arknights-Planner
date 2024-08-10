@@ -36,7 +36,9 @@ export const usePlannerStore = defineStore('planner', () => {
         }
     );
 
-    // Operators
+    // Functions
+    const importSavedRecords = setImportData;
+
     async function loadCharacters() {
         const data = await getArknightsData();
 
@@ -51,9 +53,7 @@ export const usePlannerStore = defineStore('planner', () => {
         };
     }
 
-    function importSavedRecords(importString: string) {
-        setImportData(importString);
-    }
+    
 
     function loadSavedRecords() {
 
