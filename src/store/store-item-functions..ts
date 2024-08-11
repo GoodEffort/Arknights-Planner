@@ -179,8 +179,23 @@ const handleItem = (
     return output;
 }
 
+const getAvailableItems = (inventory: Inventory, reservedItems: Inventory, lmdId: string) => {
+    for (const [itemId, count] of Object.entries(reservedItems)) {
+        inventory[itemId] -= count;
+    }
+
+    for (const key in inventory) {
+        if (key !== lmdId && (inventory[key] <= 0 || isNaN(inventory[key]))) {
+            delete inventory[key];
+        }
+    }
+
+    return inventory;
+}
+
 export {
     getNeededEXPItems,
     getNeededItems,
     handleItem,
+    getAvailableItems,
 }

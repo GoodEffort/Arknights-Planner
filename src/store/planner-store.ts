@@ -8,7 +8,7 @@ import { efficientToFarmItemIds } from '../data/farmingdata';
 import type { Item, Operator } from '../types/outputdata';
 import DriveClient from '../api/google-drive-api';
 import { clientId, scope } from '../data/authInfo';
-import { getNeededEXPItems, getNeededItems, handleItem } from './store-item-functions.';
+import { getAvailableItems, getNeededEXPItems, getNeededItems, handleItem } from './store-item-functions.';
 //import { clientId, scope } from '../data/devauthinfo';
 
 export const usePlannerStore = defineStore('planner', () => {
@@ -138,24 +138,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
     // Crafting
     const reservedItems = ref(getBlankInventory());
-
-    const availableItems = computed(() => {
-        const aItems: { [key: string]: number } = getInventoryCopy();
-
-        for (const [itemId, count] of Object.entries(reservedItems.value)) {
-            aItems[itemId] -= count;
-        }
-
-        for (const key in aItems) {
-            if (key !== lmdId.value && (aItems[key] <= 0 || isNaN(aItems[key]))) {
-                delete aItems[key];
-            }
-        }
-
-        return aItems;
-    });
-
-    const testingNeededItems = ref<{ item: Item; count: number; }[]>([]);
+    const availableItems = computed(() => getAvailableItems(getInventoryCopy(), reservedItems.value, lmdId.value));
 
     const missingItems = computed(() => {
         // setup our states, we split our needed items and subcomponents into items to farm and items to craft
@@ -310,6 +293,5 @@ export const usePlannerStore = defineStore('planner', () => {
         reservedItems,
         availableItems,
         missingItems,
-        testingNeededItems,
     }
 });
