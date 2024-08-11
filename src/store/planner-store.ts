@@ -1,7 +1,7 @@
-import { getEXPValue, Inventory } from './store-functions';
+import { getEXPValue, getSavedOperatorRecords, getSavedOperatorData, Inventory } from './store-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { SelectedOperator, OldSaveRecord, LevelUpNeeds, LevelUpNeedsKey, SaveRecord, IsOldSaveRecord } from '../types/planner-types';
+import { SelectedOperator, LevelUpNeeds, LevelUpNeedsKey, SaveRecord } from '../types/planner-types';
 import { debounce } from 'lodash';
 import { levelingCostsArray } from '../data/leveling-costs';
 import promotionLMDCosts from '../data/promotionCosts';
@@ -9,7 +9,6 @@ import { efficientToFarmItemIds, farmingChips, stages } from '../data/farmingdat
 import type { Item, Operator } from '../types/outputdata';
 import DriveClient from '../api/google-drive-api';
 import { clientId, scope } from '../data/authInfo';
-import { localeCompare } from '../data/operatorNameCompare';
 import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData } from './store-operator-functions';
 //import { clientId, scope } from '../data/devauthinfo';
 
@@ -17,7 +16,8 @@ export const usePlannerStore = defineStore('planner', () => {
     // Getters
     const getBlankInventory = () => getBlankInventoryFromItems(items.value);
     const exportSavedRecords = () => getExportData(selectedOperators.value, inventory.value);
-    const getInventoryCopy = () => JSON.parse(JSON.stringify(inventory.value)); // don't modify the original inventory
+    const getInventoryCopy = (): Inventory => JSON.parse(JSON.stringify(inventory.value)); // don't modify the original inventory
+    const getSavedInventory = (): Inventory => ({ ...getBlankInventory(), ...JSON.parse(localStorage.getItem('inventory') || '{}') });
 
     // State
     let driveClient: DriveClient;
@@ -29,104 +29,32 @@ export const usePlannerStore = defineStore('planner', () => {
 
     const googleDriveTest = ref<boolean>(localStorage.getItem("GoogleDriveTest") === "1");
     
-    const inventory = ref<Inventory>(
-        {
-            ...getBlankInventory(),
-            ...(JSON.parse(localStorage.getItem('inventory') || '{}'))
-        }
-    );
+    const inventory = ref<Inventory>(getSavedInventory());
 
     // Functions
     const importSavedRecords = setImportData;
-
+    
     async function loadCharacters() {
         const data = await getArknightsData();
 
         operators.value = data.operators;
         items.value = data.items;
 
-        const currentInventory = getInventoryCopy();
-
         inventory.value = {
             ...getBlankInventory(),
-            ...currentInventory
+            ...getInventoryCopy()
         };
     }
 
-    
-
     function loadSavedRecords() {
-
-        const inventoryData: Inventory = JSON.parse(localStorage.getItem('inventory') || '{}');
-
-        inventory.value = { ...getBlankInventory(), ...inventoryData };
-
-        selectedOperators.value = [];
-
-        const saveData: string | null = localStorage.getItem('selectedCharacters');
-        if (saveData) {
-            const operatorIds: string[] = JSON.parse(saveData);
-
-            for (const operatorId of operatorIds) {
-                const operator = operators.value.find(c => c.id === operatorId);
-
-                if (operator === undefined) {
-                    throw new Error(`Operator with id ${operatorId} not found.`);
-                }
-
-                const saveRecord = getSavedOperatorData(operatorId) || new SelectedOperator(operator);
-                //console.log(saveRecord);
-                if (selectedOperators.value.find(c => c.operator.id === operatorId) === undefined)
-                    selectedOperators.value.push(saveRecord); // only add if it doesn't already exist, Vite is duplicating entries in dev mode
-            }
-
-            let sortVal = null;
-            for (const op of selectedOperators.value) {
-                if (sortVal === null) {
-                    sortVal = op.sort;
-                }
-                else if (sortVal !== op.sort) {
-                    sortVal = null;
-                    break;
-                }
-            }
-
-            if (sortVal !== null) {
-                bringActiveToTop();
-            }
-        }
-    }
-
-    function getSavedOperatorData(operatorId: string): SelectedOperator {
-        const saveString = `plans-${operatorId}`;
-        const saveData: string | null = localStorage.getItem(saveString);
-        const operator = operators.value.find(c => c.id === operatorId);
-
-        if (operator === undefined) {
-            throw new Error(`Operator with id ${operatorId} not found.`);
-        }
-
-        let selectedOperator: SelectedOperator;
-
-        if (saveData) {
-            const SaveRecord: OldSaveRecord | SaveRecord = JSON.parse(saveData);
-            let sort = 9999999999999;
-            if (!IsOldSaveRecord(SaveRecord))
-                sort = SaveRecord.sort;
-            selectedOperator = new SelectedOperator(operator, SaveRecord.plans, SaveRecord.active, sort);
-        }
-        else {
-            selectedOperator = new SelectedOperator(operator);
-            localStorage.setItem(saveString, JSON.stringify(new SaveRecord(selectedOperator)));
-        }
-
-        return selectedOperator
+        inventory.value = getSavedInventory();
+        selectedOperators.value = getSavedOperatorRecords(operators.value);
     }
 
     function selectCharacter(character: Operator) {
         const existingSelection = selectedOperators.value.find(c => c.operator === character);
         if (existingSelection === undefined) {
-            const newOperatorSelection = getSavedOperatorData(character.id);
+            const newOperatorSelection = getSavedOperatorData(character);
             selectedOperators.value.push(newOperatorSelection);
         }
         else if (confirm(`Are you sure you want to remove ${character.name} from your selection?`)) {
@@ -136,27 +64,6 @@ export const usePlannerStore = defineStore('planner', () => {
         localStorage.setItem('selectedCharacters', JSON.stringify(selectedOperators.value.map(c => c.operator.id)));
 
         //console.log(character);
-    }
-
-    const bringActiveToTop = () => {
-        const bringInactiveToTopSort = (a: SelectedOperator, b: SelectedOperator) => {
-            if (a.active === b.active) {
-                return localeCompare(a.operator.name, b.operator.name);
-            }
-            return a.active ? -1 : 1;
-        };
-
-        const ops = selectedOperators.value
-            .slice()
-            .sort(bringInactiveToTopSort);
-
-        selectedOperators.value = [];
-
-        for (const op of ops) {
-            op.sort = ops.indexOf(op);
-        }
-
-        selectedOperators.value = ops;
     }
 
     // Costs
@@ -907,7 +814,6 @@ export const usePlannerStore = defineStore('planner', () => {
         updateFile,
         getDriveClient,
         googleDriveTest,
-        bringActiveToTop,
         loadReservedItems,
         reservedItems,
         availableItems,
