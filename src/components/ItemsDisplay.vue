@@ -94,7 +94,8 @@ const showItem = ref<Item>();
                             <b>{{ count }}</b>
                         </span>
                         <div v-if="farming">
-                            {{ stages[item.itemId] }}
+                            <hr class="my-1"/>
+                            {{ stages[item.itemId] ?? 'Craft/Buy' }}
                         </div>
                     </div>
                     <div v-if="!editInventory && controls" class="row mb-2">

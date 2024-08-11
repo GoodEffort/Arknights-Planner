@@ -37,6 +37,12 @@ watch(doNotShowAgain, (val) => {
         <div>
           <h2>New Features</h2>
           <div>
+            <h4>8/11/2024 2</h4>
+            <ul>
+              <li>Improved performance of acquisition recommendations calculation</li>
+            </ul>
+          </div>
+          <div>
             <h4>8/11/2024</h4>
             <h1>Crafting Recommendations</h1>
             <ul>
