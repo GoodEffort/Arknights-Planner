@@ -1,4 +1,5 @@
-import { getEXPValue, getSavedOperatorRecords, getSavedOperatorData, Inventory } from './store-functions';
+import { getEXPValue, Inventory } from './store-item-functions';
+import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData, getSavedOperatorRecords, getSavedOperatorData } from './store-operator-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { SelectedOperator, LevelUpNeeds, LevelUpNeedsKey, SaveRecord } from '../types/planner-types';
@@ -9,7 +10,6 @@ import { efficientToFarmItemIds, farmingChips, stages } from '../data/farmingdat
 import type { Item, Operator } from '../types/outputdata';
 import DriveClient from '../api/google-drive-api';
 import { clientId, scope } from '../data/authInfo';
-import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData } from './store-operator-functions';
 //import { clientId, scope } from '../data/devauthinfo';
 
 export const usePlannerStore = defineStore('planner', () => {
@@ -62,8 +62,6 @@ export const usePlannerStore = defineStore('planner', () => {
         }
 
         localStorage.setItem('selectedCharacters', JSON.stringify(selectedOperators.value.map(c => c.operator.id)));
-
-        //console.log(character);
     }
 
     // Costs
