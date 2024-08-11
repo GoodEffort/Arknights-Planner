@@ -4,7 +4,7 @@ import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { SelectedOperator, LevelUpNeeds, SaveRecord } from '../types/planner-types';
 import { debounce } from 'lodash';
-import { efficientToFarmItemIds, stages } from '../data/farmingdata';
+import { efficientToFarmItemIds } from '../data/farmingdata';
 import type { Item, Operator } from '../types/outputdata';
 import DriveClient from '../api/google-drive-api';
 import { clientId, scope } from '../data/authInfo';
@@ -109,17 +109,6 @@ export const usePlannerStore = defineStore('planner', () => {
         )
     );
 
-    const recomendedStages = computed(() =>
-        Object.entries(missingItems.value.itemsToFarm)
-            .map(([itemId, count]) => (
-                {
-                    item: items.value[itemId],
-                    count,
-                    stage: stages[itemId]
-                }))
-            .sort((a, b) => a.item.sortId - b.item.sortId)
-    );
-
     // Drive API
     const getDriveClient = async () => {
         if (!driveClient) {
@@ -185,9 +174,6 @@ export const usePlannerStore = defineStore('planner', () => {
             needed[item.itemId] += count;
         }
 
-        // TODO: remove this when done testing
-        const returnNeeded: { [key: string]: number; } = JSON.parse(JSON.stringify(needed));
-
         // for each item we need, see if we can craft and or farm it and do the same for its children
         for (const itemId in needed) {
             const item = items.value[itemId];
@@ -229,8 +215,6 @@ export const usePlannerStore = defineStore('planner', () => {
         return {
             itemsToFarm,
             itemsToCraft,
-            startingItems: returnNeeded,
-            leftoverItems: needed
         }
     });
 
@@ -311,7 +295,6 @@ export const usePlannerStore = defineStore('planner', () => {
         totalCostsByOperatorCategorized,
         battleRecords,
         neededItems,
-        recomendedStages,
         loadCharacters,
         loadSavedRecords,
         selectCharacter,

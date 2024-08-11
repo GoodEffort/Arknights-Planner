@@ -48,7 +48,7 @@ const displayItems = computed(() => {
         case 'craft':
             return itemsToCraft.value;
     }
-})
+});
 </script>
 
 <template>
@@ -65,6 +65,6 @@ const displayItems = computed(() => {
             </li>
         </ul>
         <hr />
-        <ItemsDisplay :display-items="displayItems" />
+        <ItemsDisplay :display-items="displayItems" :farming="tab === 'farm'" />
     </PlannerSection>
 </template>

@@ -6,6 +6,7 @@ import { storeToRefs } from 'pinia';
 import CraftButton from './CraftButton.vue';
 import ImageFinder from './ImageFinder.vue';
 import ItemModal from './ItemModal.vue';
+import { stages } from '../data/farmingdata';
 
 const { inventory, lmdId, items } = storeToRefs(usePlannerStore());
 
@@ -15,10 +16,12 @@ export interface Props {
         count: number;
     }[];
     controls?: boolean;
+    farming?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    controls: true
+    controls: true,
+    farming: false
 });
 
 const displayItems = computed(() => {
@@ -90,6 +93,9 @@ const showItem = ref<Item>();
                         <span v-else>
                             <b>{{ count }}</b>
                         </span>
+                        <div v-if="farming">
+                            {{ stages[item.itemId] }}
+                        </div>
                     </div>
                     <div v-if="!editInventory && controls" class="row mb-2">
                         <div class="col px-0">
