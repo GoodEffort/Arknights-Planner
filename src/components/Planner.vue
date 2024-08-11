@@ -4,7 +4,6 @@ import SelectedOperators from './SelectedOperators.vue';
 import { usePlannerStore } from '../store/planner-store';
 import { onMounted, ref } from 'vue';
 import InventoryControls from './InventoryControls.vue';
-import TotalCostOfPlan from './TotalCostOfPlan.vue';
 import MissingItems from './MissingItems.vue';
 
 const { loadCharacters, loadSavedRecords, getDriveClient, downloadFile, loadReservedItems } = usePlannerStore();
@@ -32,7 +31,6 @@ onMounted(async () => {
     <div style="height: 100%;">
         <div v-if="!isLoading" class="mt-5">
             <SelectedOperators />
-            <TotalCostOfPlan />
             <MissingItems />
             <InventoryControls />
             <AddOperators />

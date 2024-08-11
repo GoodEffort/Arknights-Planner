@@ -6,10 +6,25 @@ import { computed, ref, watch } from 'vue';
 import PlannerSection from './PlannerSection.vue';
 import { canCraft } from '../store/store-inventory-functions';
 
-const { neededItems, missingItems, items, inventory } = storeToRefs(usePlannerStore());
+const { totalCosts, neededItems, missingItems, items, inventory } = storeToRefs(usePlannerStore());
 
-const tab = ref<'missing' | 'farm' | 'craft'>(localStorage.getItem('missingItemTab') as 'missing' | 'farm' | 'craft' | null | '' || 'missing');
+type Tab = 'missing' | 'farm' | 'craft' | 'total';
+
+const tab = ref<Tab>((localStorage.getItem('missingItemTab') as Tab | null | '') || 'missing');
 watch(tab, () => localStorage.setItem('missingItemTab', tab.value));
+
+const totalCostsArray = computed(() => {
+    const costsDict = totalCosts.value ?? [];
+
+    const costs = Object.entries(costsDict).map(([key, count]) => {
+        const item = items.value[key];
+        return { item, count };
+    });
+
+    return costs
+        .filter(cost => cost.count > 0)
+        .sort((a, b) => a.item.sortId - b.item.sortId);
+});
 
 const itemsToFarm = computed(() =>
     Object.entries(missingItems.value.itemsToFarm).map(([itemId, count]) => {
@@ -47,18 +62,23 @@ const displayItems = computed(() => {
             return itemsToFarm.value;
         case 'craft':
             return itemsToCraft.value;
+        case 'total':
+            return totalCostsArray.value;
     }
 });
 </script>
 
 <template>
-    <PlannerSection title="Farming/Crafting Missing Items" local-storage-id="needed-items-collapsed">
+    <PlannerSection title="Missing Items and Recommendations" local-storage-id="needed-items-collapsed">
         <ul class="nav nav-pills nav-fill">
+            <li class="nav-item" @click="tab = 'total'">
+                <a class="nav-link" :class="{ 'active': tab === 'total' }" href="#">Total Cost</a>
+            </li>
             <li class="nav-item" @click="tab = 'missing'">
-                <a class="nav-link" :class="{ 'active': tab === 'missing' }" href="#">Total Missing Items</a>
+                <a class="nav-link" :class="{ 'active': tab === 'missing' }" href="#">Missing Items</a>
             </li>
             <li class="nav-item" @click="tab = 'farm'">
-                <a class="nav-link" href="#" :class="{ 'active': tab === 'farm' }">Items to Farm / Item breakdown</a>
+                <a class="nav-link" href="#" :class="{ 'active': tab === 'farm' }">Items to Farm/Breakdown</a>
             </li>
             <li class="nav-item" @click="tab = 'craft'">
                 <a class="nav-link" href="#" :class="{ 'active': tab === 'craft' }">Crafting Recommendations</a>
