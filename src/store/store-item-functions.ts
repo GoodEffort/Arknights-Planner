@@ -1,10 +1,11 @@
 import { levelingCostsArray } from "../data/leveling-costs";
 import promotionLMDCosts from "../data/promotionCosts";
-import { Item } from "../types/outputdata";
+import { Item, Recipe } from "../types/outputdata";
 import { LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from "../types/planner-types";
 
 // key is item id, value is quantity
 type Inventory = { [key: string]: number; };
+type ItemWithRecipe = Item & { recipe: Recipe };
 
 const inventoryToList = (
     itemDictionary: Inventory,
@@ -368,12 +369,34 @@ const getTotalCosts = (
     return neededItems;
 }
 
+const canCraft = (
+    item: Item, 
+    inventory: Inventory, 
+    items?: { [key: string]: Item; }
+ ): item is ItemWithRecipe => {
+    if (item.recipe === undefined) {
+        items === undefined ? null : alert(`Item ${item.name} cannot be crafted.`);
+        return false;
+    }
+    
+    // verify if we have enough items
+    for (const { id, count } of item.recipe.costs) {
+        if (inventory[id] < count) {
+            items === undefined ? null : alert(`You don't have enough ${items[id].name} to craft ${item.name}.`);
+            return false;
+        }
+    }
+
+    return true;
+}
+
 export {
     getEXPValue,
     getBattleRecords,
     getCostOfOperator,
     getTotalCostsByOperator,
     getTotalCosts,
+    canCraft,
 }
 
 export type {

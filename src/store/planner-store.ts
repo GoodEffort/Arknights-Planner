@@ -1,4 +1,4 @@
-import { getBattleRecords, getCostOfOperator, getEXPValue, getTotalCosts, getTotalCostsByOperator, Inventory } from './store-item-functions';
+import { canCraft, getBattleRecords, getCostOfOperator, getEXPValue, getTotalCosts, getTotalCostsByOperator, Inventory } from './store-item-functions';
 import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData, getSavedOperatorRecords, getSavedOperatorData } from './store-operator-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
@@ -66,9 +66,8 @@ export const usePlannerStore = defineStore('planner', () => {
 
     const totalCostsByOperatorCategorized = computed(() => {
         const neededItemsByOperator: { [key: string]: LevelUpNeeds } = {};
-        const selOps = selectedOperators.value;
 
-        for (const selectedOperator of selOps) {
+        for (const selectedOperator of selectedOperators.value) {
             neededItemsByOperator[selectedOperator.operator.id] = getCostOfOperator(selectedOperator, lmdId.value, battleRecords.value);
         }
 
@@ -84,29 +83,15 @@ export const usePlannerStore = defineStore('planner', () => {
     const inventoryEXPValue = computed(() => getEXPValue(inventory.value, items.value));
 
     const craftItem = (item: Item) => {
-        if (item.recipe === undefined) {
-            alert(`Item ${item.name} cannot be crafted.`);
-            return;
-        }
-
-        const { itemId } = item;
-        const { count: outputCount, costs } = item.recipe;
-
-        // verify if we have enough items
-        for (const { id, count } of costs) {
-            if (inventory.value[id] < count) {
-                alert(`You don't have enough ${items.value[id].name} to craft ${item.name}.`);
-                return;
+        if (canCraft(item, inventory.value, items.value)) {
+            // remove items from inventory
+            for (const { id, count } of item.recipe.costs) {
+                inventory.value[id] -= count;
             }
+    
+            // add crafted item to inventory
+            inventory.value[item.itemId] += item.recipe.count;
         }
-
-        // remove items from inventory
-        for (const { id, count } of costs) {
-            inventory.value[id] -= count;
-        }
-
-        // add crafted item to inventory
-        inventory.value[itemId] += outputCount;
     }
 
     // Needed Items

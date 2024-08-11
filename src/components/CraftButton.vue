@@ -3,6 +3,7 @@ import { usePlannerStore } from '../store/planner-store';
 import { Item } from '../types/outputdata';
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
+import { canCraft } from '../store/store-item-functions';
 
 const { craftItem } = usePlannerStore();
 const { inventory } = storeToRefs(usePlannerStore());
@@ -18,13 +19,7 @@ const props = withDefaults(defineProps<Props>(), {
     buttonClass: 'btn btn-primary craft-button'
 });
 
-const enableCraftButton = computed(() => {
-    const formula = props.item.recipe;
-    return !!formula?.costs && formula.costs.every(cost => {
-        const { id: itemId, count } = cost;
-        return inventory.value[itemId] >= count;
-    });
-});
+const enableCraftButton = computed(() => canCraft(props.item, inventory.value));
 </script>
 
 <template>
