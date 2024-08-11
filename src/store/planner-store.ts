@@ -8,6 +8,7 @@ import { efficientToFarmItemIds, farmingChips, stages } from '../data/farmingdat
 import type { Item, Operator } from '../types/outputdata';
 import DriveClient from '../api/google-drive-api';
 import { clientId, scope } from '../data/authInfo';
+import { getNeededEXPItems } from './store-item-functions.';
 //import { clientId, scope } from '../data/devauthinfo';
 
 export const usePlannerStore = defineStore('planner', () => {
@@ -93,33 +94,6 @@ export const usePlannerStore = defineStore('planner', () => {
     }
 
     // Needed Items
-    const neededEXPItems = computed(() => {
-        const needed: { item: Item, count: number }[] = [];
-
-        let neededEXP = totalEXPValueCost.value - inventoryEXPValue.value;
-        if (neededEXP > 0) {
-            for (const { id, gainExp } of battleRecords.value) {
-                const count = Math.floor(neededEXP / gainExp);
-                neededEXP = neededEXP % gainExp;
-                if (count > 0) {
-                    needed.push({ item: items.value[id], count });
-                }
-            }
-        }
-
-        if (neededEXP > 0) {
-            const lastExpItemId = battleRecords.value[battleRecords.value.length - 1].id;
-            if (needed.find(n => n.item.itemId === lastExpItemId)) {
-                needed.find(n => n.item.itemId === lastExpItemId)!.count += 1;
-            }
-            else {
-                needed.push({ item: items.value[lastExpItemId], count: 1 });
-            }
-        }
-
-        return needed;
-    });
-
     const neededItems = computed(() => {
         const needed: { item: Item, count: number }[] = [];
 
@@ -134,7 +108,14 @@ export const usePlannerStore = defineStore('planner', () => {
             }
         }
 
-        needed.push(...neededEXPItems.value);
+        needed.push(
+            ...getNeededEXPItems(
+                totalEXPValueCost.value, 
+                inventoryEXPValue.value, 
+                battleRecords.value, 
+                items.value
+            )
+        );
 
         return needed.sort((a, b) => a.item.sortId - b.item.sortId);
     });
@@ -200,8 +181,15 @@ export const usePlannerStore = defineStore('planner', () => {
         for (const [key, value] of Object.entries(breakdownCosts)) {
             costs.push({ item: items.value[key], count: value });
         }
-
-        costs.push(...neededEXPItems.value);
+        
+        costs.push(
+            ...getNeededEXPItems(
+                totalEXPValueCost.value, 
+                inventoryEXPValue.value, 
+                battleRecords.value, 
+                items.value
+            )
+        );
 
         return costs.sort((a, b) => a.item.sortId - b.item.sortId);
     });
