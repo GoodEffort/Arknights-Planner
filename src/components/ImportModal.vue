@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import Modal from './Modal.vue';
 import { usePlannerStore } from '../store/planner-store';
+import { setImportData } from '../store/store-operator-functions';
 
 const props = defineProps<{
     modelValue: boolean;
@@ -11,7 +12,7 @@ const emit = defineEmits<{
     (e: 'update:modelValue', value: boolean): void;
 }>();
 
-const { importSavedRecords, loadSavedRecords } = usePlannerStore();
+const { loadSavedRecords } = usePlannerStore();
 
 const importString = ref('');
 
@@ -22,7 +23,7 @@ const show = computed({
 
 const importData = () => {
   if (importString.value) {
-    importSavedRecords(importString.value);
+    setImportData(importString.value);
     loadSavedRecords();
     show.value = false;
     importString.value = '';

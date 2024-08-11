@@ -5,6 +5,7 @@ import importArkPRTSData from '../data/arkprts-to-record';
 import type { ArkPrtsCharacter, ArkPrtsCharacterList } from '../types/arkprts'
 import { usePlannerStore } from '../store/planner-store';
 import { storeToRefs } from 'pinia';
+import { setImportData } from '../store/store-operator-functions';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -20,7 +21,7 @@ const show = computed({
 });
 
 const { operators } = storeToRefs(usePlannerStore());
-const { exportSavedRecords, getBlankInventory, importSavedRecords, loadSavedRecords } = usePlannerStore();
+const { exportSavedRecords, getBlankInventory, loadSavedRecords } = usePlannerStore();
 
 const characters = ref('');
 const items = ref('');
@@ -75,7 +76,7 @@ const importData = () => {
         
         const arkprtsimport = importArkPRTSData(arkprtsCharacters, operators.value, existingRecords.p, itemscsv, blankInventory);
 
-        importSavedRecords(JSON.stringify(arkprtsimport));
+        setImportData(JSON.stringify(arkprtsimport));
         loadSavedRecords();
 
         show.value = false;

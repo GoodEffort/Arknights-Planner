@@ -352,11 +352,28 @@ const getTotalCostsByOperator = (
 
 }
 
+const getTotalCosts = (
+    neededItems: Inventory, 
+    totalCostsByOperator: { [key: string]: Inventory; },
+    selectedOperators: SelectedOperator[],
+) => {
+
+    for (const [operatorId, items] of Object.entries(totalCostsByOperator)) {
+        if (selectedOperators.find(c => c.operator.id === operatorId)?.active) {
+            for (const [id, count] of Object.entries(items)) {
+                neededItems[id] += count;
+            }
+        }
+    }
+    return neededItems;
+}
+
 export {
     getEXPValue,
     getBattleRecords,
     getCostOfOperator,
     getTotalCostsByOperator,
+    getTotalCosts,
 }
 
 export type {

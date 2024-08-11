@@ -1,4 +1,4 @@
-import { getBattleRecords, getCostOfOperator, getEXPValue, getTotalCostsByOperator, Inventory } from './store-item-functions';
+import { getBattleRecords, getCostOfOperator, getEXPValue, getTotalCosts, getTotalCostsByOperator, Inventory } from './store-item-functions';
 import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData, getSavedOperatorRecords, getSavedOperatorData } from './store-operator-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
@@ -30,7 +30,6 @@ export const usePlannerStore = defineStore('planner', () => {
     const inventory = ref<Inventory>(getSavedInventory());
 
     // Functions
-    const importSavedRecords = setImportData;
     
     async function loadCharacters() {
         const data = await getArknightsData();
@@ -76,22 +75,8 @@ export const usePlannerStore = defineStore('planner', () => {
         return neededItemsByOperator;
     });
 
-    const totalCostsByOperator = computed(() => 
-        getTotalCostsByOperator(totalCostsByOperatorCategorized.value, getBlankInventory));
-
-    const totalCosts = computed(() => {
-        const neededItems = getBlankInventory();
-
-        for (const [operatorId, items] of Object.entries(totalCostsByOperator.value)) {
-            if (selectedOperators.value.find(c => c.operator.id === operatorId)?.active) {
-                for (const [id, count] of Object.entries(items)) {
-                    neededItems[id] += count;
-                }
-            }
-        }
-        return neededItems;
-    });
-
+    const totalCostsByOperator = computed(() => getTotalCostsByOperator(totalCostsByOperatorCategorized.value, getBlankInventory));
+    const totalCosts = computed(() => getTotalCosts(getBlankInventory(), totalCostsByOperator.value, selectedOperators.value));
     const totalEXPValueCost = computed(() => getEXPValue(totalCosts.value, items.value));
 
     // Inventory
@@ -273,7 +258,7 @@ export const usePlannerStore = defineStore('planner', () => {
     const downloadFile = async () => {
         const client = await getDriveClient();
         const data = await client.downloadFile();
-        importSavedRecords(JSON.stringify(data));
+        setImportData(JSON.stringify(data));
     }
 
     // Crafting
@@ -550,7 +535,6 @@ export const usePlannerStore = defineStore('planner', () => {
         craftItem,
         exportSavedRecords,
         getBlankInventory,
-        importSavedRecords,
         renderButton,
         downloadFile,
         updateFile,
