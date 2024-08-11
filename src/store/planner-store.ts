@@ -1,8 +1,8 @@
-import { getBattleRecords, getCostOfOperator, getEXPValue, Inventory } from './store-item-functions';
+import { getBattleRecords, getCostOfOperator, getEXPValue, getTotalCostsByOperator, Inventory } from './store-item-functions';
 import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData, getSavedOperatorRecords, getSavedOperatorData } from './store-operator-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { SelectedOperator, LevelUpNeeds, LevelUpNeedsKey, SaveRecord } from '../types/planner-types';
+import { SelectedOperator, LevelUpNeeds, SaveRecord } from '../types/planner-types';
 import { debounce } from 'lodash';
 import { efficientToFarmItemIds, farmingChips, stages } from '../data/farmingdata';
 import type { Item, Operator } from '../types/outputdata';
@@ -76,41 +76,8 @@ export const usePlannerStore = defineStore('planner', () => {
         return neededItemsByOperator;
     });
 
-    const totalCostsByOperator = computed(() => {
-        const neededItemsByOperator: { [key: string]: { [key: string]: number } } = {};
-        for (const [operatorId, levelUpNeeds] of Object.entries(totalCostsByOperatorCategorized.value)) {
-            const neededItems: { [key: string]: number } = getBlankInventory();
-            const addNeededItems = (costs: {
-                [key: string]: number;
-            }) => {
-                for (const [id, count] of Object.entries(costs)) {
-                    neededItems[id] += count;
-                }
-            }
-
-            for (const key in levelUpNeeds) {
-                if (key === 'skill') {
-                    for (const skillCosts of levelUpNeeds.skill) {
-                        if (skillCosts)
-                            addNeededItems(skillCosts);
-                    }
-                }
-                else if (key === 'modules') {
-                    for (const moduleType in levelUpNeeds.modules) {
-                        for (let levelIndex = 0; levelIndex < levelUpNeeds.modules[moduleType].length; levelIndex++) {
-                            addNeededItems(levelUpNeeds.modules[moduleType][levelIndex]);
-                        }
-                    }
-                }
-                else {
-                    addNeededItems(levelUpNeeds[key as LevelUpNeedsKey]);
-                }
-            }
-
-            neededItemsByOperator[operatorId] = neededItems;
-        }
-        return neededItemsByOperator;
-    });
+    const totalCostsByOperator = computed(() => 
+        getTotalCostsByOperator(totalCostsByOperatorCategorized.value, getBlankInventory));
 
     const totalCosts = computed(() => {
         const neededItems = getBlankInventory();
@@ -125,11 +92,11 @@ export const usePlannerStore = defineStore('planner', () => {
         return neededItems;
     });
 
-    const totalEXPValueCost = computed(() => getEXPValue(totalCosts.value));
+    const totalEXPValueCost = computed(() => getEXPValue(totalCosts.value, items.value));
 
     // Inventory
 
-    const inventoryEXPValue = computed(() => getEXPValue(inventory.value));
+    const inventoryEXPValue = computed(() => getEXPValue(inventory.value, items.value));
 
     const craftItem = (item: Item) => {
         if (item.recipe === undefined) {

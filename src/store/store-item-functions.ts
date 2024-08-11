@@ -1,7 +1,7 @@
 import { levelingCostsArray } from "../data/leveling-costs";
 import promotionLMDCosts from "../data/promotionCosts";
 import { Item } from "../types/outputdata";
-import { LevelUpNeeds, SelectedOperator } from "../types/planner-types";
+import { LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from "../types/planner-types";
 
 // key is item id, value is quantity
 type Inventory = { [key: string]: number; };
@@ -58,47 +58,17 @@ const getBattleRecords = (items: { [key: string]: Item; }) => {
     return br.sort((a, b) => b.gainExp - a.gainExp);
 }
 
-const getCostOfOperator = (selectedOperator: SelectedOperator, lmdId: string, battleRecords: ReturnType<typeof getBattleRecords>) => {
+const getLevelUpCosts = (selectedOperator: SelectedOperator, lmdId: string, battleRecords: ReturnType<typeof getBattleRecords>) => {
     const {
         currentElite,
         targetElite,
         currentLevel,
-        targetLevel,
-        currentSkillLevels,
-        targetSkillLevels,
-        targetSkillMasteries,
-        currentSkillMasteries,
-        currentModules,
-        targetModules
+        targetLevel
     } = selectedOperator.plans;
 
-    const {
-        promotions,
-        skillLevelUpCosts,
-        skills,
-        rarity
-    } = selectedOperator.operator;
+    const { promotions } = selectedOperator.operator;
 
-    const neededItems: LevelUpNeeds = {
-        levelup: {},
-        e1: {},
-        e2: {},
-        skill: [],
-        s1m1: {},
-        s1m2: {},
-        s1m3: {},
-        s2m1: {},
-        s2m2: {},
-        s2m3: {},
-        s3m1: {},
-        s3m2: {},
-        s3m3: {},
-        modules: {}
-    };
-
-    const promotionLMD = promotionLMDCosts[rarity];
-
-    // level up costs
+    const neededItems: Inventory = {};
 
     let currentLevelIndex = currentLevel;
     let lmd = 0;
@@ -128,7 +98,7 @@ const getCostOfOperator = (selectedOperator: SelectedOperator, lmdId: string, ba
     }
 
     if (lmd > 0) {
-        neededItems.levelup[lmdId] = lmd;
+        neededItems[lmdId] = lmd;
     }
 
     // calculate exp items needed
@@ -137,23 +107,37 @@ const getCostOfOperator = (selectedOperator: SelectedOperator, lmdId: string, ba
         exp = exp % gainExp;
 
         if (recordsNeeded > 0) {
-            if (neededItems.levelup[id] === undefined) {
-                neededItems.levelup[id] = 0;
+            if (neededItems[id] === undefined) {
+                neededItems[id] = 0;
             }
 
-            neededItems.levelup[id] += recordsNeeded;
+            neededItems[id] += recordsNeeded;
         }
     }
 
     if (exp > 0) {
         const lastExpItemId = battleRecords[battleRecords.length - 1].id;
 
-        if (neededItems.levelup[lastExpItemId] === undefined) {
-            neededItems.levelup[lastExpItemId] = 0;
+        if (neededItems[lastExpItemId] === undefined) {
+            neededItems[lastExpItemId] = 0;
         }
 
-        neededItems.levelup[lastExpItemId] += 1;
+        neededItems[lastExpItemId] += 1;
     }
+
+    return neededItems;
+}
+
+const getPromotionCosts = (selectedOperator: SelectedOperator, lmdId: string) => {
+    const { currentElite, targetElite } = selectedOperator.plans;
+    const { promotions, rarity } = selectedOperator.operator;
+
+    const neededItems: { e1: Inventory; e2: Inventory } = {
+        e1: {},
+        e2: {}
+    }
+
+    const { ELITE_1, ELITE_2 } = promotionLMDCosts[rarity];
 
     // promotion costs
 
@@ -172,7 +156,7 @@ const getCostOfOperator = (selectedOperator: SelectedOperator, lmdId: string, ba
             if (neededItems.e1[lmdId] === undefined)
                 neededItems.e1[lmdId] = 0;
 
-            neededItems.e1[lmdId] += promotionLMD.ELITE_1;
+            neededItems.e1[lmdId] += ELITE_1;
         }
     }
 
@@ -191,9 +175,24 @@ const getCostOfOperator = (selectedOperator: SelectedOperator, lmdId: string, ba
             if (neededItems.e2[lmdId] === undefined)
                 neededItems.e2[lmdId] = 0;
 
-            neededItems.e2[lmdId] += promotionLMD.ELITE_2;
+            neededItems.e2[lmdId] += ELITE_2;
         }
     }
+
+    return neededItems;
+}
+
+const getSkillLevelUpCosts = (selectedOperator: SelectedOperator) => {
+    const {
+        currentSkillLevels,
+        targetSkillLevels,
+    } = selectedOperator.plans;
+
+    const {
+        skillLevelUpCosts,
+    } = selectedOperator.operator;
+
+    const skill: Inventory[] = [];
 
     // skill level up costs
     for (
@@ -204,16 +203,34 @@ const getCostOfOperator = (selectedOperator: SelectedOperator, lmdId: string, ba
         const lvlUpCost = skillLevelUpCosts[currentSkillIndex] ?? [];
 
         for (const { count, id } of lvlUpCost) {
-            if (neededItems.skill[currentSkillIndex] === undefined)
-                neededItems.skill[currentSkillIndex] = {};
+            if (skill[currentSkillIndex] === undefined)
+                skill[currentSkillIndex] = {};
 
-            const skill = neededItems.skill[currentSkillIndex];
-            if (skill[id] === undefined)
-                skill[id] = 0;
+            if (skill[currentSkillIndex][id] === undefined)
+                skill[currentSkillIndex][id] = 0;
 
-            skill[id] += count;
+            skill[currentSkillIndex][id] += count;
         }
     }
+
+    return skill;
+}
+
+const getSkillMasteryCosts = (selectedOperator: SelectedOperator) => {
+    const { targetSkillMasteries, currentSkillMasteries } = selectedOperator.plans;
+    const { skills } = selectedOperator.operator;
+
+    const neededItems: { [key: string]: Inventory } = {
+        s1m1: {},
+        s1m2: {},
+        s1m3: {},
+        s2m1: {},
+        s2m2: {},
+        s2m3: {},
+        s3m1: {},
+        s3m2: {},
+        s3m3: {}
+    };
 
     // mastery costs
     for (let skillIndex = 0; skillIndex < skills.length; skillIndex++) {
@@ -237,8 +254,17 @@ const getCostOfOperator = (selectedOperator: SelectedOperator, lmdId: string, ba
         }
     }
 
+    return neededItems;
+}
+
+const getModuleCosts = (selectedOperator: SelectedOperator) => {
+    const { currentModules, targetModules } = selectedOperator.plans;
+    const { modules } = selectedOperator.operator;
+
+    const neededItems: LevelUpNeeds['modules'] = {};
+
     // module costs
-    for (const module of selectedOperator.operator.modules) {
+    for (const module of modules) {
         const moduleType = module.type.toLowerCase();
 
         const currentModuleLevel = currentModules.find(m => m.type.toLowerCase() === moduleType)?.level ?? 0;
@@ -250,25 +276,25 @@ const getCostOfOperator = (selectedOperator: SelectedOperator, lmdId: string, ba
             const cost = moduleCosts[moduleLevelIndex];
 
             for (const { id: itemId, count } of cost) {
-                let neededmodule = neededItems.modules[module.type];
+                let neededmodule = neededItems[module.type];
 
                 if (neededmodule === undefined) {
-                    neededItems.modules[module.type] = [{}, {}, {}];
-                    neededmodule = neededItems.modules[module.type];
+                    neededItems[module.type] = [{}, {}, {}];
+                    neededmodule = neededItems[module.type];
                 }
 
                 let neededModuleLevel = neededmodule[moduleLevelIndex];
 
                 if (neededModuleLevel == null) {
-                    neededItems.modules[module.type][moduleLevelIndex] = {};
-                    neededModuleLevel = neededItems.modules[module.type][moduleLevelIndex];
+                    neededItems[module.type][moduleLevelIndex] = {};
+                    neededModuleLevel = neededItems[module.type][moduleLevelIndex];
                 }
 
                 if (neededModuleLevel != null && neededModuleLevel[itemId] == null) {
                     neededModuleLevel[itemId] = 0;
                 }
 
-                neededItems.modules[module.type][moduleLevelIndex][itemId] += count;
+                neededItems[module.type][moduleLevelIndex][itemId] += count;
             }
         }
     }
@@ -276,10 +302,61 @@ const getCostOfOperator = (selectedOperator: SelectedOperator, lmdId: string, ba
     return neededItems;
 }
 
+const getCostOfOperator = (selectedOperator: SelectedOperator, lmdId: string, battleRecords: ReturnType<typeof getBattleRecords>) => {
+    const levelup = getLevelUpCosts(selectedOperator, lmdId, battleRecords);
+    const { e1, e2 } = getPromotionCosts(selectedOperator, lmdId);
+    const skill = getSkillLevelUpCosts(selectedOperator);
+    const { s1m1, s1m2, s1m3, s2m1, s2m2, s2m3, s3m1, s3m2, s3m3 } = getSkillMasteryCosts(selectedOperator);
+    const modules = getModuleCosts(selectedOperator);
+
+    return { levelup, e1, e2, skill, s1m1, s1m2, s1m3, s2m1, s2m2, s2m3, s3m1, s3m2, s3m3, modules };
+}
+
+const getTotalCostsByOperator = (
+    costsByOperator: { [key: string]: LevelUpNeeds; },
+    getBlankInventory: () => Inventory
+) => {
+    const neededItemsByOperator: { [key: string]: { [key: string]: number } } = {};
+    for (const [operatorId, levelUpNeeds] of Object.entries(costsByOperator)) {
+        const neededItems: { [key: string]: number } = getBlankInventory();
+        const addNeededItems = (costs: {
+            [key: string]: number;
+        }) => {
+            for (const [id, count] of Object.entries(costs)) {
+                neededItems[id] += count;
+            }
+        }
+
+        for (const key in levelUpNeeds) {
+            if (key === 'skill') {
+                for (const skillCosts of levelUpNeeds.skill) {
+                    if (skillCosts)
+                        addNeededItems(skillCosts);
+                }
+            }
+            else if (key === 'modules') {
+                for (const moduleType in levelUpNeeds.modules) {
+                    for (let levelIndex = 0; levelIndex < levelUpNeeds.modules[moduleType].length; levelIndex++) {
+                        addNeededItems(levelUpNeeds.modules[moduleType][levelIndex]);
+                    }
+                }
+            }
+            else {
+                addNeededItems(levelUpNeeds[key as LevelUpNeedsKey]);
+            }
+        }
+
+        neededItemsByOperator[operatorId] = neededItems;
+    }
+    return neededItemsByOperator;
+
+}
+
 export {
     getEXPValue,
     getBattleRecords,
     getCostOfOperator,
+    getTotalCostsByOperator,
 }
 
 export type {
