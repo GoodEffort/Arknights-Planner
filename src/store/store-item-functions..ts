@@ -72,8 +72,6 @@ const commitDictionaryTransaction = (dict: { [key: string]: number; }, transacti
     }
 }
 
-let callCount = 0;
-
 const handleItem = (
     item: Item,
     qty: number,
@@ -84,8 +82,6 @@ const handleItem = (
     lmdId: string,
     hasEfficientParent: boolean = false // skip checking if a parent is efficient to farm
 ): number => {
-    console.log(`Call count: ${++callCount}`);
-
     const { itemId } = item;
     let output = 0;
 
