@@ -400,5 +400,6 @@ export {
 }
 
 export type {
-    Inventory
+    Inventory,
+    ItemWithRecipe,
 }
