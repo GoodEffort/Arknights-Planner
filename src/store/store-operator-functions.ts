@@ -3,7 +3,7 @@ import { localeCompare } from "../data/operatorNameCompare";
 import { Item, Operator } from "../types/outputdata";
 import { IsOldSaveRecord, OldSaveRecord, SaveRecord, SelectedOperator } from "../types/planner-types";
 import { OperatorPlans } from "../types/plans";
-import { Inventory } from "./store-item-functions";
+import { Inventory } from "./store-inventory-functions";
 
 type OldExportData = {
     s: string[];

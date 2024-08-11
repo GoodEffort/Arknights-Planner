@@ -1,4 +1,4 @@
-import { canCraft, getBattleRecords, getCostOfOperator, getEXPValue, getTotalCosts, getTotalCostsByOperator, Inventory } from './store-item-functions';
+import { canCraft, getBattleRecords, getCostOfOperator, getEXPValue, getTotalCosts, getTotalCostsByOperator, Inventory } from './store-inventory-functions';
 import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData, getSavedOperatorRecords, getSavedOperatorData } from './store-operator-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
@@ -30,7 +30,6 @@ export const usePlannerStore = defineStore('planner', () => {
     const inventory = ref<Inventory>(getSavedInventory());
 
     // Functions
-    
     async function loadCharacters() {
         const data = await getArknightsData();
 
@@ -79,7 +78,6 @@ export const usePlannerStore = defineStore('planner', () => {
     const totalEXPValueCost = computed(() => getEXPValue(totalCosts.value, items.value));
 
     // Inventory
-
     const inventoryEXPValue = computed(() => getEXPValue(inventory.value, items.value));
 
     const craftItem = (item: Item) => {
