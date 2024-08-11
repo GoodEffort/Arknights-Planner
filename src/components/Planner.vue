@@ -7,7 +7,6 @@ import InventoryControls from './InventoryControls.vue';
 import TotalCostOfPlan from './TotalCostOfPlan.vue';
 import MissingItems from './MissingItems.vue';
 import Farming from './Farming.vue';
-import CraftingRec from './CraftingRec.vue';
 
 const { loadCharacters, loadSavedRecords, getDriveClient, downloadFile, loadReservedItems } = usePlannerStore();
 
@@ -37,7 +36,6 @@ onMounted(async () => {
             <TotalCostOfPlan />
             <MissingItems />
             <Farming />
-            <CraftingRec />
             <InventoryControls />
             <AddOperators />
         </div>

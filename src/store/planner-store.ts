@@ -4,11 +4,11 @@ import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { SelectedOperator, LevelUpNeeds, SaveRecord } from '../types/planner-types';
 import { debounce } from 'lodash';
-import { efficientToFarmItemIds, farmingChips, stages } from '../data/farmingdata';
+import { efficientToFarmItemIds, stages } from '../data/farmingdata';
 import type { Item, Operator } from '../types/outputdata';
 import DriveClient from '../api/google-drive-api';
 import { clientId, scope } from '../data/authInfo';
-import { getNeededEXPItems } from './store-item-functions.';
+import { getNeededEXPItems, getNeededItems, handleItem } from './store-item-functions.';
 //import { clientId, scope } from '../data/devauthinfo';
 
 export const usePlannerStore = defineStore('planner', () => {
@@ -27,7 +27,7 @@ export const usePlannerStore = defineStore('planner', () => {
     const lmdId = ref<string>('4001'); // this should be constant
 
     const googleDriveTest = ref<boolean>(localStorage.getItem("GoogleDriveTest") === "1");
-    
+
     const inventory = ref<Inventory>(getSavedInventory());
 
     // Functions
@@ -87,112 +87,27 @@ export const usePlannerStore = defineStore('planner', () => {
             for (const { id, count } of item.recipe.costs) {
                 inventory.value[id] -= count;
             }
-    
+
             // add crafted item to inventory
             inventory.value[item.itemId] += item.recipe.count;
         }
     }
 
     // Needed Items
-    const neededItems = computed(() => {
-        const needed: { item: Item, count: number }[] = [];
-
-        for (const key in totalCosts.value) {
-            if (battleRecords.value.find(b => b.id === key)) {
-                continue;
-            }
-            const count = totalCosts.value[key] - (inventory.value[key] ?? 0);
-            if (count > 0) {
-                const item = items.value[key];
-                needed.push({ item, count });
-            }
-        }
-
-        needed.push(
-            ...getNeededEXPItems(
-                totalEXPValueCost.value, 
-                inventoryEXPValue.value, 
-                battleRecords.value, 
+    const neededItems = computed(() =>
+        getNeededItems(
+            inventory.value,
+            totalCosts.value,
+            battleRecords.value,
+            items.value,
+            getNeededEXPItems(
+                totalEXPValueCost.value,
+                inventoryEXPValue.value,
+                battleRecords.value,
                 items.value
             )
-        );
-
-        return needed.sort((a, b) => a.item.sortId - b.item.sortId);
-    });
-
-    const neededItemsBreakdown = computed(() => {
-        const totalCostDict = totalCosts.value;
-        const currentInventory = getInventoryCopy();
-        const breakdownCosts: { [key: string]: number } = {};
-
-        const stopItems = efficientToFarmItemIds;
-        stopItems.push(...Object.keys(battleRecords.value));
-
-        const subtractFromInventory = (neededCount: number, id: string) => {
-            let currentCount = currentInventory[id] || 0;
-
-            // if we have some of the item, we don't need to farm it
-            if (currentCount > 0) {
-                // keep track of how much we have left for other items
-                neededCount -= currentCount;
-                // less than 0 in the current inventory doesn't matter as it is treated as 0 for this function
-                currentInventory[id] = -1 * neededCount;
-            }
-
-            // return the amount we still need to farm, or 0 if we have enough
-            return neededCount < 0 ? 0 : neededCount;
-        }
-
-        const breakdownItem = (neededCount: number, itemId: string) => {
-            neededCount = subtractFromInventory(neededCount, itemId);
-
-            if (neededCount > 0) {
-                const item = items.value[itemId];
-                // and we should not breakdown the item
-                if (
-                    stopItems.indexOf(itemId) >= 0 ||
-                    item.recipe === undefined
-                ) {
-                    if (breakdownCosts[itemId] === undefined) {
-                        breakdownCosts[itemId] = 0;
-                    }
-                    // add it to the breakdown
-                    breakdownCosts[itemId] += neededCount;
-                }
-                // otherwise we need to break it down
-                else {
-                    const costs = item.recipe.costs;
-                    for (const { id: recipeItemId, count: recipeCount } of costs) {
-                        breakdownItem((recipeCount * neededCount), recipeItemId);
-                    }
-                }
-            }
-        };
-
-        for (const key in totalCostDict) {
-            if (battleRecords.value.find(b => b.id === key)) {
-                continue;
-            }
-            breakdownItem(totalCostDict[key], key);
-        }
-
-        const costs: { item: Item, count: number }[] = [];
-
-        for (const [key, value] of Object.entries(breakdownCosts)) {
-            costs.push({ item: items.value[key], count: value });
-        }
-        
-        costs.push(
-            ...getNeededEXPItems(
-                totalEXPValueCost.value, 
-                inventoryEXPValue.value, 
-                battleRecords.value, 
-                items.value
-            )
-        );
-
-        return costs.sort((a, b) => a.item.sortId - b.item.sortId);
-    });
+        )
+    );
 
     const recomendedStages = computed(() =>
         Object.entries(missingItems.value.itemsToFarm)
@@ -251,119 +166,6 @@ export const usePlannerStore = defineStore('planner', () => {
         return aItems;
     });
 
-    const commitDictionaryTransaction = (dict: { [key: string]: number; }, transaction: { [key: string]: number; }) => {
-        for (const key in dict) {
-            delete dict[key];
-        }
-
-        for (const key in transaction) {
-            dict[key] = transaction[key];
-        }
-    }
-
-    const handleItem = (
-        item: Item,
-        available: { [key: string]: number; },
-        itemsToFarm: { [key: string]: number; },
-        itemsToCraft: { [key: string]: number; },
-        hasEfficientParent: boolean = false // skip checking if a parent is efficient to farm
-    ): number => {
-
-        const { itemId } = item;
-        let output = 0;
-
-        const shouldFarm = !hasEfficientParent && efficientToFarmItemIds.indexOf(itemId) >= 0;
-
-        // if available take it from there
-        if (available[itemId] > 0) {
-            available[itemId]--;
-            output = 1;
-        }
-        // else if check if we can craft it with or without farming children
-        // skip chips as they infinitely recurse
-        else if (item.recipe && farmingChips.indexOf(itemId) < 0) {
-            // setup a transaction style edit of our states
-            const availableUpdate = JSON.parse(JSON.stringify(available));
-            const itemsToFarmUpdate = JSON.parse(JSON.stringify(itemsToFarm));
-            const itemsToCraftUpdate = JSON.parse(JSON.stringify(itemsToCraft));
-
-            let canResolve = true;
-
-            for (const childNode of item.recipe.costs) {
-                let childCount = childNode.count;
-                const childItem = items.value[childNode.id];
-
-                if (childItem.itemId === lmdId.value) {
-                    const availableLMD = availableUpdate[lmdId.value] ?? 0;
-                    const subtractamount = Math.min(childCount, availableLMD);
-
-                    childCount -= subtractamount;
-                    availableUpdate[lmdId.value] -= subtractamount;
-
-                    if (childCount > 0) {
-                        if (itemsToFarmUpdate[lmdId.value] === undefined) {
-                            itemsToFarmUpdate[lmdId.value] = 0;
-                        }
-
-                        itemsToFarmUpdate[lmdId.value] += childCount;
-                    }
-
-                    continue;
-                }
-
-                while (childCount > 0) {
-                    const amountProduced = handleItem(
-                        childItem,
-                        availableUpdate,
-                        itemsToFarmUpdate,
-                        itemsToCraftUpdate,
-                        shouldFarm || hasEfficientParent
-                    );
-
-                    if (amountProduced <= 0) {
-                        canResolve = false;
-                        break;
-                    }
-                    else {
-                        childCount -= amountProduced;
-                    }
-                }
-
-                if (!canResolve) {
-                    break;
-                }
-            }
-
-            if (canResolve) {
-                if (itemsToCraftUpdate[itemId] === undefined) {
-                    itemsToCraftUpdate[itemId] = 0;
-                }
-
-                itemsToCraftUpdate[itemId] += item.recipe.count;
-
-                commitDictionaryTransaction(available, availableUpdate);
-                commitDictionaryTransaction(itemsToFarm, itemsToFarmUpdate);
-                commitDictionaryTransaction(itemsToCraft, itemsToCraftUpdate);
-                output = item.recipe.count;
-            }
-        }
-
-        // else check if the item is efficient to farm
-        if (
-            !hasEfficientParent &&
-            output === 0 &&
-            shouldFarm
-        ) {
-            if (itemsToFarm[itemId] === undefined) {
-                itemsToFarm[itemId] = 0;
-            }
-            itemsToFarm[itemId]++;
-            output = 1;
-        }
-
-        return output;
-    }
-
     const testingNeededItems = ref<{ item: Item; count: number; }[]>([]);
 
     const missingItems = computed(() => {
@@ -375,10 +177,8 @@ export const usePlannerStore = defineStore('planner', () => {
         const available: { [key: string]: number; } = JSON.parse(JSON.stringify(availableItems.value));
         const needed: { [key: string]: number; } = {};
 
-        // TODO: fix this when done testing
-        const n: { item: Item; count: number; }[] = testingNeededItems.value;//neededItems.value;
-
-        for (const { item, count } of n) {
+        for (const [itemId, count] of Object.entries(totalCosts.value)) {
+            const item = items.value[itemId];
             if (needed[item.itemId] === undefined) {
                 needed[item.itemId] = 0;
             }
@@ -393,7 +193,7 @@ export const usePlannerStore = defineStore('planner', () => {
             const item = items.value[itemId];
 
             while (needed[itemId] > 0) {
-                let created = handleItem(item, available, itemsToFarm, itemsToCraft);
+                let created = handleItem(item, available, itemsToFarm, itemsToCraft, items.value, lmdId.value);
                 if (created > 0) {
                     needed[itemId] -= created;
                 }
@@ -405,6 +205,19 @@ export const usePlannerStore = defineStore('planner', () => {
 
         // handle leftover items that we couldn't resolve by adding them to items to farm
         for (const itemId in needed) {
+            // if our leftover item is a reserved item see if we can use the reserved item
+            if (reservedItems.value[itemId] > 0) {
+                const reservedCount = reservedItems.value[itemId];
+                const inventoryCount = inventory.value[itemId];
+
+                if (inventoryCount > reservedCount) {
+                    needed[itemId] -= reservedCount;
+                }
+                else {
+                    needed[itemId] -= inventoryCount;
+                }
+                
+            }
             if (needed[itemId] > 0) {
                 if (itemsToFarm[itemId] === undefined) {
                     itemsToFarm[itemId] = 0;
@@ -498,7 +311,6 @@ export const usePlannerStore = defineStore('planner', () => {
         totalCostsByOperatorCategorized,
         battleRecords,
         neededItems,
-        neededItemsBreakdown,
         recomendedStages,
         loadCharacters,
         loadSavedRecords,
