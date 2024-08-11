@@ -149,12 +149,19 @@ export const usePlannerStore = defineStore('planner', () => {
         const available: { [key: string]: number; } = JSON.parse(JSON.stringify(availableItems.value));
         const needed: { [key: string]: number; } = {};
 
+        let missingEXPValue: number = totalEXPValueCost.value - inventoryEXPValue.value;
+
         for (const [itemId, count] of Object.entries(totalCosts.value)) {
-            const item = items.value[itemId];
-            if (needed[item.itemId] === undefined) {
-                needed[item.itemId] = 0;
+            if (battleRecords.value.find(b => b.id === itemId) !== undefined) {
+                continue;
             }
-            needed[item.itemId] += count;
+            else {
+                const item = items.value[itemId];
+                if (needed[item.itemId] === undefined) {
+                    needed[item.itemId] = 0;
+                }
+                needed[item.itemId] += count;
+            }
         }
 
         // for each item we need, see if we can craft and or farm it and do the same for its children
@@ -162,6 +169,7 @@ export const usePlannerStore = defineStore('planner', () => {
             const item = items.value[itemId];
 
             while (needed[itemId] > 0) {
+
                 let created = handleItem(item, available, itemsToFarm, itemsToCraft, items.value, lmdId.value);
                 if (created > 0) {
                     needed[itemId] -= created;
@@ -174,6 +182,11 @@ export const usePlannerStore = defineStore('planner', () => {
 
         // handle leftover items that we couldn't resolve by adding them to items to farm
         for (const itemId in needed) {
+            // skip exp items
+            if (battleRecords.value.find(b => b.id === itemId) !== undefined) {
+                continue;
+            }
+
             // if our leftover item is a reserved item see if we can use the reserved item
             if (reservedItems.value[itemId] > 0) {
                 const reservedCount = reservedItems.value[itemId];
@@ -193,6 +206,25 @@ export const usePlannerStore = defineStore('planner', () => {
                 }
                 itemsToFarm[itemId] += needed[itemId];
             }
+        }
+
+        // handle exp value
+        for(const { gainExp, id } of battleRecords.value) {
+            console.log('missingEXPValue', missingEXPValue);
+            const count = Math.floor(missingEXPValue / gainExp);
+            if (count > 0) {           
+                itemsToFarm[id] = count;
+            }
+            missingEXPValue = missingEXPValue % gainExp;
+        }
+
+        if (missingEXPValue > 0) {
+            console.log('missingEXPValue', missingEXPValue);
+            const { id } = battleRecords.value[battleRecords.value.length - 1];
+            if (itemsToFarm[id] === undefined) {
+                itemsToFarm[id] = 0;
+            }
+            itemsToFarm[id] += 1;
         }
 
         return {
