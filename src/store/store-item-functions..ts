@@ -210,7 +210,7 @@ const handleItem = (
 
     // if we have any left over and there is no efficient parent to farm we need to farm the item
     if (!hasEfficientParent && output < qty && shouldFarm) {
-        addToFarm(itemId, qty - output, itemsToFarm);
+        output += addToFarm(itemId, qty - output, itemsToFarm);
     }
 
     return output;
