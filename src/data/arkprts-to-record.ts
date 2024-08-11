@@ -1,7 +1,7 @@
+import { ExportData } from '../store/store-operator-functions';
 import type { ArkPrtsCharacter, ArkPrtsCharacterList } from '../types/arkprts'
 import { Operator } from '../types/outputdata';
 import type { SaveRecord } from '../types/planner-types'
-import type { DriveJSON } from '../api/google-drive-api';
 
 const mapArkPrtsToRecord = (arkprts: ArkPrtsCharacterList, operators: Operator[]): SaveRecord[] => {
     const records: SaveRecord[] = [];
@@ -28,14 +28,14 @@ const mapArkPrtsToRecord = (arkprts: ArkPrtsCharacterList, operators: Operator[]
                 targetSkillLevels: arkPrtsChar.skillLevel,
                 currentModules: [],
                 targetModules: [],
-                currentSkillMasteries: { 
-                    skill1: arkPrtsChar.mastery[0] ?? 0, 
-                    skill2: arkPrtsChar.mastery[1] ?? 0, 
+                currentSkillMasteries: {
+                    skill1: arkPrtsChar.mastery[0] ?? 0,
+                    skill2: arkPrtsChar.mastery[1] ?? 0,
                     skill3: arkPrtsChar.mastery[2] ?? 0
                 },
-                targetSkillMasteries: { 
-                    skill1: arkPrtsChar.mastery[0] ?? 0, 
-                    skill2: arkPrtsChar.mastery[1] ?? 0, 
+                targetSkillMasteries: {
+                    skill1: arkPrtsChar.mastery[0] ?? 0,
+                    skill2: arkPrtsChar.mastery[1] ?? 0,
                     skill3: arkPrtsChar.mastery[2] ?? 0
                 },
             },
@@ -153,7 +153,13 @@ const importArkPRTSInventoryData = (csvInventory: string, blankInventory: { [key
     return newInventory;
 }
 
-const importArkPRTSData = (arkprts: ArkPrtsCharacterList, operators: Operator[], currentRecords: SaveRecord[], csvInventory: string, blankInventory: { [key: string]: number }): DriveJSON => {
+const importArkPRTSData = (
+    arkprts: ArkPrtsCharacterList,
+    operators: Operator[],
+    currentRecords: SaveRecord[],
+    csvInventory: string,
+    blankInventory: { [key: string]: number }
+): ExportData => {
     const records = importArkPRTSOperatorData(arkprts, operators, currentRecords);
     const inventory = importArkPRTSInventoryData(csvInventory, blankInventory);
     return {

@@ -6,9 +6,9 @@ import OperatorControls from './OperatorControls.vue';
 import { computed, ref, watch } from 'vue';
 import { localeCompare, localeContains, localeStartsWith } from '../data/operatorNameCompare';
 import { SelectedOperator } from '../types/planner-types';
+import { bringActiveToTop } from '../store/store-operator-functions';
 
 const { selectedOperators } = storeToRefs(usePlannerStore());
-const { bringActiveToTop } = usePlannerStore();
 
 const showInactive = ref((localStorage.getItem('showInactive') ?? 'true') === 'true');
 const operatorFilter = ref('');
@@ -45,6 +45,12 @@ const selectedOperatorsSorted = computed(() => {
     return [...startsWith, ...contains];
 });
 
+const sortCustomSort = () => {
+    const selop = selectedOperators.value;
+    bringActiveToTop(selop);
+    selectedOperators.value = selop;
+}
+
 watch(showInactive, () => localStorage.setItem('showInactive', showInactive.value.toString()));
 </script>
 
@@ -60,7 +66,7 @@ watch(showInactive, () => localStorage.setItem('showInactive', showInactive.valu
                     </div>
                 </div>
                 <div class="col text-end">
-                    <button class="btn btn-primary me-lg-2" @click="bringActiveToTop" v-if="showInactive">Sort by Active/Inactive and Name</button>
+                    <button class="btn btn-primary me-lg-2" @click="sortCustomSort" v-if="showInactive">Sort by Active/Inactive and Name</button>
                     <button class="btn btn-primary" @click="showInactive = !showInactive">{{ showInactive ? 'Hide' :
                         'Show' }} Inactive Operators</button>
                 </div>

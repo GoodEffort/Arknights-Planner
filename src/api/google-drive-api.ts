@@ -1,16 +1,10 @@
-import { SaveRecord } from "../types/planner-types";
+import { ExportData } from "../store/store-operator-functions";
 
 type CredentialResponse = google.accounts.id.CredentialResponse;
 type TokenResponse = google.accounts.oauth2.TokenResponse;
 type IdConfiguration = google.accounts.id.IdConfiguration;
 
-type DriveJSON = {
-    s: string[];
-    i: {
-        [k: string]: number;
-    };
-    p: SaveRecord[];
-};
+
 
 class DriveClient {
     public credentials: CredentialResponse | null;
@@ -18,7 +12,7 @@ class DriveClient {
     public scope: string;
     public fileId: string | undefined;
     public initializationPromise: Promise<CredentialResponse | void>;
-    public data: DriveJSON | null = null;
+    public data: ExportData | null = null;
 
     constructor(clientId: string, scope: string) {
         this.clientId = clientId;
@@ -138,7 +132,7 @@ class DriveClient {
         return this.fileId;
     }
 
-    private uploadFile = async (data: DriveJSON) => {
+    private uploadFile = async (data: ExportData) => {
         const fileMetadata = {
             name: 'config.json',
             mimeType: 'application/json',
@@ -180,7 +174,7 @@ class DriveClient {
         });
 
         console.log(downloadResponse);
-        const configData: DriveJSON = await downloadResponse.json();
+        const configData: ExportData = await downloadResponse.json();
         console.log(configData);
 
         this.data = configData;
@@ -188,7 +182,7 @@ class DriveClient {
         return configData;
     }
 
-    public updateFile = async (data: DriveJSON) => {
+    public updateFile = async (data: ExportData) => {
         if (JSON.stringify(data) === JSON.stringify(this.data)) {
             return this.fileId;
         }
@@ -243,4 +237,4 @@ class DriveClient {
 }
 
 export default DriveClient;
-export type { DriveClient, DriveJSON };
+export type { DriveClient };

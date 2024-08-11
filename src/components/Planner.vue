@@ -4,17 +4,16 @@ import SelectedOperators from './SelectedOperators.vue';
 import { usePlannerStore } from '../store/planner-store';
 import { onMounted, ref } from 'vue';
 import InventoryControls from './InventoryControls.vue';
-import TotalCostOfPlan from './TotalCostOfPlan.vue';
 import MissingItems from './MissingItems.vue';
-import Farming from './Farming.vue';
 
-const { loadCharacters, loadSavedRecords, getDriveClient, downloadFile } = usePlannerStore();
+const { loadCharacters, loadSavedRecords, getDriveClient, downloadFile, loadReservedItems } = usePlannerStore();
 
 const isLoading = ref(true);
 
 onMounted(async () => {
     await loadCharacters();
     loadSavedRecords(); // loads saved records from local storage
+    loadReservedItems(); // loads reserved items from local storage
 
     if (localStorage.getItem("GoogleDriveTest") === "1") {
         const { credentials } = await getDriveClient();
@@ -32,9 +31,7 @@ onMounted(async () => {
     <div style="height: 100%;">
         <div v-if="!isLoading" class="mt-5">
             <SelectedOperators />
-            <TotalCostOfPlan />
             <MissingItems />
-            <Farming />
             <InventoryControls />
             <AddOperators />
         </div>
@@ -53,7 +50,11 @@ onMounted(async () => {
     transform: scale(1) rotate(0deg);
     opacity: .8;
 	animation: pulse 2s infinite;
+    overflow: hidden;
+}
 
+.loading-penguin {
+    width: 80vh;
 }
 
 @keyframes pulse {
