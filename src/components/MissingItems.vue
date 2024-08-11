@@ -82,6 +82,6 @@ const displayItems = computed(() => {
             </li>
         </ul>
         <hr />
-        <ItemsDisplay :display-items="displayItems" :farming="tab === 'farm'" />
+        <ItemsDisplay :display-items="displayItems" :farming="tab === 'farm' || tab === 'missing'" />
     </PlannerSection>
 </template>
