@@ -81,7 +81,7 @@ const displayItems = computed(() => {
                 <a class="nav-link" href="#" :class="{ 'active': tab === 'farm' }">Items to Farm/Breakdown</a>
             </li>
             <li class="nav-item" @click="tab = 'craft'">
-                <a class="nav-link" href="#" :class="{ 'active': tab === 'craft' }">Crafting Recommendations</a>
+                <a class="nav-link" href="#" :class="{ 'active': tab === 'craft' }">Crafting Recommendations (Beta)</a>
             </li>
         </ul>
         <hr />
