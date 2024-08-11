@@ -47,10 +47,7 @@ const itemsToCraft = computed(() =>
             return craftSort;
         }
         else {
-            const aRarity = +(a.item.rarity.split('_')[1]);
-            const bRarity = +(b.item.rarity.split('_')[1]);
-
-            return bRarity - aRarity;
+            return b.item.rarity.localeCompare(a.item.rarity);
         }
     }));
 
