@@ -72,76 +72,76 @@ const commitDictionaryTransaction = (dict: { [key: string]: number; }, transacti
     }
 }
 
+let callCount = 0;
+
 const handleItem = (
     item: Item,
-    available: { [key: string]: number; },
-    itemsToFarm: { [key: string]: number; },
-    itemsToCraft: { [key: string]: number; },
+    qty: number,
+    available: Inventory,
+    itemsToFarm: Inventory,
+    itemsToCraft: Inventory,
     items: { [key: string]: Item },
     lmdId: string,
     hasEfficientParent: boolean = false // skip checking if a parent is efficient to farm
 ): number => {
+    console.log(`Call count: ${++callCount}`);
 
     const { itemId } = item;
     let output = 0;
 
     const shouldFarm = !hasEfficientParent && efficientToFarmItemIds.indexOf(itemId) >= 0;
 
-    // if available take it from there
+    // if we have some available take what we can from there and add it to the output and remove it from the available resources
     if (available[itemId] > 0) {
-        available[itemId]--;
-        output = 1;
+        const produced = Math.min(qty, available[itemId]);
+        available[itemId] -= produced;
+        output = produced;
     }
-    // else if check if we can craft it with or without farming children
-    // skip chips as they infinitely recurse
-    else if (item.recipe && farmingChips.indexOf(itemId) < 0) {
-        // setup a transaction style edit of our states
-        const availableUpdate = JSON.parse(JSON.stringify(available));
-        const itemsToFarmUpdate = JSON.parse(JSON.stringify(itemsToFarm));
-        const itemsToCraftUpdate = JSON.parse(JSON.stringify(itemsToCraft));
 
+    // if our output is less than what we need and we have a recipe
+    // and the item is not a farming chip
+    // try to craft the item with the available resources
+    if (
+        output < qty && 
+        item.recipe && 
+        farmingChips.indexOf(itemId) < 0
+    ) {
+        // setup a transaction style edit of our states
+        const availableUpdate: Inventory = JSON.parse(JSON.stringify(available));
+        const itemsToFarmUpdate: Inventory = JSON.parse(JSON.stringify(itemsToFarm));
+        const itemsToCraftUpdate: Inventory = JSON.parse(JSON.stringify(itemsToCraft));
+
+        // if this is true at the end of the loop we can resolve the recipe
+        // either by using available resources to craft it or by farming the resources
         let canResolve = true;
 
+        // calculate the amount of crafts we need to do
+        // if the output is more than the needed qty we can't do a partial craft
+        const recipeOutput = item.recipe.count;
+        const neededOutput = qty - output;
+
+        // this is the amount of crafts we need to do to fulfill the needed output (most of the time the recipe output is 1, but there are some exceptions)
+        const amountOfCrafts = Math.ceil(neededOutput / recipeOutput);
+
         for (const childNode of item.recipe.costs) {
-            let childCount = childNode.count;
-            const childItem = items[childNode.id];
+            // calculate the amount of children we need for the amount of crafts we need to do
+            let childNeededQty = childNode.count * amountOfCrafts;
 
-            if (childItem.itemId === lmdId) {
-                const availableLMD = availableUpdate[lmdId] ?? 0;
-                const subtractamount = Math.min(childCount, availableLMD);
+            // check if we can fulfill the needed qty for the child with the available resources (or farm etc.) recursively
+            const amountProduced = handleItem(
+                items[childNode.id],
+                childNeededQty,
+                availableUpdate,
+                itemsToFarmUpdate,
+                itemsToCraftUpdate,
+                items,
+                lmdId,
+                shouldFarm || hasEfficientParent
+            );
 
-                childCount -= subtractamount;
-                availableUpdate[lmdId] -= subtractamount;
-
-                if (childCount > 0) {
-                    if (itemsToFarmUpdate[lmdId] === undefined) {
-                        itemsToFarmUpdate[lmdId] = 0;
-                    }
-
-                    itemsToFarmUpdate[lmdId] += childCount;
-                }
-
-                continue;
-            }
-
-            while (childCount > 0) {
-                const amountProduced = handleItem(
-                    childItem,
-                    availableUpdate,
-                    itemsToFarmUpdate,
-                    itemsToCraftUpdate,
-                    items,
-                    lmdId,
-                    shouldFarm || hasEfficientParent
-                );
-
-                if (amountProduced <= 0) {
-                    canResolve = false;
-                    break;
-                }
-                else {
-                    childCount -= amountProduced;
-                }
+            if (amountProduced < childNeededQty) {
+                canResolve = false;
+                break;
             }
 
             if (!canResolve) {
@@ -149,40 +149,44 @@ const handleItem = (
             }
         }
 
+        // if we can resolve the recipe we commit the transaction and add the crafting output to the total output
         if (canResolve) {
             if (itemsToCraftUpdate[itemId] === undefined) {
                 itemsToCraftUpdate[itemId] = 0;
             }
 
-            itemsToCraftUpdate[itemId] += item.recipe.count;
+            const craftOutput = recipeOutput * amountOfCrafts;
+
+            itemsToCraftUpdate[itemId] += craftOutput;
+            output += craftOutput;
 
             commitDictionaryTransaction(available, availableUpdate);
             commitDictionaryTransaction(itemsToFarm, itemsToFarmUpdate);
             commitDictionaryTransaction(itemsToCraft, itemsToCraftUpdate);
-            output = item.recipe.count;
+
         }
     }
 
-    // else check if the item is efficient to farm
+    // if we have any left over and there is no efficient parent to farm we need to farm the item
     if (
         !hasEfficientParent &&
-        output === 0 &&
+        output < qty &&
         shouldFarm
     ) {
         if (itemsToFarm[itemId] === undefined) {
             itemsToFarm[itemId] = 0;
         }
-        itemsToFarm[itemId]++;
-        output = 1;
+        itemsToFarm[itemId] += (qty - output);
+        output += itemsToFarm[itemId];
     }
 
     return output;
 }
 
-const getAvailableItems = (inventory: Inventory, reservedItems: Inventory, lmdId: string) => {
-    for (const [itemId, count] of Object.entries(reservedItems)) {
-        inventory[itemId] -= count;
-    }
+const getAvailableItems = (inventory: Inventory, _: Inventory, lmdId: string) => {
+    // for (const [itemId, count] of Object.entries(reservedItems)) {
+    //     //inventory[itemId] -= count;
+    // }
 
     for (const key in inventory) {
         if (key !== lmdId && (inventory[key] <= 0 || isNaN(inventory[key]))) {
