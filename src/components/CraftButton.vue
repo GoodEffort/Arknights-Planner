@@ -20,6 +20,15 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const enableCraftButton = computed(() => canCraft(props.item, inventory.value));
+
+const buttonLabel = computed(() => {
+    if (props.item.itemId === 'mod_unlock_token' || props.item.itemId === '32001') {
+        return 'Buy';
+    }
+    else {
+        return 'Craft';
+    }
+})
 </script>
 
 <template>
@@ -29,6 +38,6 @@ const enableCraftButton = computed(() => canCraft(props.item, inventory.value));
             :disabled="!enableCraftButton"
             @click="craftItem(item)"
             tabindex="30000"
-        >Craft</button>
+        >{{ buttonLabel }}</button>
     </div>
 </template>
