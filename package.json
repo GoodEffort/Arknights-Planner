@@ -15,7 +15,6 @@
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/vue-fontawesome": "^3.0.5",
     "@popperjs/core": "^2.11.8",
-    "@types/gapi": "^0.0.47",
     "@types/google.accounts": "^0.0.14",
     "axios": "^1.6.2",
     "bootstrap": "^5.3.2",
@@ -26,6 +25,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.202",
+    "@types/node": "^22.2.0",
     "@types/vue": "^2.0.0",
     "@vitejs/plugin-basic-ssl": "^1.1.0",
     "@vitejs/plugin-vue": "^4.5.2",
