@@ -6,6 +6,9 @@ https://goodeffort.github.io/Arknights-Planner/
 Data Compilation:
 https://github.com/GoodEffort/Arknights-Planner-Data
 
+Project Board:
+https://tree.taiga.io/project/goodeffort-arknights-planner/kanban
+
 How to use
  - On the bottom of the page you can add operators to your plan
  - From there you can click Plan up top on and input the current levels and the planned levels
@@ -20,10 +23,6 @@ If you run into an issue where the page stops working due to some invalid state 
  - Press F12 (or however your browser opens the developer console)
  - In the developer console type in: localstorage.clear()
  - press Enter and refresh the page
-
-things I want to add
- - a way to sync your saved plans across devices (In progress)
- - share link to move it to another device/browser (new Import/Export feature kind of does this, I want it easier still)
 
  Data Sources
  - https://github.com/Kengxxiao/ArknightsGameData
