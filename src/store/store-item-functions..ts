@@ -3,25 +3,23 @@ import { Item, Recipe } from "../types/outputdata";
 import { Inventory, ItemWithRecipe } from "./store-inventory-functions";
 
 const getNeededEXPItems = (
-    totalEXPCost: number,
-    inventoryEXPCost: number,
+    totalEXPValue: number,
     battleRecords: { id: string, gainExp: number }[],
     items: { [key: string]: Item }
 ) => {
     const needed: { item: Item, count: number }[] = [];
-
-    let neededEXP = totalEXPCost - inventoryEXPCost;
-    if (neededEXP > 0) {
+    
+    if (totalEXPValue > 0) {
         for (const { id, gainExp } of battleRecords) {
-            const count = Math.floor(neededEXP / gainExp);
-            neededEXP = neededEXP % gainExp;
+            const count = Math.floor(totalEXPValue / gainExp);
+            totalEXPValue = totalEXPValue % gainExp;
             if (count > 0) {
                 needed.push({ item: items[id], count });
             }
         }
     }
 
-    if (neededEXP > 0) {
+    if (totalEXPValue > 0) {
         const lastExpItemId = battleRecords[battleRecords.length - 1].id;
         if (needed.find(n => n.item.itemId === lastExpItemId)) {
             needed.find(n => n.item.itemId === lastExpItemId)!.count += 1;
@@ -86,7 +84,7 @@ const removeFromAvailable = (available: Inventory, itemId: string, qty: number) 
 
 const attemptCraft = (
     itemId: string,
-    { 
+    {
         count: recipeOutput,
         costs
     }: Recipe,
@@ -190,8 +188,8 @@ const handleItem = (
     // and the item is not a farming chip
     // try to craft the item with the available resources
     if (
-        output < qty && 
-        isItemWithRecipe(item) && 
+        output < qty &&
+        isItemWithRecipe(item) &&
         farmingChips.indexOf(itemId) < 0
     ) {
         output += attemptCraft(

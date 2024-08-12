@@ -99,8 +99,7 @@ export const usePlannerStore = defineStore('planner', () => {
             battleRecords.value,
             items.value,
             getNeededEXPItems(
-                totalEXPValueCost.value,
-                inventoryEXPValue.value,
+                totalEXPValueCost.value - inventoryEXPValue.value,
                 battleRecords.value,
                 items.value
             )
