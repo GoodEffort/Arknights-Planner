@@ -1,13 +1,13 @@
 import { efficientToFarmItemIds, farmingChips } from "../data/farmingdata";
 import { Item, Recipe } from "../types/outputdata";
-import { Inventory, ItemWithRecipe } from "./store-inventory-functions";
+import { Inventory, inventoryToList, isEXPItem, ItemWithRecipe } from "./store-inventory-functions";
 
 const getNeededEXPItems = (
     totalEXPValue: number,
     battleRecords: { id: string, gainExp: number }[]
 ) => {
     const needed: Inventory = {};
-    
+
     if (totalEXPValue > 0) {
         for (const { id, gainExp } of battleRecords) {
             const count = Math.floor(totalEXPValue / gainExp);
@@ -21,14 +21,14 @@ const getNeededEXPItems = (
     if (totalEXPValue > 0) {
         const minEXP = Math.min(...battleRecords.map(b => b.gainExp));
         const minEXPId = battleRecords.find(b => b.gainExp === minEXP)!.id;
-        
+
         if (needed[minEXPId] === undefined) {
             needed[minEXPId] = 0;
         }
 
         needed[minEXPId]++;
     }
-    
+
     return needed;
 }
 
@@ -54,7 +54,7 @@ const getNeededItems = (
         }
     }
 
-    return needed.sort((a, b) => a.item.sortId - b.item.sortId);
+    return needed;
 }
 
 const duplicateInventory = (inventory: Inventory) => JSON.parse(JSON.stringify(inventory));
@@ -225,9 +225,76 @@ const getAvailableItems = (inventory: Inventory, _: Inventory, lmdId: string) =>
     return inventory;
 }
 
+const getMissingItems = (
+    totalCosts: Inventory,
+    available: Inventory,
+    lmdId: string,
+    items: { [key: string]: Item },
+) => {
+    // setup our states, we split our needed items and subcomponents into items to farm and items to craft
+    const itemsToFarm: Inventory = {};
+    const itemsToCraft: Inventory = {};
+
+    // copy the available items and needed items so we can modify it
+    const needed: Inventory = {};
+
+    const totalCostList = inventoryToList(totalCosts, items);
+
+    // setup needed Inventory
+    for (const { item, count } of totalCostList) {
+        if (isEXPItem(item)) {
+            continue;
+        }
+        else {
+            if (needed[item.itemId] === undefined) {
+                needed[item.itemId] = 0;
+            }
+            needed[item.itemId] += count;
+        }
+    }
+
+    // for each item we need, see if we can craft and or farm it and do the same for its children
+    for (const itemId in needed) {
+        const item = items[itemId];
+
+        while (needed[itemId] > 0) {
+            let created = handleItem(item, needed[itemId], available, itemsToFarm, itemsToCraft, items, lmdId);
+
+            if (created > 0) {
+                needed[itemId] -= created;
+            }
+            else {
+                break;
+            }
+        }
+    }
+
+    // handle leftover items that we couldn't resolve by adding them to items to farm
+    // this is stuff like low tier mats that we can't craft and aren't efficient to farm
+    for (const itemId in needed) {
+        // skip exp items
+        if (isEXPItem(items[itemId])) {
+            continue;
+        }
+
+        if (needed[itemId] > 0) {
+            if (itemsToFarm[itemId] === undefined) {
+                itemsToFarm[itemId] = 0;
+            }
+            itemsToFarm[itemId] += needed[itemId];
+        }
+    }
+
+    return {
+        itemsToFarm,
+        itemsToCraft,
+    }
+}
+
 export {
     getNeededEXPItems,
     getNeededItems,
     handleItem,
     getAvailableItems,
+    getMissingItems,
 }

@@ -443,6 +443,7 @@ export {
     itemListToInventory,
     inventoryToList,
     getReservedItems,
+    isEXPItem,
 }
 
 export type {

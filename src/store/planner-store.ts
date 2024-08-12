@@ -6,7 +6,7 @@ import { SelectedOperator, LevelUpNeeds, SaveRecord } from '../types/planner-typ
 import { debounce } from 'lodash';
 import type { Item, Operator } from '../types/outputdata';
 import DriveClient from '../api/google-drive-api';
-import { getAvailableItems, getNeededEXPItems, getNeededItems, handleItem } from './store-item-functions.';
+import { getAvailableItems, getMissingItems, getNeededEXPItems, getNeededItems } from './store-item-functions.';
 
 export const usePlannerStore = defineStore('planner', () => {
     // Getters
@@ -59,7 +59,7 @@ export const usePlannerStore = defineStore('planner', () => {
         localStorage.setItem('selectedCharacters', JSON.stringify(selectedOperators.value.map(c => c.operator.id)));
     }
 
-   function craftItem (item: Item) {
+    function craftItem(item: Item) {
         if (canCraft(item, inventory.value, items.value)) {
             // remove items from inventory
             for (const { id, count } of item.recipe.costs) {
@@ -69,6 +69,10 @@ export const usePlannerStore = defineStore('planner', () => {
             // add crafted item to inventory
             inventory.value[item.itemId] += item.recipe.count;
         }
+    }
+
+    function loadReservedItems() {
+        reservedItems.value = getReservedItems(items.value);
     }
 
     // Costs
@@ -92,23 +96,54 @@ export const usePlannerStore = defineStore('planner', () => {
     const inventoryEXPValue = computed(() => getEXPValue(inventory.value, items.value));
 
     // Items
-    
-    const neededItems = computed(() =>
-        getNeededItems(
+    const neededEXPItems = computed(() => inventoryToList(
+        getNeededEXPItems(
+            totalEXPValueCost.value - inventoryEXPValue.value,
+            battleRecords.value,
+        ),
+        items.value
+    ));
+
+    const neededItems = computed(() => [
+        ...getNeededItems(
             inventory.value,
             totalCosts.value,
             battleRecords.value,
             items.value,
-        ).concat(
-            inventoryToList(
-                getNeededEXPItems(
-                    totalEXPValueCost.value - inventoryEXPValue.value,
-                    battleRecords.value,
-                ),
-                items.value
-            ),
-        )
+        ),
+        ...neededEXPItems.value,
+    ].sort((a, b) => a.item.sortId - b.item.sortId));
+
+    const availableItems = computed(() => getAvailableItems(
+        getInventoryCopy(),
+        reservedItems.value,
+        lmdId.value
+    ));
+
+    const missingItems = computed(() => getMissingItems(
+        totalCosts.value,
+        JSON.parse(JSON.stringify(inventory.value)),
+        lmdId.value,
+        items.value,
+    ));
+
+    const itemsToCraft = computed(() => inventoryToList(missingItems.value.itemsToCraft, items.value)
+        .sort((a, b) => {
+            const craftSort = (canCraft(b.item, inventory.value) ? 1 : 0) - (canCraft(a.item, inventory.value) ? 1 : 0);
+
+            if (craftSort !== 0) {
+                return craftSort;
+            }
+            else {
+                return b.item.rarity.localeCompare(a.item.rarity);
+            }
+        })
     );
+
+    const itemsToFarm = computed(() => [
+        ...inventoryToList(missingItems.value.itemsToFarm, items.value),
+        ...neededEXPItems.value
+    ].sort((a, b) => a.item.sortId - b.item.sortId));
 
     // Drive API
     const getDriveClient = async () => {
@@ -135,103 +170,6 @@ export const usePlannerStore = defineStore('planner', () => {
         const client = await getDriveClient();
         const data = await client.downloadFile();
         setImportData(JSON.stringify(data));
-    }
-    const availableItems = computed(() => getAvailableItems(getInventoryCopy(), reservedItems.value, lmdId.value));
-
-    const missingItems = computed(() => {
-        // setup our states, we split our needed items and subcomponents into items to farm and items to craft
-        const itemsToFarm: Inventory = {};
-        const itemsToCraft: Inventory = {};
-
-        // copy the available items and needed items so we can modify it
-        const available: Inventory = JSON.parse(JSON.stringify(availableItems.value));
-        const needed: Inventory = {};
-
-        let missingEXPValue: number = totalEXPValueCost.value - inventoryEXPValue.value;
-
-        // setup needed Inventory
-        for (const [itemId, count] of Object.entries(totalCosts.value)) {
-            if (battleRecords.value.find(b => b.id === itemId) !== undefined) {
-                continue;
-            }
-            else {
-                const item = items.value[itemId];
-                if (needed[item.itemId] === undefined) {
-                    needed[item.itemId] = 0;
-                }
-                needed[item.itemId] += count;
-            }
-        }
-
-        // for each item we need, see if we can craft and or farm it and do the same for its children
-        for (const itemId in needed) {
-            const item = items.value[itemId];
-
-            while (needed[itemId] > 0) {
-                let created = handleItem(item, needed[itemId], available, itemsToFarm, itemsToCraft, items.value, lmdId.value);
-
-                if (created > 0) {
-                    needed[itemId] -= created;
-                }
-                else {
-                    break;
-                }
-            }
-        }
-
-        // handle leftover items that we couldn't resolve by adding them to items to farm
-        // this is stuff like low tier mats that we can't craft and aren't efficient to farm
-        for (const itemId in needed) {
-            // skip exp items
-            if (battleRecords.value.find(b => b.id === itemId) !== undefined) {
-                continue;
-            }
-
-            // if our leftover item is a reserved item see if we can use the reserved item
-            if (reservedItems.value[itemId] > 0) {
-                const reservedCount = reservedItems.value[itemId];
-                const inventoryCount = inventory.value[itemId];
-
-                if (inventoryCount > reservedCount) {
-                    needed[itemId] -= reservedCount;
-                }
-                else {
-                    needed[itemId] -= inventoryCount;
-                }
-            }
-            if (needed[itemId] > 0) {
-                if (itemsToFarm[itemId] === undefined) {
-                    itemsToFarm[itemId] = 0;
-                }
-                itemsToFarm[itemId] += needed[itemId];
-            }
-        }
-
-        // handle exp value
-        for(const { gainExp, id } of battleRecords.value) {
-            const count = Math.floor(missingEXPValue / gainExp);
-            if (count > 0) {           
-                itemsToFarm[id] = count;
-            }
-            missingEXPValue = missingEXPValue % gainExp;
-        }
-
-        if (missingEXPValue > 0) {
-            const { id } = battleRecords.value[battleRecords.value.length - 1];
-            if (itemsToFarm[id] === undefined) {
-                itemsToFarm[id] = 0;
-            }
-            itemsToFarm[id] += 1;
-        }
-
-        return {
-            itemsToFarm,
-            itemsToCraft,
-        }
-    });
-
-    const loadReservedItems = () => {
-        reservedItems.value = getReservedItems(items.value);
     }
 
     // Watchers
@@ -303,6 +241,7 @@ export const usePlannerStore = defineStore('planner', () => {
         loadReservedItems,
         reservedItems,
         availableItems,
-        missingItems,
+        itemsToFarm,
+        itemsToCraft,
     }
 });
