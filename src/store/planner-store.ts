@@ -1,4 +1,4 @@
-import { canCraft, getBattleRecords, getCostOfOperator, getEXPValue, getTotalCosts, getTotalCostsByOperator, Inventory } from './store-inventory-functions';
+import { canCraft, getBattleRecords, getCostOfOperator, getEXPValue, getTotalCosts, getTotalCostsByOperator, Inventory, inventoryToList } from './store-inventory-functions';
 import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData, getSavedOperatorRecords, getSavedOperatorData } from './store-operator-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
@@ -59,6 +59,18 @@ export const usePlannerStore = defineStore('planner', () => {
         localStorage.setItem('selectedCharacters', JSON.stringify(selectedOperators.value.map(c => c.operator.id)));
     }
 
+   function craftItem (item: Item) {
+        if (canCraft(item, inventory.value, items.value)) {
+            // remove items from inventory
+            for (const { id, count } of item.recipe.costs) {
+                inventory.value[id] -= count;
+            }
+
+            // add crafted item to inventory
+            inventory.value[item.itemId] += item.recipe.count;
+        }
+    }
+
     // Costs
     const battleRecords = computed(() => getBattleRecords(items.value));
 
@@ -74,35 +86,27 @@ export const usePlannerStore = defineStore('planner', () => {
 
     const totalCostsByOperator = computed(() => getTotalCostsByOperator(totalCostsByOperatorCategorized.value, getBlankInventory));
     const totalCosts = computed(() => getTotalCosts(getBlankInventory(), totalCostsByOperator.value, selectedOperators.value));
-    const totalEXPValueCost = computed(() => getEXPValue(totalCosts.value, items.value));
 
-    // Inventory
+    // EXP Value
+    const totalEXPValueCost = computed(() => getEXPValue(totalCosts.value, items.value));
     const inventoryEXPValue = computed(() => getEXPValue(inventory.value, items.value));
 
-    const craftItem = (item: Item) => {
-        if (canCraft(item, inventory.value, items.value)) {
-            // remove items from inventory
-            for (const { id, count } of item.recipe.costs) {
-                inventory.value[id] -= count;
-            }
-
-            // add crafted item to inventory
-            inventory.value[item.itemId] += item.recipe.count;
-        }
-    }
-
-    // Needed Items
+    // Items
+    
     const neededItems = computed(() =>
         getNeededItems(
             inventory.value,
             totalCosts.value,
             battleRecords.value,
             items.value,
-            getNeededEXPItems(
-                totalEXPValueCost.value - inventoryEXPValue.value,
-                battleRecords.value,
+        ).concat(
+            inventoryToList(
+                getNeededEXPItems(
+                    totalEXPValueCost.value - inventoryEXPValue.value,
+                    battleRecords.value,
+                ),
                 items.value
-            )
+            ),
         )
     );
 

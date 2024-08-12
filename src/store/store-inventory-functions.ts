@@ -6,6 +6,11 @@ import { LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from "../types/planne
 // key is item id, value is quantity
 type Inventory = { [key: string]: number; };
 type ItemWithRecipe = Item & { recipe: Recipe };
+type EXPItem = Item & { gainExp: number; };
+
+const isEXPItem = (item: Item): item is EXPItem => {
+    return item.gainExp !== undefined;
+}
 
 const inventoryToList = (
     itemDictionary: Inventory,
@@ -23,6 +28,16 @@ const inventoryToList = (
         }
     }
     return list;
+}
+
+const itemListToInventory = (itemList: { item: Item, count: number }[]) => {
+    const inventory: Inventory = {};
+
+    for (const { item, count } of itemList) {
+        inventory[item.itemId] = count;
+    }
+
+    return inventory;
 }
 
 const getEXPValue = (
@@ -51,12 +66,14 @@ const getEXPValue = (
 }
 
 const getBattleRecords = (items: { [key: string]: Item; }) => {
-    let br: { gainExp: number; id: string; }[] = [];
-    for (let [_, expItem] of Object.entries(items)) {
-        if (expItem.gainExp !== undefined)
-            br.push({ gainExp: expItem.gainExp, id: expItem.itemId });
+    let battleRecords: { gainExp: number; id: string; }[] = [];
+    const expItemList = Object.values(items).filter(item => isEXPItem(item));
+
+    for (let expItem of expItemList) {
+        battleRecords.push({ gainExp: expItem.gainExp, id: expItem.itemId });
     }
-    return br.sort((a, b) => b.gainExp - a.gainExp);
+
+    return battleRecords.sort((a, b) => b.gainExp - a.gainExp);
 }
 
 const getLevelUpCosts = (selectedOperator: SelectedOperator, lmdId: string, battleRecords: ReturnType<typeof getBattleRecords>) => {
@@ -397,6 +414,8 @@ export {
     getTotalCostsByOperator,
     getTotalCosts,
     canCraft,
+    itemListToInventory,
+    inventoryToList,
 }
 
 export type {

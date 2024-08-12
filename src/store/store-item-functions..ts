@@ -4,31 +4,31 @@ import { Inventory, ItemWithRecipe } from "./store-inventory-functions";
 
 const getNeededEXPItems = (
     totalEXPValue: number,
-    battleRecords: { id: string, gainExp: number }[],
-    items: { [key: string]: Item }
+    battleRecords: { id: string, gainExp: number }[]
 ) => {
-    const needed: { item: Item, count: number }[] = [];
+    const needed: Inventory = {};
     
     if (totalEXPValue > 0) {
         for (const { id, gainExp } of battleRecords) {
             const count = Math.floor(totalEXPValue / gainExp);
             totalEXPValue = totalEXPValue % gainExp;
             if (count > 0) {
-                needed.push({ item: items[id], count });
+                needed[id] = count;
             }
         }
     }
 
     if (totalEXPValue > 0) {
-        const lastExpItemId = battleRecords[battleRecords.length - 1].id;
-        if (needed.find(n => n.item.itemId === lastExpItemId)) {
-            needed.find(n => n.item.itemId === lastExpItemId)!.count += 1;
+        const minEXP = Math.min(...battleRecords.map(b => b.gainExp));
+        const minEXPId = battleRecords.find(b => b.gainExp === minEXP)!.id;
+        
+        if (needed[minEXPId] === undefined) {
+            needed[minEXPId] = 0;
         }
-        else {
-            needed.push({ item: items[lastExpItemId], count: 1 });
-        }
-    }
 
+        needed[minEXPId]++;
+    }
+    
     return needed;
 }
 
@@ -38,7 +38,6 @@ const getNeededItems = (
     totalCosts: Inventory,
     battleRecords: { id: string, gainExp: number }[],
     items: { [key: string]: Item },
-    neededEXPItems: { item: Item, count: number }[],
 ) => {
     const needed: { item: Item, count: number }[] = [];
 
@@ -54,8 +53,6 @@ const getNeededItems = (
             });
         }
     }
-
-    needed.push(...neededEXPItems);
 
     return needed.sort((a, b) => a.item.sortId - b.item.sortId);
 }
