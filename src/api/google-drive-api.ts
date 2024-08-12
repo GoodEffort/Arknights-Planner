@@ -14,9 +14,10 @@ class DriveClient {
     public initializationPromise: Promise<CredentialResponse | void>;
     public data: ExportData | null = null;
 
-    constructor(clientId: string, scope: string) {
-        this.clientId = clientId;
-        this.scope = scope;
+    constructor() {
+        this.clientId = import.meta.env.VITE_CLIENT_ID;
+        this.scope = import.meta.env.VITE_SCOPE;
+        console.log(import.meta.env.VITE_CLIENT_ID);
         this.credentials = null;
 
         this.initializationPromise = this.initialize();
