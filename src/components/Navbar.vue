@@ -4,7 +4,7 @@ import NightModeToggle from './NightModeToggle.vue';
 import ArkPRTSImportModal from './ArkPRTSImportModal.vue';
 import { ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
-import GoogleDriveAPI from './GoogleDriveAPI.vue';
+import GoogleButton from './GoogleButton.vue';
 import SettingsModal from './SettingsModal.vue';
 import CreditsModal from './CreditsModal.vue';
 import ExportModal from './ExportModal.vue';
@@ -58,7 +58,7 @@ const openUpcomingEvents = () => {
       <div class="list-group">
         <div class="list-group-item no-hover" v-if="googleDriveTest">
           <div class="google-login">
-            <GoogleDriveAPI />
+            <GoogleButton />
           </div>
         </div>
         <div class="list-group-item separator"></div>
