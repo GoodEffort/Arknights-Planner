@@ -69,19 +69,25 @@ const displayItems = computed(() => {
     <PlannerSection title="Missing Items and Recommendations" local-storage-id="needed-items-collapsed">
         <ul class="nav nav-pills nav-fill">
             <li class="nav-item" @click="tab = 'total'">
-                <a class="nav-link" :class="{ 'active': tab === 'total' }" href="#">Total Cost</a>
+                <a class="nav-link" :class="{ 'active': tab === 'total' }">Total Cost</a>
             </li>
             <li class="nav-item" @click="tab = 'missing'">
-                <a class="nav-link" :class="{ 'active': tab === 'missing' }" href="#">Missing Items</a>
+                <a class="nav-link" :class="{ 'active': tab === 'missing' }">Missing Items</a>
             </li>
             <li class="nav-item" @click="tab = 'farm'">
-                <a class="nav-link" href="#" :class="{ 'active': tab === 'farm' }">Items to Farm/Breakdown</a>
+                <a class="nav-link" :class="{ 'active': tab === 'farm' }">Items to Farm/Breakdown</a>
             </li>
             <li class="nav-item" @click="tab = 'craft'">
-                <a class="nav-link" href="#" :class="{ 'active': tab === 'craft' }">Crafting Recommendations (Beta)</a>
+                <a class="nav-link" :class="{ 'active': tab === 'craft' }">Crafting Recommendations (Beta)</a>
             </li>
         </ul>
         <hr />
         <ItemsDisplay :display-items="displayItems" :farming="tab === 'farm' || tab === 'missing'" />
     </PlannerSection>
 </template>
+
+<style scoped>
+.nav-pills .nav-link {
+    cursor: pointer;
+}
+</style>
