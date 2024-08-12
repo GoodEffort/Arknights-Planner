@@ -1,10 +1,9 @@
-import { canCraft, getBattleRecords, getCostOfOperator, getEXPValue, getTotalCosts, getTotalCostsByOperator, Inventory, inventoryToList } from './store-inventory-functions';
+import { canCraft, getBattleRecords, getCostOfOperator, getEXPValue, getReservedItems, getTotalCosts, getTotalCostsByOperator, Inventory, inventoryToList } from './store-inventory-functions';
 import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData, getSavedOperatorRecords, getSavedOperatorData } from './store-operator-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { SelectedOperator, LevelUpNeeds, SaveRecord } from '../types/planner-types';
 import { debounce } from 'lodash';
-import { efficientToFarmItemIds } from '../data/farmingdata';
 import type { Item, Operator } from '../types/outputdata';
 import DriveClient from '../api/google-drive-api';
 import { getAvailableItems, getNeededEXPItems, getNeededItems, handleItem } from './store-item-functions.';
@@ -27,6 +26,7 @@ export const usePlannerStore = defineStore('planner', () => {
     const googleDriveTest = ref<boolean>(localStorage.getItem("GoogleDriveTest") === "1");
 
     const inventory = ref<Inventory>(getSavedInventory());
+    const reservedItems = ref(getBlankInventory());
 
     // Functions
     async function loadCharacters() {
@@ -136,9 +136,6 @@ export const usePlannerStore = defineStore('planner', () => {
         const data = await client.downloadFile();
         setImportData(JSON.stringify(data));
     }
-
-    // Crafting
-    const reservedItems = ref(getBlankInventory());
     const availableItems = computed(() => getAvailableItems(getInventoryCopy(), reservedItems.value, lmdId.value));
 
     const missingItems = computed(() => {
@@ -234,25 +231,7 @@ export const usePlannerStore = defineStore('planner', () => {
     });
 
     const loadReservedItems = () => {
-        const reservedItemsString = localStorage.getItem('reservedItems');
-        // if we have previously saved reserved items, load them
-        if (reservedItemsString) {
-            reservedItems.value = JSON.parse(reservedItemsString);
-        }
-        // else set the reserved items to the default values
-        else {
-            for (const [itemId, item] of Object.entries(items.value)) {
-                if (
-                    (item.rarity === 'TIER_1' || item.rarity === 'TIER_2') &&
-                    efficientToFarmItemIds.indexOf(itemId) < 0
-                ) {
-                    reservedItems.value[itemId] = 20;
-                }
-                else {
-                    reservedItems.value[itemId] = 0;
-                }
-            }
-        }
+        reservedItems.value = getReservedItems(items.value);
     }
 
     // Watchers
