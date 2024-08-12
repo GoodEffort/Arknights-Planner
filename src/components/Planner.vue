@@ -29,7 +29,7 @@ onMounted(async () => {
 
 <template>
     <div style="height: 100%;">
-        <div v-if="!isLoading" class="mt-5">
+        <div v-if="!isLoading" class="mt-5 extra-space">
             <SelectedOperators />
             <MissingItems />
             <InventoryControls />
@@ -39,9 +39,18 @@ onMounted(async () => {
             <img src="/trap_035_emperor_1.png" class="loading-penguin" />
         </div>
     </div>
+    <div class="footer">
+        <p class="text-center">
+            <a href="https://github.com/GoodEffort/Arknights-Planner" target="_blank">Source Code</a>
+        </p>
+    </div>
 </template>
 
 <style scoped>
+.extra-space {
+    margin-bottom: 40vh;
+}
+
 .spin-container {
     display: flex;
     justify-content: center;

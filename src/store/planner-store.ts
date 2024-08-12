@@ -7,9 +7,7 @@ import { debounce } from 'lodash';
 import { efficientToFarmItemIds } from '../data/farmingdata';
 import type { Item, Operator } from '../types/outputdata';
 import DriveClient from '../api/google-drive-api';
-import { clientId, scope } from '../data/authInfo';
 import { getAvailableItems, getNeededEXPItems, getNeededItems, handleItem } from './store-item-functions.';
-//import { clientId, scope } from '../data/devauthinfo';
 
 export const usePlannerStore = defineStore('planner', () => {
     // Getters
@@ -112,7 +110,7 @@ export const usePlannerStore = defineStore('planner', () => {
     // Drive API
     const getDriveClient = async () => {
         if (!driveClient) {
-            driveClient = new DriveClient(clientId, scope);
+            driveClient = new DriveClient();
         }
 
         await driveClient.initializationPromise;
