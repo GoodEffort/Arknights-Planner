@@ -1,4 +1,3 @@
-import { efficientToFarmItemIds } from "../data/farmingdata";
 import { levelingCostsArray } from "../data/leveling-costs";
 import promotionLMDCosts from "../data/promotionCosts";
 import { Item, Recipe } from "../types/outputdata";
@@ -71,7 +70,8 @@ const getBattleRecords = (items: { [key: string]: Item; }) => {
     const expItemList = Object.values(items).filter(item => isEXPItem(item));
 
     for (let expItem of expItemList) {
-        battleRecords.push({ gainExp: expItem.gainExp, id: expItem.itemId });
+        const gainExp: number = expItem.gainExp ?? 0;
+        battleRecords.push({ gainExp, id: expItem.itemId });
     }
 
     return battleRecords.sort((a, b) => b.gainExp - a.gainExp);
@@ -408,7 +408,7 @@ const canCraft = (
     return true;
 }
 
-const getReservedItems = (items: { [key: string]: Item; }) => {
+const getReservedItems = (items: { [key: string]: Item; }, efficientToFarmItemIds: string[]) => {
     const reservedItems: Inventory = JSON.parse(localStorage.getItem('reservedItems') || '{}');
 
     // if we have previously saved reserved items, load them

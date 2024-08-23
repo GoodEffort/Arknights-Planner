@@ -6,7 +6,7 @@ import { SelectedOperator, LevelUpNeeds, SaveRecord } from '../types/planner-typ
 import { debounce } from 'lodash';
 import type { Item, Operator } from '../types/outputdata';
 import DriveClient from '../api/google-drive-api';
-import { getAvailableItems, getMissingItems, getNeededEXPItems, getNeededItems } from './store-item-functions.';
+import { getAvailableItems, getEfficentToFarmItemIds, getMissingItems, getNeededEXPItems, getNeededItems } from './store-item-functions.';
 
 export const usePlannerStore = defineStore('planner', () => {
     // Getters
@@ -72,7 +72,7 @@ export const usePlannerStore = defineStore('planner', () => {
     }
 
     function loadReservedItems() {
-        reservedItems.value = getReservedItems(items.value);
+        reservedItems.value = getReservedItems(items.value, getEfficentToFarmItemIds(items.value));
     }
 
     // Costs

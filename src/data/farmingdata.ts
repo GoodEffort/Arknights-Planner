@@ -58,9 +58,6 @@ const stages: { [key: string]: string } = {
     "3272": "PR-C-2",           // Supporter Chip Pack
 };
 
-// aim to use these mats to craft if possible
-const efficientToFarmItemIds = Object.keys(stages);
-
 // ignore these crafting recipes in efficiency calc because they'll cause an infinite loop as they craft into each other
 const farmingChips = [
     "3211", // Vanguard Chip
@@ -92,4 +89,4 @@ const dualchips = [
     "3283"  // Specialist Dualchip
 ];
 
-export { efficientToFarmItemIds, dualchips, stages, farmingChips };
+export { dualchips, stages, farmingChips };

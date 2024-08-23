@@ -1,6 +1,26 @@
-import { efficientToFarmItemIds, farmingChips } from "../data/farmingdata";
+import { farmingChips, stages } from "../data/farmingdata";
 import { Item, Recipe } from "../types/outputdata";
 import { Inventory, inventoryToList, isEXPItem, ItemWithRecipe } from "./store-inventory-functions";
+
+const getEfficentToFarmItemIds = (items: {
+    [key: string]: Item;
+}) => Object.keys(stages).filter(id => {
+        // manual exceptions
+        if (id === '30012') return true; // Orirock Cube
+        if (id === '30013') return false; // Orirock Cluster
+        if (id === '3301') return true; // Skill Summary - 1
+        if (id === '3302') return true; // Skill Summary - 2
+        if (id === '3303') return true; // Skill Summary - 3
+        if (id === '4001') return true; // LMD
+
+        const item = items[id];
+
+        if (isEXPItem(item)) return true;
+        if (farmingChips.includes(id)) return true;
+
+        return item.rarity === 'TIER_3';
+        
+    })
 
 const getNeededEXPItems = (
     totalEXPValue: number,
@@ -176,6 +196,8 @@ const handleItem = (
     const { itemId } = item;
     let output = 0;
 
+    const efficientToFarmItemIds = getEfficentToFarmItemIds(items);
+
     const shouldFarm = !hasEfficientParent && efficientToFarmItemIds.indexOf(itemId) >= 0;
 
     // if we have some available take what we can from there and add it to the output and remove it from the available resources
@@ -230,6 +252,7 @@ const getMissingItems = (
     available: Inventory,
     lmdId: string,
     items: { [key: string]: Item },
+    reservedItems: Inventory = {},
 ) => {
     // setup our states, we split our needed items and subcomponents into items to farm and items to craft
     const itemsToFarm: Inventory = {};
@@ -238,18 +261,31 @@ const getMissingItems = (
     // copy the available items and needed items so we can modify it
     const needed: Inventory = {};
 
-    const totalCostList = inventoryToList(totalCosts, items);
+    // setup the total cost list without exp items
+    const totalCostList = inventoryToList(totalCosts, items).filter(({ item }) => !isEXPItem(item));
 
     // setup needed Inventory
     for (const { item, count } of totalCostList) {
-        if (isEXPItem(item)) {
+        if (needed[item.itemId] === undefined) {
+            needed[item.itemId] = 0;
+        }
+
+        // if we have available items we can subtract the amount we have from the needed amount
+        const subtractAmount = Math.min(count, available[item.itemId] ?? 0)
+        needed[item.itemId] += count - subtractAmount;
+        available[item.itemId] -= subtractAmount;
+    }
+
+    // for each reserved item value we remove it from the available items
+    for (const key in reservedItems) {
+        if (available[key] === undefined) {
             continue;
         }
-        else {
-            if (needed[item.itemId] === undefined) {
-                needed[item.itemId] = 0;
-            }
-            needed[item.itemId] += count;
+
+        available[key] -= reservedItems[key];
+
+        if (available[key] <= 0) {
+            available[key] = 0;
         }
     }
 
@@ -297,4 +333,5 @@ export {
     handleItem,
     getAvailableItems,
     getMissingItems,
+    getEfficentToFarmItemIds,
 }
