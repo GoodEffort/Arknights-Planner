@@ -66,6 +66,8 @@ const bomTree = computed(() => {
             node.children.push(childNode);
 
             addChildren(childNode);
+            // itemIds should only track the current branch
+            itemIds.pop();
         }
     };
 
