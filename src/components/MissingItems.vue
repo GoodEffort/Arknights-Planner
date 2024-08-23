@@ -5,6 +5,7 @@ import ItemsDisplay from './ItemsDisplay.vue';
 import { computed, ref, watch } from 'vue';
 import PlannerSection from './PlannerSection.vue';
 import { inventoryToList } from '../store/store-inventory-functions';
+import ReservedItemsModal from './ReservedItemsModal.vue';
 
 const { itemsToCraft, itemsToFarm, totalCosts, neededItems, items } = storeToRefs(usePlannerStore());
 
@@ -30,6 +31,8 @@ const displayItems = computed(() => {
             return totalCostsArray.value;
     }
 });
+
+const showReservedItemsModal = ref(false);
 </script>
 
 <template>
@@ -48,8 +51,13 @@ const displayItems = computed(() => {
                 <a class="nav-link" :class="{ 'active': tab === 'craft' }">Crafting Recommendations (Beta)</a>
             </li>
         </ul>
+        <hr v-if="tab === 'craft'" />
+        <div v-if="tab === 'craft'">
+            <button @click="showReservedItemsModal = true">Edit Reserved Items</button>
+        </div>
         <hr />
         <ItemsDisplay :display-items="displayItems" :farming="tab === 'farm' || tab === 'missing'" />
+        <ReservedItemsModal v-model="showReservedItemsModal" />
     </PlannerSection>
 </template>
 
