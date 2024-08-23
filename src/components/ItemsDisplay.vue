@@ -40,7 +40,7 @@ const displayItems = computed<ReturnType<typeof inventoryToList>>(() => {
                 inventory.value
             ),
             items.value)
-            .sort((a, b) => a.item.sortId - b.item.sortId);
+            .sort((a, b) => props.reservedItems? a.item.rarity.localeCompare(b.item.rarity) : a.item.sortId - b.item.sortId);
     }
 });
 
