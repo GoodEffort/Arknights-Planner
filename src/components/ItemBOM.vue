@@ -28,10 +28,13 @@ const children = computed<TreeNode[]>(() => props.tree.children.sort((a, b) => {
     }
 }));
 const show = ref(level.value === 0);
+const notEnough = computed<boolean>(() => {
+    return count.value > inventory.value[item.value.itemId];
+});
 </script>
 
 <template>
-    <div class="row text-start bor-bot py-1 user-select-none" @click="show = !show">
+    <div class="row text-start bor-bot py-1 user-select-none" @click="show = !show" :class="{ warning: notEnough && level>0 }">
         <div v-for="i in level" class="col-auto" :class="`${i > 1 ? 'bor-left' : ''}`">
             &nbsp;
         </div>
@@ -96,5 +99,9 @@ html.dark .row.bor-bot:hover {
 
 .row.bor-bot:hover {
     background-color: #b4aedf;
+}
+
+.row.warning {
+    background-color: rgba(229, 255, 0, 0.4);
 }
 </style>

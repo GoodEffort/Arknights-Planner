@@ -4,52 +4,20 @@ import { storeToRefs } from 'pinia';
 import ItemsDisplay from './ItemsDisplay.vue';
 import { computed, ref, watch } from 'vue';
 import PlannerSection from './PlannerSection.vue';
-import { canCraft } from '../store/store-inventory-functions';
+import { inventoryToList } from '../store/store-inventory-functions';
+import ReservedItemsModal from './ReservedItemsModal.vue';
 
-const { totalCosts, neededItems, missingItems, items, inventory } = storeToRefs(usePlannerStore());
+const { itemsToCraft, itemsToFarm, totalCosts, neededItems, items } = storeToRefs(usePlannerStore());
 
 type Tab = 'missing' | 'farm' | 'craft' | 'total';
 
 const tab = ref<Tab>((localStorage.getItem('missingItemTab') as Tab | null | '') || 'missing');
 watch(tab, () => localStorage.setItem('missingItemTab', tab.value));
 
-const totalCostsArray = computed(() => {
-    const costsDict = totalCosts.value ?? [];
-
-    const costs = Object.entries(costsDict).map(([key, count]) => {
-        const item = items.value[key];
-        return { item, count };
-    });
-
-    return costs
+const totalCostsArray = computed(() =>
+    inventoryToList(totalCosts.value, items.value)
         .filter(cost => cost.count > 0)
-        .sort((a, b) => a.item.sortId - b.item.sortId);
-});
-
-const itemsToFarm = computed(() =>
-    Object.entries(missingItems.value.itemsToFarm).map(([itemId, count]) => {
-        return {
-            item: items.value[itemId],
-            count
-        }
-    }).sort((a, b) => a.item.sortId - b.item.sortId));
-
-const itemsToCraft = computed(() =>
-    Object.entries(missingItems.value.itemsToCraft).map(([itemId, count]) => {
-        return {
-            item: items.value[itemId],
-            count
-        }
-    }).sort((a, b) => {
-        const craftSort = (canCraft(b.item, inventory.value) ? 1 : 0) - (canCraft(a.item, inventory.value) ? 1 : 0);
-
-        if (craftSort !== 0) {
-            return craftSort;
-        }
-        else {
-            return b.item.rarity.localeCompare(a.item.rarity);
-        }
-    }));
+        .sort((a, b) => a.item.sortId - b.item.sortId));
 
 const displayItems = computed(() => {
     switch (tab.value) {
@@ -63,6 +31,8 @@ const displayItems = computed(() => {
             return totalCostsArray.value;
     }
 });
+
+const showReservedItemsModal = ref(false);
 </script>
 
 <template>
@@ -81,8 +51,13 @@ const displayItems = computed(() => {
                 <a class="nav-link" :class="{ 'active': tab === 'craft' }">Crafting Recommendations (Beta)</a>
             </li>
         </ul>
+        <hr v-if="tab === 'craft'" />
+        <div v-if="tab === 'craft'">
+            <button @click="showReservedItemsModal = true">Edit Reserved Items</button>
+        </div>
         <hr />
         <ItemsDisplay :display-items="displayItems" :farming="tab === 'farm' || tab === 'missing'" />
+        <ReservedItemsModal v-model="showReservedItemsModal" />
     </PlannerSection>
 </template>
 

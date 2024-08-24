@@ -143,10 +143,39 @@ const showAnyRow = computed(() => {
     return false;
 });
 
+const checkPreviousModuleLevels = (moduleCosts: { [key: string]: number }[], index: number) => {
+    return moduleCosts.slice(0, index).every(a => JSON.stringify(a) === '{}');
+};
+
 </script>
 
 <template>
     <div class="container mt-4 ms-md-2 ms-0 me-0 asdf" v-if="showAnyRow">
+        <!-- Promotion and Level Up Costs -->
+
+        <div class="row" v-if="ShowRow(Costs.levelup)">
+            <OperatorCostRow :costs="Costs.levelup" title="Level Up" :enable-apply="false" :hide-apply="true" />
+        </div>
+
+        <div class="row" v-if="ShowRow(Costs.e1)">
+            <OperatorCostRow :costs="Costs.e1" title="Elite 1" :enable-apply="CanE1" :hide-apply="false"
+                @apply-upgrade="costs => applyUpgrade(costs, 'E1', 0)" />
+        </div>
+
+        <div class="row" v-if="ShowRow(Costs.e2)">
+            <OperatorCostRow :costs="Costs.e2" title="Elite 2" :enable-apply="CanE2" :hide-apply="false"
+                @apply-upgrade="costs => applyUpgrade(costs, 'E2', 0)" />
+        </div>
+
+        <!-- Skill up Costs -->
+
+        <div class="row" v-for="skillCost in Costs.skill.filter(c => JSON.stringify(c) !== '{}')">
+            <!-- +2 because skills start at 1 so the first cost is at 2 -->
+            <OperatorCostRow :costs="skillCost" :title="`Skill ${Costs.skill.indexOf(skillCost) + 2}`"
+                :enable-apply="(selectedOperator.plans.currentSkillLevels - 1) === Costs.skill.indexOf(skillCost)" :hide-apply="false"
+                @apply-upgrade="costs => applyUpgrade(costs, 'SkillLevel', Costs.skill.indexOf(skillCost) + 2)" />
+        </div>
+
         <!-- Skill 1 Masteries -->
         <div class="row" v-if="ShowRow(Costs.s1m1)">
             <OperatorCostRow :costs="Costs.s1m1" title="Skill 1 Mastery 1"
@@ -201,59 +230,12 @@ const showAnyRow = computed(() => {
 
         <!-- Modules -->
         <div v-for="[type, moduleCosts] in Object.entries(Costs.modules)">
-            <div class="row" v-if="moduleCosts.length > 0" v-for="cost in moduleCosts.filter(a => JSON.stringify(a) !== '{}')">
+            <div class="row" v-if="moduleCosts.length > 0" v-for="(cost, index) in moduleCosts.filter(a => JSON.stringify(a) !== '{}')">
                 <OperatorCostRow :costs="cost"
-                    :title="`Module ${type} Level ${ moduleCosts.indexOf(cost) + 1 }`"
-                    :enable-apply="moduleCosts.indexOf(cost) === (moduleCosts.filter(a => JSON.stringify(a) === '{}').length) && CanModuleBeApplied"
-                    :hide-apply="false" @apply-upgrade="costs => applyModuleUpgrade(costs, type, moduleCosts.indexOf(cost) + 1)" />
+                    :title="`Module ${type} Level ${ index + 1 }`"
+                    :enable-apply="checkPreviousModuleLevels(moduleCosts, index) && CanModuleBeApplied"
+                    :hide-apply="false" @apply-upgrade="costs => applyModuleUpgrade(costs, type, index + 1)" />
             </div>
-        </div>
-
-        <!-- Skill up Costs -->
-
-        <div class="row" v-if="ShowRow(Costs.skill[0])">
-            <OperatorCostRow :costs="Costs.skill[0]" title="Skill 2"
-                :enable-apply="selectedOperator.plans.currentSkillLevels === 1" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'SkillLevel', 2)" />
-        </div>
-        <div class="row" v-if="ShowRow(Costs.skill[1])">
-            <OperatorCostRow :costs="Costs.skill[1]" title="Skill 3"
-                :enable-apply="selectedOperator.plans.currentSkillLevels === 2" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'SkillLevel', 3)" />
-        </div>
-        <div class="row" v-if="ShowRow(Costs.skill[2])">
-            <OperatorCostRow :costs="Costs.skill[2]" title="Skill 4"
-                :enable-apply="selectedOperator.plans.currentSkillLevels === 3" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'SkillLevel', 4)" />
-        </div>
-        <div class="row" v-if="ShowRow(Costs.skill[3])">
-            <OperatorCostRow :costs="Costs.skill[3]" title="Skill 5"
-                :enable-apply="selectedOperator.plans.currentSkillLevels === 4" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'SkillLevel', 5)" />
-        </div>
-        <div class="row" v-if="ShowRow(Costs.skill[4])">
-            <OperatorCostRow :costs="Costs.skill[4]" title="Skill 6"
-                :enable-apply="selectedOperator.plans.currentSkillLevels === 5" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'SkillLevel', 6)" />
-        </div>
-        <div class="row" v-if="ShowRow(Costs.skill[5])">
-            <OperatorCostRow :costs="Costs.skill[5]" title="Skill 7"
-                :enable-apply="selectedOperator.plans.currentSkillLevels === 6" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'SkillLevel', 7)" />
-        </div>
-
-        <!-- Promotion and Level Up Costs -->
-
-        <div class="row" v-if="ShowRow(Costs.e1)">
-            <OperatorCostRow :costs="Costs.e1" title="Elite 1" :enable-apply="CanE1" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'E1', 0)" />
-        </div>
-        <div class="row" v-if="ShowRow(Costs.e2)">
-            <OperatorCostRow :costs="Costs.e2" title="Elite 2" :enable-apply="CanE2" :hide-apply="false"
-                @apply-upgrade="costs => applyUpgrade(costs, 'E2', 0)" />
-        </div>
-        <div class="row" v-if="ShowRow(Costs.levelup)">
-            <OperatorCostRow :costs="Costs.levelup" title="Level Up" :enable-apply="false" :hide-apply="true" />
         </div>
     </div>
     <div class="container mt-4" v-else>

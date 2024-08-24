@@ -7,8 +7,9 @@ import CraftButton from './CraftButton.vue';
 import ImageFinder from './ImageFinder.vue';
 import ItemModal from './ItemModal.vue';
 import { stages } from '../data/farmingdata';
+import { Inventory, inventoryToList } from '../store/store-inventory-functions';
 
-const { inventory, lmdId, items } = storeToRefs(usePlannerStore());
+const { inventory, reservedItems, lmdId, items } = storeToRefs(usePlannerStore());
 
 export interface Props {
     displayItems?: {
@@ -16,25 +17,30 @@ export interface Props {
         count: number;
     }[];
     controls?: boolean;
+    craftButton?: boolean;
     farming?: boolean;
+    reservedItems?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     controls: true,
-    farming: false
+    farming: false,
+    craftButton: true,
+    reservedItems: false
 });
 
-const displayItems = computed(() => {
-    if (props.displayItems) {
+const displayItems = computed<ReturnType<typeof inventoryToList>>(() => {
+    if (props.displayItems !== undefined) {
         return props.displayItems;
     }
     else {
-        return Object.values(items.value).map(item => {
-            return {
-                item,
-                count: inventory.value[item.itemId] || 0
-            };
-        }).sort((a, b) => a.item.sortId - b.item.sortId);
+        return inventoryToList(
+            (props.reservedItems ?
+                reservedItems.value :
+                inventory.value
+            ),
+            items.value)
+            .sort((a, b) => props.reservedItems? a.item.rarity.localeCompare(b.item.rarity) : a.item.sortId - b.item.sortId);
     }
 });
 
@@ -57,12 +63,35 @@ const lmdChangeAmountString = computed(() => {
     return amount === 1000 ? '1k' : '10k';
 });
 
-const changeItemAmount = (item: Item, amount: number) => {
-    if (inventory.value[item.itemId] === undefined) {
-        inventory.value[item.itemId] = 0;
+const editableInv = computed({
+    get: () => {
+        if (props.reservedItems) {
+            return reservedItems.value;
+        }
+        else {
+            return inventory.value;
+        }
+    },
+    set: value => {
+        if (props.reservedItems) {
+            reservedItems.value = value;
+        }
+        else {
+            inventory.value = value;
+        }
+    }
+});
+
+const changeItemAmount = ({ itemId }: Item, amount: number) => {
+    const inv: Inventory = JSON.parse(JSON.stringify(editableInv.value));
+
+    if (inv[itemId] === undefined) {
+        inv[itemId] = 0;
     }
 
-    inventory.value[item.itemId] += amount;
+    inv[itemId] += amount;
+
+    editableInv.value = inv;
 };
 
 const showItem = ref<Item>();
@@ -81,7 +110,7 @@ const showItem = ref<Item>();
                     <div class="text-align-end">
                         <ImageFinder :subject="item" class="item-image" />
                         <CraftButton v-if="controls" :item="item" />
-                        <div class="bom" v-if="item.recipe?.costs.length ?? 0 > 0">
+                        <div class="bom" v-if="(item.recipe?.costs.length ?? 0 > 0) && craftButton">
                             <button @click="showItem = item" class="btn btn-primary" tabindex="30000">
                                 <font-awesome-icon icon="hammer" />
                             </button>
@@ -89,19 +118,19 @@ const showItem = ref<Item>();
                     </div>
                     <div class="count">
                         <input v-if="editInventory" type="number" class="form-control" min="0"
-                            v-model="inventory[item.itemId]" />
+                            v-model="editableInv[item.itemId]" />
                         <span v-else>
                             <b>{{ count }}</b>
                         </span>
                         <div v-if="farming">
-                            <hr class="my-1"/>
+                            <hr class="my-1" />
                             {{ stages[item.itemId] ?? 'Craft/Buy' }}
                         </div>
                     </div>
                     <div v-if="!editInventory && controls" class="row mb-2">
                         <div class="col px-0">
                             <button class="btn btn-primary"
-                                :disabled="inventory[item.itemId] === undefined || inventory[item.itemId] === 0"
+                                :disabled="editableInv[item.itemId] === undefined || editableInv[item.itemId] === 0"
                                 @click="changeItemAmount(item, item.itemId === lmdId ? -lmdChangeAmount : -1)">-{{
                                     item.itemId === lmdId ? lmdChangeAmountString : '1' }}</button>
                         </div>

@@ -22,7 +22,7 @@ type ExportData = {
 };
 
 const getBlankInventoryFromItems = (items: { [key: string]: Item; }) => {
-    const blankInv: { [key: string]: number } = {};
+    const blankInv: Inventory = {};
 
     for (const itemId in items) {
         blankInv[itemId] = 0;
