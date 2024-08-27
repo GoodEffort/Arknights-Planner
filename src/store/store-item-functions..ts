@@ -193,6 +193,7 @@ const handleItem = (
     lmdId: string,
     hasEfficientParent: boolean = false // skip checking if a parent is efficient to farm
 ): number => {
+
     const { itemId } = item;
     let output = 0;
 
@@ -202,6 +203,11 @@ const handleItem = (
 
     // if we have some available take what we can from there and add it to the output and remove it from the available resources
     output += removeFromAvailable(available, itemId, qty);
+
+    if (lmdId === itemId) {
+        itemsToFarm[lmdId] = qty - output;
+        output = qty;
+    }
 
     // if our output is less than what we need and we have a recipe
     // and the item is not a farming chip
