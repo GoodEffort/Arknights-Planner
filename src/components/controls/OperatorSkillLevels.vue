@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
 import type { SelectedOperator } from '../../types/planner-types';
+import { debounce } from 'lodash';
 
 const props = defineProps<{
     selectedOperator: SelectedOperator;
@@ -16,7 +17,7 @@ const minSkill = computed(() => props.type === "current" ? 1 : props.selectedOpe
 
 const skillLevel = computed({
     get: () => plans.value[skillsKey.value],
-    set: value => {
+    set: debounce(value => {
         let newSkill = +value;
 
         if (newSkill < minSkill.value) {
@@ -27,7 +28,7 @@ const skillLevel = computed({
         }
 
         plans.value[skillsKey.value] = newSkill;
-    }
+    }, 250)
 });
 
 watch(skillLevel, () => {

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { debounce } from 'lodash';
+
 const emit = defineEmits<{
     (e: 'update:model-value', value: number | undefined): number;
 }>();
@@ -9,10 +11,10 @@ const { modelValue, maxLevel } = defineProps<{
     minLevel: number;
 }>();
 
-const onChange = (e: Event) => {
+const onChange = debounce((e: Event) => {
     const value = +((e.target as HTMLInputElement).value);        
     emit('update:model-value', value);
-};
+}, 250);
 </script>
 
 <template>

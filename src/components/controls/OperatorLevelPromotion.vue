@@ -21,7 +21,14 @@ const elite = computed({
 });
 
 const levelMax = computed(() => operator.value.promotions[elite.value].maxLevel);
-const levelMin = computed(() => props.type === "current" ? 1 : props.selectedOperator.plans.currentLevel);
+const levelMin = computed(() => {
+    if (props.type === "target" && props.selectedOperator.plans.currentElite === props.selectedOperator.plans.targetElite) {
+        return props.selectedOperator.plans.currentLevel;
+    }
+    else {
+        return 1;
+    }
+});
 
 const level = computed({
     get: () => props.selectedOperator.plans[levelKey.value],
