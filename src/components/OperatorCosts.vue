@@ -230,11 +230,13 @@ const checkPreviousModuleLevels = (moduleCosts: { [key: string]: number }[], ind
 
         <!-- Modules -->
         <div v-for="[type, moduleCosts] in Object.entries(Costs.modules)">
-            <div class="row" v-if="moduleCosts.length > 0" v-for="(cost, index) in moduleCosts.filter(a => JSON.stringify(a) !== '{}')">
-                <OperatorCostRow :costs="cost"
-                    :title="`Module ${type} Level ${ index + 1 }`"
-                    :enable-apply="checkPreviousModuleLevels(moduleCosts, index) && CanModuleBeApplied"
-                    :hide-apply="false" @apply-upgrade="costs => applyModuleUpgrade(costs, type, index + 1)" />
+            <div v-for="(cost, index) in moduleCosts">
+                <div class="row" v-if="JSON.stringify(cost) !== '{}' && moduleCosts.length > 0">
+                    <OperatorCostRow :costs="cost"
+                        :title="`Module ${type} Level ${ index + 1 }`"
+                        :enable-apply="checkPreviousModuleLevels(moduleCosts, index) && CanModuleBeApplied"
+                        :hide-apply="false" @apply-upgrade="costs => applyModuleUpgrade(costs, type, index + 1)" />
+                </div>
             </div>
         </div>
     </div>
