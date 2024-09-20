@@ -114,22 +114,23 @@ const attemptCraft = (
     shouldFarm: boolean,
     hasEfficientParent: boolean,
 ) => {
-    // setup a transaction style edit of our states
-    const availableUpdate: Inventory = duplicateInventory(available);
-    const itemsToFarmUpdate: Inventory = duplicateInventory(itemsToFarm);
-    const itemsToCraftUpdate: Inventory = duplicateInventory(itemsToCraft);
-
-    // if this is true at the end of the loop we can resolve the recipe
-    // either by using available resources to craft it or by farming the resources
-    let canResolve = true;
 
     // calculate the amount of crafts we need to do to fulfill the needed output (most of the time the recipe output is 1, but there are some exceptions)
     // if the output is more than the needed qty we can't do a partial craft
-    const amountOfCrafts = Math.ceil(qty / recipeOutput);
+    const idealAmountOfCrafts = Math.ceil(qty / recipeOutput);
+    let craftable = qty;
 
-    for (const childNode of costs) {
+    // setup a transaction style edit of our states
+    let availableUpdate: Inventory = duplicateInventory(available);
+    let itemsToFarmUpdate: Inventory = duplicateInventory(itemsToFarm);
+    let itemsToCraftUpdate: Inventory = duplicateInventory(itemsToCraft);
+
+    // find the amount we can craft based on the available resources
+    for (const childNode of costs) {    
+
         // calculate the amount of children we need for the amount of crafts we need to do
-        let childNeededQty = childNode.count * amountOfCrafts;
+        const countPerRecipe = childNode.count;
+        const childNeededQty = countPerRecipe * idealAmountOfCrafts;
 
         // check if we can fulfill the needed qty for the child with the available resources (or farm etc.) recursively
         const amountProduced = handleItem(
@@ -144,29 +145,59 @@ const attemptCraft = (
         );
 
         if (amountProduced < childNeededQty) {
-            canResolve = false;
-            break;
+            const creatableFromChild = Math.floor(amountProduced / countPerRecipe)
+            
+            if (creatableFromChild < craftable) {
+                craftable = creatableFromChild;
+            }
+        }
+    }
+
+    // if we can't craft any of the items return 0 without committing the transaction
+    if (craftable === 0) {
+        return 0;
+    }
+
+    // setup a transaction style edit of our states
+    availableUpdate = duplicateInventory(available);
+    itemsToFarmUpdate = duplicateInventory(itemsToFarm);
+    itemsToCraftUpdate = duplicateInventory(itemsToCraft);
+
+    // craft what we can with the available resources and change our inventory states
+    for (const childNode of costs) {
+        // calculate the amount of children we need for the amount of crafts we can do
+        const countPerRecipe = childNode.count;
+        const childNeededQty = countPerRecipe * craftable;
+
+        const amountProduced = handleItem(
+            items[childNode.id],
+            childNeededQty,
+            availableUpdate,
+            itemsToFarmUpdate,
+            itemsToCraftUpdate,
+            items,
+            lmdId,
+            shouldFarm || hasEfficientParent
+        );
+
+        if (amountProduced < childNeededQty) {
+            console.error(`Failed to craft ${itemId} because we couldn't get enough ${childNode.id}. This should be avoided in the previous loop.`);
+            return 0;
         }
     }
 
     // if we can resolve the recipe we commit the transaction and add the crafting output to the total output
-    if (canResolve) {
-        if (itemsToCraftUpdate[itemId] === undefined) {
-            itemsToCraftUpdate[itemId] = 0;
-        }
-
-        const craftOutput = recipeOutput * amountOfCrafts;
-
-        itemsToCraftUpdate[itemId] += craftOutput;
-
-        commitDictionaryTransaction(available, availableUpdate);
-        commitDictionaryTransaction(itemsToFarm, itemsToFarmUpdate);
-        commitDictionaryTransaction(itemsToCraft, itemsToCraftUpdate);
-
-        return craftOutput;
+    if (itemsToCraftUpdate[itemId] === undefined) {
+        itemsToCraftUpdate[itemId] = 0;
     }
 
-    return 0;
+    itemsToCraftUpdate[itemId] += craftable;
+
+    commitDictionaryTransaction(available, availableUpdate);
+    commitDictionaryTransaction(itemsToFarm, itemsToFarmUpdate);
+    commitDictionaryTransaction(itemsToCraft, itemsToCraftUpdate);
+
+    return craftable;
 }
 
 const addToFarm = (itemId: string, qty: number, itemsToFarm: Inventory) => {
@@ -204,7 +235,7 @@ const handleItem = (
     // if we have some available take what we can from there and add it to the output and remove it from the available resources
     output += removeFromAvailable(available, itemId, qty);
 
-    if (lmdId === itemId) {
+    if (lmdId === itemId && output < qty) {
         itemsToFarm[lmdId] = qty - output;
         output = qty;
     }
