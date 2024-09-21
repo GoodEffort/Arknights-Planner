@@ -37,17 +37,12 @@ watch(doNotShowAgain, (val) => {
         <div>
           <h2>New Features</h2>
           <div>
-            <h4>8/11/2024 2</h4>
+            <h4>9/20/2024</h4>
             <ul>
-              <li>Improved performance of acquisition recommendations calculation</li>
-            </ul>
-          </div>
-          <div>
-            <h4>8/11/2024</h4>
-            <h1>Crafting Recommendations</h1>
-            <ul>
-              <li>Added crafting recommendations to the Missing Items and Recommendations Section</li>
-              <li>Moved farming, total cost, and breakdown to the missing items section</li>
+              <li>Fixed crafting recommendations not moving things correctly between crafting and farming</li>
+              <li>Moved crafting and farming recs into the same tab to make changes between them make sense</li>
+              <li>Fixed missing PowerStrike ability icons</li>
+              
             </ul>
           </div>
         </div>
