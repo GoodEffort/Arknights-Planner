@@ -9,7 +9,7 @@ import ReservedItemsModal from './ReservedItemsModal.vue';
 
 const { itemsToCraft, itemsToFarm, totalCosts, neededItems, items } = storeToRefs(usePlannerStore());
 
-type Tab = 'missing' | 'farm' | 'craft' | 'total';
+type Tab = 'missing' | 'breakdown' | 'total';
 
 const tab = ref<Tab>((localStorage.getItem('missingItemTab') as Tab | null | '') || 'missing');
 watch(tab, () => localStorage.setItem('missingItemTab', tab.value));
@@ -23,10 +23,8 @@ const displayItems = computed(() => {
     switch (tab.value) {
         case 'missing':
             return neededItems.value;
-        case 'farm':
+        case 'breakdown':
             return itemsToFarm.value;
-        case 'craft':
-            return itemsToCraft.value;
         case 'total':
             return totalCostsArray.value;
     }
@@ -44,19 +42,22 @@ const showReservedItemsModal = ref(false);
             <li class="nav-item" @click="tab = 'missing'">
                 <a class="nav-link" :class="{ 'active': tab === 'missing' }">Missing Items</a>
             </li>
-            <li class="nav-item" @click="tab = 'farm'">
-                <a class="nav-link" :class="{ 'active': tab === 'farm' }">Items to Farm/Breakdown</a>
-            </li>
-            <li class="nav-item" @click="tab = 'craft'">
-                <a class="nav-link" :class="{ 'active': tab === 'craft' }">Crafting Recommendations (Beta)</a>
+            <li class="nav-item" @click="tab = 'breakdown'">
+                <a class="nav-link" :class="{ 'active': tab === 'breakdown' }">Items to Farm/Craft</a>
             </li>
         </ul>
-        <hr v-if="tab === 'craft'" />
-        <div v-if="tab === 'craft'">
+        <hr />
+        <h3 v-if="tab === 'breakdown'" class="mb-4">Items To Farm</h3>
+        <ItemsDisplay :display-items="displayItems" :farming="tab === 'breakdown' || tab === 'missing'" :flash="tab === 'breakdown'" />
+        <hr v-if="tab === 'breakdown'" />
+        <h3 v-if="tab === 'breakdown'" class="mb-3">Items To Craft</h3>
+        <div v-if="tab === 'breakdown'" class="mb-4">
             <button @click="showReservedItemsModal = true">Edit Reserved Items</button>
         </div>
-        <hr />
-        <ItemsDisplay :display-items="displayItems" :farming="tab === 'farm' || tab === 'missing'" />
+        <ItemsDisplay v-if="tab === 'breakdown'"  :display-items="itemsToCraft" :flash="tab === 'breakdown'" />
+        <div v-if="tab === 'breakdown'">
+            If using the +1/-1 buttons in the crafting section it will remove from the "Items to Farm" section above first.
+        </div>
         <ReservedItemsModal v-model="showReservedItemsModal" />
     </PlannerSection>
 </template>
