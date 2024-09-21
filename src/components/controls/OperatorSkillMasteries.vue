@@ -56,7 +56,7 @@ const mins = computed(() => operator.value.skills.map((_, index) => {
         <div class="row" :class="{ 'mb-2': index !== operator.skills.length - 1 }"
             v-for="(skill, index) in operator.skills">
             <div class="col-auto" v-if="!imageErrors.includes(index)">
-                <img :src="`https://goodeffort.github.io/Arknights-Planner-Data/images/skills/${skill.icon}.webp`"
+                <img :src="`https://goodeffort.github.io/Arknights-Planner-Data/images/skills/${skill.id}.webp`"
                     :alt="skill.name" class="img-thumbnail skill-img" @error="imageErrors.push(index)" />
             </div>
             <div class="col text-start">
