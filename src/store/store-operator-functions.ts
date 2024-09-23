@@ -7,17 +7,13 @@ import { Inventory } from "./store-inventory-functions";
 
 type OldExportData = {
     s: string[];
-    i: {
-        [k: string]: number;
-    };
+    i: Inventory;
     p: SaveRecord[] | OldSaveRecord[];
 };
 
 type ExportData = {
     s: string[];
-    i: {
-        [k: string]: number;
-    };
+    i: Inventory;
     p: SaveRecord[];
 };
 
