@@ -125,6 +125,7 @@ export const usePlannerStore = defineStore('planner', () => {
         JSON.parse(JSON.stringify(inventory.value)),
         lmdId.value,
         items.value,
+        reservedItems.value
     ));
 
     const itemsToCraft = computed(() => inventoryToList(missingItems.value.itemsToCraft, items.value)

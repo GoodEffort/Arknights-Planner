@@ -240,7 +240,7 @@ const handleItem = (
         if (itemsToFarm[lmdId] === undefined) {
             itemsToFarm[lmdId] = 0;
         }
-        
+
         itemsToFarm[lmdId] += qty - output;
         output = qty;
     }
@@ -294,7 +294,7 @@ const getMissingItems = (
     available: Inventory,
     lmdId: string,
     items: { [key: string]: Item },
-    reservedItems: Inventory = {},
+    reservedItems: Inventory,
 ) => {
     // setup our states, we split our needed items and subcomponents into items to farm and items to craft
     const itemsToFarm: Inventory = {};
