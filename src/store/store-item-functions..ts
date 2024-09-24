@@ -235,8 +235,13 @@ const handleItem = (
     // if we have some available take what we can from there and add it to the output and remove it from the available resources
     output += removeFromAvailable(available, itemId, qty);
 
+    // lmd can only be farmed and everything uses it so we can skip the rest of the checks
     if (lmdId === itemId && output < qty) {
-        itemsToFarm[lmdId] = qty - output;
+        if (itemsToFarm[lmdId] === undefined) {
+            itemsToFarm[lmdId] = 0;
+        }
+        
+        itemsToFarm[lmdId] += qty - output;
         output = qty;
     }
 
@@ -367,7 +372,6 @@ const getMissingItems = (
 export {
     getNeededEXPItems,
     getNeededItems,
-    handleItem,
     getAvailableItems,
     getMissingItems,
     getEfficentToFarmItemIds,
