@@ -37,9 +37,16 @@ watch(doNotShowAgain, (val) => {
         <div>
           <h2>New Features</h2>
           <div>
+            <h4>9/24/2024</h4>
+            <ul>
+              <li>Fixed reserved items not working</li>
+              <li>Fixed recommended LMD farming amount</li>
+            </ul>
+          </div>
+          <div>
             <h4>9/23/2024</h4>
             <ul>
-              <li>Added Penguin Stats export</li>              
+              <li>Added Penguin Stats export</li>
             </ul>
           </div>
           <div>
@@ -48,13 +55,9 @@ watch(doNotShowAgain, (val) => {
               <li>Fixed crafting recommendations not moving things correctly between crafting and farming</li>
               <li>Moved crafting and farming recs into the same tab to make changes between them make sense</li>
               <li>Fixed missing PowerStrike ability icons</li>
-              
+
             </ul>
           </div>
-        </div>
-        
-        <div>
-          Currently reserved items aren't working correctly, I'm working on a fix for that.
         </div>
 
         <div>
