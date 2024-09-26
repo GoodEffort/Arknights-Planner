@@ -41,7 +41,7 @@ const bomTree = computed(() => {
 
     const tree: TreeNode = {
         item,
-        count: 1,
+        count: item.recipe?.count ?? 1,
         children: []
     };
 
