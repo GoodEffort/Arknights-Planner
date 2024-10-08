@@ -47,16 +47,20 @@ export const usePlannerStore = defineStore('planner', () => {
     }
 
     function selectCharacter(character: Operator) {
+        let ret: SelectedOperator | undefined;
+
         const existingSelection = selectedOperators.value.find(c => c.operator === character);
         if (existingSelection === undefined) {
             const newOperatorSelection = getSavedOperatorData(character);
             selectedOperators.value.push(newOperatorSelection);
+            ret = newOperatorSelection;
         }
         else if (confirm(`Are you sure you want to remove ${character.name} from your selection?`)) {
             selectedOperators.value.splice(selectedOperators.value.indexOf(existingSelection), 1);
         }
 
         localStorage.setItem('selectedCharacters', JSON.stringify(selectedOperators.value.map(c => c.operator.id)));
+        return ret;
     }
 
     function craftItem(item: Item) {

@@ -5,8 +5,10 @@ import { usePlannerStore } from '../store/planner-store';
 import { onMounted, ref } from 'vue';
 import InventoryControls from './InventoryControls.vue';
 import MissingItems from './MissingItems.vue';
+import { storeToRefs } from 'pinia';
 
 const { loadCharacters, loadSavedRecords, getDriveClient, downloadFile, loadReservedItems } = usePlannerStore();
+const { selectedOperators } = storeToRefs(usePlannerStore());
 
 const isLoading = ref(true);
 
@@ -30,8 +32,8 @@ onMounted(async () => {
 <template>
     <div style="height: 100%;">
         <div v-if="!isLoading" class="mt-5 extra-space">
-            <SelectedOperators />
-            <MissingItems />
+            <SelectedOperators v-if="selectedOperators.length > 0" />
+            <MissingItems v-if="selectedOperators.length > 0" />
             <InventoryControls />
             <AddOperators />
         </div>
