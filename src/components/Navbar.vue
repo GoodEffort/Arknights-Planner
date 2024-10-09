@@ -7,7 +7,6 @@ import { usePlannerStore } from '../store/planner-store';
 import GoogleButton from './GoogleButton.vue';
 import SettingsModal from './SettingsModal.vue';
 import CreditsModal from './CreditsModal.vue';
-import ExportModal from './ExportModal.vue';
 import ImportExportModal from './ImportExportModal.vue';
 import { storeToRefs } from 'pinia';
 
@@ -16,7 +15,6 @@ const { googleDriveTest } = storeToRefs(usePlannerStore());
 const lastUse = new Date(localStorage.getItem('last-use-timestamp') ?? 0);
 
 const showCreditsmodal = ref(false);
-const showExportModal = ref(false);
 const showImportExportModal = ref(false);
 const showNewFeaturesModal = ref(lastUse < new Date(BUILD_DATE)); // can use BUILD_DATE but if I push a quick bug fix, I don't want to show it again
 const showSideMenu = ref(false);
@@ -37,13 +35,9 @@ const openUpcomingEvents = () => {
     </div>
     <div>
       <div class="btn-group" role="group">
-        <button class="btn btn-primary" @click="showExportModal = !showExportModal">
-          <font-awesome-icon icon="download" />
-          <span class="d-none d-md-inline"> Export</span>
-        </button>
         <button class="btn btn-primary" @click="showImportExportModal = !showImportExportModal">
           <font-awesome-icon icon="upload" />
-          <span class="d-none d-md-inline"> Import</span>
+          <span class="d-none d-md-inline"> Import / Export</span>
         </button>
         <a href="https://arknights.wiki.gg/wiki/Event" target="_blank" class="btn btn-primary text-light">
           <font-awesome-icon icon="calendar-day" />
@@ -62,11 +56,8 @@ const openUpcomingEvents = () => {
           </div>
         </div>
         <div class="list-group-item separator"></div>
-        <div class="list-group-item" @click="showExportModal = !showExportModal">
-          <div><font-awesome-icon icon="download" /> Export</div>
-        </div>
         <div class="list-group-item" @click="showImportExportModal = !showImportExportModal">
-          <div><font-awesome-icon icon="upload" /> Import</div>
+          <div><font-awesome-icon icon="upload" /> Import / Export</div>
         </div>
         <div class="list-group-item" @click="showArkPRTSImportModal = !showArkPRTSImportModal">
           <div><font-awesome-icon icon="upload" /> Import from ArkPRTS</div>
@@ -95,8 +86,6 @@ const openUpcomingEvents = () => {
   <SettingsModal v-model="showSettings" />
 
   <CreditsModal v-model="showCreditsmodal" />
-
-  <ExportModal v-model="showExportModal" />
 
   <ImportExportModal v-model="showImportExportModal" />
 
