@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import Modal from './Modal.vue';
 import NavTabList from './NavTabList.vue';
-import ImportTab from './ImportTab.vue';
+import ImportTab from './DefaultImportExportTab.vue';
 import PenguinStatsTab from './PenguinStatsTab.vue';
 
 const props = defineProps<{
