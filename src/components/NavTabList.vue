@@ -3,9 +3,17 @@ import { ref } from 'vue';
 
 const props = defineProps<{
     tabs: { title: string, name: string }[];
+    defaultTab?: number;
 }>();
 
-const selected: Ref<number | undefined> = ref(0);
+const selected = ref();
+
+if (props.defaultTab !== undefined) {
+    selected.value = props.defaultTab;
+}
+else if (props.tabs.length >= 0) {
+    selected.value = 0;
+}
 
 const toggle = (index: number) => {
     if (selected.value === index) {

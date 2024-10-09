@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import Modal from './Modal.vue';
-import { usePlannerStore } from '../store/planner-store';
-import { setImportData } from '../store/store-operator-functions';
-import ImportTab from './ImportTab.vue';
 import NavTabList from './NavTabList.vue';
+import ImportTab from './ImportTab.vue';
+import PenguinStatsTab from './PenguinStatsTab.vue';
 
 const props = defineProps<{
-    modelValue: boolean;
+    modelValue: boolean | string;
+    defaultTab?: string;
 }>();
 
 const emit = defineEmits<{
@@ -15,9 +15,20 @@ const emit = defineEmits<{
 }>();
 
 const show = computed({
-    get: () => props.modelValue,
+    get: () => !!props.modelValue,
     set: (value) => emit('update:modelValue', value)
 });
+
+const tabs = [
+    {
+        name: 'arknightsplanner',
+        title: 'Arknights Planner'
+    },
+    {
+        name: 'penguin-stats',
+        title: 'Penguin Stats'
+    }
+];
 </script>
 
 <template>
@@ -26,12 +37,13 @@ const show = computed({
             Import or Export Data
         </template>
         <template #body>
-            <nav-tab-list :tabs="[{
-                name: 'arknightsplanner',
-                title: 'Arknights Planner'
-            }]">
+            <nav-tab-list :tabs="tabs"
+                :default-tab="defaultTab ? tabs.findIndex(t => t.name === defaultTab) : undefined">
                 <template #arknightsplanner>
                     <import-tab @imported="show = false" />
+                </template>
+                <template #penguin-stats>
+                    <penguin-stats-tab @imported="show = false" />
                 </template>
             </nav-tab-list>
         </template>

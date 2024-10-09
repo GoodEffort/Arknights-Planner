@@ -6,7 +6,7 @@ import { computed, ref, watch } from 'vue';
 import PlannerSection from './PlannerSection.vue';
 import { inventoryToList } from '../store/store-inventory-functions';
 import ReservedItemsModal from './ReservedItemsModal.vue';
-import PenguinStatsExport from './PenguinStatsExport.vue';
+import ImportExportModal from './ImportExportModal.vue';
 
 const { itemsToCraft, itemsToFarm, totalCosts, neededItems, items } = storeToRefs(usePlannerStore());
 
@@ -62,7 +62,7 @@ const showPenguinExportModal = ref(false);
             If using the +1/-1 buttons in the crafting section it will remove from the "Items to Farm" section above first.
         </div>
         <ReservedItemsModal v-model="showReservedItemsModal" />
-        <PenguinStatsExport v-model="showPenguinExportModal" />
+        <ImportExportModal default-tab="penguin-stats" v-model="showPenguinExportModal" />
     </PlannerSection>
 </template>
 

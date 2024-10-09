@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import { setImportData } from '../store/store-operator-functions';
 
@@ -38,6 +38,8 @@ const copyToClipboard = () => {
   <div class="row">
     <div class="col">
       <h2>Export Data</h2>
+      <div class="mb-2">
+      </div>
       <div class="my-4">
         <textarea rows="10" cols="50" readonly>{{ exportString }}</textarea>
       </div>
