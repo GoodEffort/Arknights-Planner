@@ -4,6 +4,7 @@ import Modal from './Modal.vue';
 import { usePlannerStore } from '../store/planner-store';
 import { setImportData } from '../store/store-operator-functions';
 import ImportTab from './ImportTab.vue';
+import NavTabList from './NavTabList.vue';
 
 const props = defineProps<{
     modelValue: boolean;
@@ -20,15 +21,22 @@ const show = computed({
 </script>
 
 <template>
-  <modal v-model="show">
-    <template #header>
-      Import or Export Data
-    </template>
-    <template #body>
-        <import-tab @imported="show = false" />
-    </template>
-    <template #footer>
-      <button class="btn btn-danger" @click="show = false">Cancel</button>
-    </template>
-  </modal>
+    <modal v-model="show">
+        <template #header>
+            Import or Export Data
+        </template>
+        <template #body>
+            <nav-tab-list :tabs="[{
+                name: 'arknightsplanner',
+                title: 'Arknights Planner'
+            }]">
+                <template #arknightsplanner>
+                    <import-tab @imported="show = false" />
+                </template>
+            </nav-tab-list>
+        </template>
+        <template #footer>
+            <button class="btn btn-danger" @click="show = false">Cancel</button>
+        </template>
+    </modal>
 </template>
