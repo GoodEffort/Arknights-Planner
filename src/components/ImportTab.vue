@@ -1,32 +1,22 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import Modal from './Modal.vue';
 import { usePlannerStore } from '../store/planner-store';
 import { setImportData } from '../store/store-operator-functions';
 
-const props = defineProps<{
-    modelValue: boolean;
-}>();
-
 const emit = defineEmits<{
-    (e: 'update:modelValue', value: boolean): void;
+  (e: 'imported'): void;
 }>();
 
 const { loadSavedRecords } = usePlannerStore();
 
 const importString = ref('');
 
-const show = computed({
-    get: () => props.modelValue,
-    set: (value) => emit('update:modelValue', value)
-});
-
 const importData = () => {
   if (importString.value) {
     setImportData(importString.value);
     loadSavedRecords();
-    show.value = false;
     importString.value = '';
+    emit('imported');
   }
   else {
     alert('No data to import');
@@ -40,22 +30,13 @@ const pasteFromClipboard = async () => {
 </script>
 
 <template>
-  <modal v-model="show">
-    <template #header>
-      Import Data
-    </template>
-    <template #body>
-      <div class="mb-2">
-        <h2>This will overwrite all data currently on the page with what you paste below!</h2>
-      </div>
-      <div>
-        <textarea rows="10" cols="50" v-model="importString"></textarea>
-      </div>
-      <button class="btn btn-primary" @click="pasteFromClipboard">Paste from Clipboard</button>
-    </template>
-    <template #footer>
-      <button class="btn btn-danger" @click="show = false">Cancel</button>
-      <button class="btn btn-success" @click="importData">Import Data</button>
-    </template>
-  </modal>
+  <div class="mb-2">
+    <h2>This will overwrite all data currently on the page with what you paste below!</h2>
+  </div>
+  <div>
+    <textarea rows="10" cols="50" v-model="importString"></textarea>
+  </div>
+  <button class="btn btn-primary" @click="pasteFromClipboard">Paste from Clipboard</button>
+  <hr />
+  <button class="btn btn-success" @click="importData">Import Data</button>
 </template>

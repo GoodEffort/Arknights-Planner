@@ -8,7 +8,7 @@ import GoogleButton from './GoogleButton.vue';
 import SettingsModal from './SettingsModal.vue';
 import CreditsModal from './CreditsModal.vue';
 import ExportModal from './ExportModal.vue';
-import ImportModal from './ImportModal.vue';
+import ImportExportModal from './ImportExportModal.vue';
 import { storeToRefs } from 'pinia';
 
 const { googleDriveTest } = storeToRefs(usePlannerStore());
@@ -17,7 +17,7 @@ const lastUse = new Date(localStorage.getItem('last-use-timestamp') ?? 0);
 
 const showCreditsmodal = ref(false);
 const showExportModal = ref(false);
-const showImportModal = ref(false);
+const showImportExportModal = ref(false);
 const showNewFeaturesModal = ref(lastUse < new Date(BUILD_DATE)); // can use BUILD_DATE but if I push a quick bug fix, I don't want to show it again
 const showSideMenu = ref(false);
 const showSettings = ref(false);
@@ -41,7 +41,7 @@ const openUpcomingEvents = () => {
           <font-awesome-icon icon="download" />
           <span class="d-none d-md-inline"> Export</span>
         </button>
-        <button class="btn btn-primary" @click="showImportModal = !showImportModal">
+        <button class="btn btn-primary" @click="showImportExportModal = !showImportExportModal">
           <font-awesome-icon icon="upload" />
           <span class="d-none d-md-inline"> Import</span>
         </button>
@@ -65,7 +65,7 @@ const openUpcomingEvents = () => {
         <div class="list-group-item" @click="showExportModal = !showExportModal">
           <div><font-awesome-icon icon="download" /> Export</div>
         </div>
-        <div class="list-group-item" @click="showImportModal = !showImportModal">
+        <div class="list-group-item" @click="showImportExportModal = !showImportExportModal">
           <div><font-awesome-icon icon="upload" /> Import</div>
         </div>
         <div class="list-group-item" @click="showArkPRTSImportModal = !showArkPRTSImportModal">
@@ -98,7 +98,7 @@ const openUpcomingEvents = () => {
 
   <ExportModal v-model="showExportModal" />
 
-  <ImportModal v-model="showImportModal" />
+  <ImportExportModal v-model="showImportExportModal" />
 
   <NewFeatures v-model="showNewFeaturesModal" />
 

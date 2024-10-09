@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import Modal from './Modal.vue';
 import { usePlannerStore } from '../store/planner-store';
 import { setImportData } from '../store/store-operator-functions';
+import ImportTab from './ImportTab.vue';
 
 const props = defineProps<{
     modelValue: boolean;
@@ -24,6 +25,7 @@ const show = computed({
       Import or Export Data
     </template>
     <template #body>
+        <import-tab @imported="show = false" />
     </template>
     <template #footer>
       <button class="btn btn-danger" @click="show = false">Cancel</button>
