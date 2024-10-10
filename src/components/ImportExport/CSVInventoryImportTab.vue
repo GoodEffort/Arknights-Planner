@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { usePlannerStore } from '../store/planner-store';
-import { convertCSVInventory } from '../data/arkprts-to-record';
+import { usePlannerStore } from '@/store/planner-store';
+import { convertCSVInventory } from '@/data/arkprts-to-record';
 import { storeToRefs } from 'pinia';
 
 

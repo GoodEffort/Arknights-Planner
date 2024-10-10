@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import ItemsDisplay from './ItemsDisplay.vue';
-import PlannerSection from './PlannerSection.vue';
+import ItemsDisplay from '@/components/ItemsDisplay.vue';
+import PlannerSection from '@/components/PlannerSection.vue';
 </script>
 
 <template>

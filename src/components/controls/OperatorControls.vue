@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import OperatorSkillMasteries from './controls/OperatorSkillMasteries.vue';
-import type { SelectedOperator } from '../types/planner-types';
-import OperatorCosts from './OperatorCosts.vue';
-import ImageFinder from './ImageFinder.vue';
-import { usePlannerStore } from '../store/planner-store';
-import OperatorControlsTabs from './OperatorControlsTabs.vue';
-import OperatorModules from './controls/OperatorModules.vue';
-import OperatorLevelPromotion from './controls/OperatorLevelPromotion.vue';
-import OperatorSkillLevels from './controls/OperatorSkillLevels.vue';
-import Tooltip from './Tooltip.vue';
+import OperatorSkillMasteries from '@/components/controls/OperatorSkillMasteries.vue';
+import type { SelectedOperator } from '@/types/planner-types';
+import OperatorCosts from '@/components/OperatorCosts.vue';
+import ImageFinder from '@/components/ImageFinder.vue';
+import { usePlannerStore } from '@/store/planner-store';
+import OperatorControlsTabs from '@/components/controls/OperatorControlsTabs.vue';
+import OperatorModules from '@/components/controls/OperatorModules.vue';
+import OperatorLevelPromotion from '@/components/controls/OperatorLevelPromotion.vue';
+import OperatorSkillLevels from '@/components/controls/OperatorSkillLevels.vue';
+import Tooltip from '@/components/Tooltip.vue';
 import { storeToRefs } from 'pinia';
 
 const props = defineProps<{

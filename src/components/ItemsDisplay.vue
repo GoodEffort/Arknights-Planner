@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { usePlannerStore } from '../store/planner-store';
-import { Item } from '../types/outputdata';
+import { usePlannerStore } from '@/store/planner-store';
+import { Item } from '@/types/outputdata';
 import { storeToRefs } from 'pinia';
-import ItemModal from './ItemModal.vue';
-import { inventoryToList } from '../store/store-inventory-functions';
-import ItemDisplayCell from './ItemDisplayCell.vue';
+import ItemModal from '@/components/ItemModal.vue';
+import { inventoryToList } from '@/store/store-inventory-functions';
+import ItemDisplayCell from '@/components/ItemDisplayCell.vue';
 
 const { inventory, reservedItems, items } = storeToRefs(usePlannerStore());
 

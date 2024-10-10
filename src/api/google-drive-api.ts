@@ -1,4 +1,4 @@
-import { ExportData } from "../store/store-operator-functions";
+import { ExportData } from "@/store/store-operator-functions";
 
 type CredentialResponse = google.accounts.id.CredentialResponse;
 type TokenResponse = google.accounts.oauth2.TokenResponse;

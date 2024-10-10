@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import type { TreeNode } from '../types/bomtree';
-import type { Item } from '../types/outputdata';
+import type { TreeNode } from '@/types/bomtree';
+import type { Item } from '@/types/outputdata';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import CraftButton from './CraftButton.vue';
-import { usePlannerStore } from '../store/planner-store';
+import CraftButton from '@/components/CraftButton.vue';
+import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
 
 const { inventory } = storeToRefs(usePlannerStore());

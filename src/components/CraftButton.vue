@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { usePlannerStore } from '../store/planner-store';
-import { Item } from '../types/outputdata';
+import { usePlannerStore } from '@/store/planner-store';
+import { Item } from '@/types/outputdata';
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import { canCraft } from '../store/store-inventory-functions';
+import { canCraft } from '@/store/store-inventory-functions';
 
 const { craftItem } = usePlannerStore();
 const { inventory } = storeToRefs(usePlannerStore());

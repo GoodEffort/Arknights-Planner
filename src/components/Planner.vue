@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import AddOperators from './AddOperators.vue';
-import SelectedOperators from './SelectedOperators.vue';
-import { usePlannerStore } from '../store/planner-store';
+import AddOperators from '@/components/AddOperators.vue';
+import SelectedOperators from '@/components/SelectedOperators.vue';
+import { usePlannerStore } from '@/store/planner-store';
 import { onMounted, ref } from 'vue';
-import InventoryControls from './InventoryControls.vue';
-import MissingItems from './MissingItems.vue';
+import InventoryControls from '@/components/InventoryControls.vue';
+import MissingItems from '@/components/MissingItems.vue';
 import { storeToRefs } from 'pinia';
 
 const { loadCharacters, loadSavedRecords, getDriveClient, downloadFile, loadReservedItems } = usePlannerStore();

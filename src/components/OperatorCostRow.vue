@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { usePlannerStore } from '../store/planner-store';
+import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
-import ItemCell from './ItemCell.vue';
-import { Item } from '../types/outputdata';
+import ItemCell from '@/components/ItemCell.vue';
+import { Item } from '@/types/outputdata';
 
 const emit = defineEmits<{
     (e: 'applyUpgrade', costs: {

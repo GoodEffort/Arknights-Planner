@@ -1,16 +1,13 @@
 <script setup lang="ts">
-// lmd json path: data.status.gold
-// operators json path: data.troop.chars
-// inventory json path: data.inventory
 import { ref } from 'vue';
-import { usePlannerStore } from '../store/planner-store';
+import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
-import type { ARKPRTSData } from '../types/arkprts';
-import type { SaveRecord } from '../types/planner-types';
-import { Operator } from '../types/outputdata';
-import { combineCurrentRecordsWithImport } from '../data/arkprts-to-record';
-import { Inventory } from '../store/store-inventory-functions';
-import { setImportData } from '../store/store-operator-functions';
+import type { ARKPRTSData } from '@/types/arkprts';
+import type { SaveRecord } from '@/types/planner-types';
+import { Operator } from '@/types/outputdata';
+import { combineCurrentRecordsWithImport } from '@/data/arkprts-to-record';
+import { Inventory } from '@/store/store-inventory-functions';
+import { setImportData } from '@/store/store-operator-functions';
 
 type Tmpl = NonNullable<ARKPRTSData["troop"]["chars"]["0"]["tmpl"]>;
 

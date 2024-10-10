@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { usePlannerStore } from '../store/planner-store';
+import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
-import OperatorCostRow from './OperatorCostRow.vue';
+import OperatorCostRow from '@/components/OperatorCostRow.vue';
 import type { ComputedRef } from 'vue';
-import type { LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from '../types/planner-types';
+import type { LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from '@/types/planner-types';
 
 const { totalCostsByOperatorCategorized, selectedOperators, inventory } = storeToRefs(usePlannerStore());
 

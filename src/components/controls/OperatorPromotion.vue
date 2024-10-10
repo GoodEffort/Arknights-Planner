@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Promotion } from '../../types/outputdata';
+import { Promotion } from '@/types/outputdata';
 
 defineEmits<{
     (e: 'update:model-value', value: number): void;

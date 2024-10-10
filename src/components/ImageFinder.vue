@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { Item, Operator } from '../types/outputdata';
+import { Item, Operator } from '@/types/outputdata';
 
 const operatorSources = [
     "https://goodeffort.github.io/Arknights-Planner-Data/images/operators/{id}.webp",

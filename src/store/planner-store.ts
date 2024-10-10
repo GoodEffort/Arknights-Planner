@@ -1,12 +1,12 @@
-import { canCraft, getBattleRecords, getCostOfOperator, getEXPValue, getReservedItems, getTotalCosts, getTotalCostsByOperator, Inventory, inventoryToList } from './store-inventory-functions';
-import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData, getSavedOperatorRecords, getSavedOperatorData } from './store-operator-functions';
+import { canCraft, getBattleRecords, getCostOfOperator, getEXPValue, getReservedItems, getTotalCosts, getTotalCostsByOperator, Inventory, inventoryToList } from '@/store/store-inventory-functions';
+import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData, getSavedOperatorRecords, getSavedOperatorData } from '@/store/store-operator-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { SelectedOperator, LevelUpNeeds, SaveRecord } from '../types/planner-types';
+import { SelectedOperator, LevelUpNeeds, SaveRecord } from '@/types/planner-types';
 import { debounce } from 'lodash';
-import type { Item, Operator } from '../types/outputdata';
-import DriveClient from '../api/google-drive-api';
-import { getAvailableItems, getEfficentToFarmItemIds, getMissingItems, getNeededEXPItems, getNeededItems } from './store-item-functions.';
+import type { Item, Operator } from '@/types/outputdata';
+import DriveClient from '@/api/google-drive-api';
+import { getAvailableItems, getEfficentToFarmItemIds, getMissingItems, getNeededEXPItems, getNeededItems } from '@/store/store-item-functions.';
 
 export const usePlannerStore = defineStore('planner', () => {
     // Getters

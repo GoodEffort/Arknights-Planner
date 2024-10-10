@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { SelectedOperator } from '../../types/planner-types';
-import OperatorInputGroup from './OperatorInputGroup.vue';
-import { usePlannerStore } from '../../store/planner-store';
+import { SelectedOperator } from '@/types/planner-types';
+import OperatorInputGroup from '@/components/controls/OperatorInputGroup.vue';
+import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
-import { Module } from '../../types/outputdata';
-import Modal from '../Modal.vue';
-import Tooltip from '../Tooltip.vue';
+import { Module } from '@/types/outputdata';
+import Modal from '@/components/generic/Modal.vue';
+import Tooltip from '@/components/Tooltip.vue';
 
 const { selectedOperators } = storeToRefs(usePlannerStore());
 

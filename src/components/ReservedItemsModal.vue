@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import Modal from './Modal.vue';
-import ItemsDisplay from './ItemsDisplay.vue';
+import Modal from '@/components/generic/Modal.vue';
+import ItemsDisplay from '@/components/ItemsDisplay.vue';
 
 const props = defineProps<{
   modelValue: boolean;

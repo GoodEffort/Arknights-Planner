@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { usePlannerStore } from '../store/planner-store';
+import { usePlannerStore } from '@/store/planner-store';
 
-import type { Operator } from '../types/outputdata';
-import PlannerSection from './PlannerSection.vue';
-import AddOperatorsCell from './AddOperatorsCell.vue';
-import { localeContains, localeStartsWith } from '../data/operatorNameCompare';
+import type { Operator } from '@/types/outputdata';
+import PlannerSection from '@/components/PlannerSection.vue';
+import AddOperatorsCell from '@/components/AddOperatorsCell.vue';
+import { localeContains, localeStartsWith } from '@/data/operatorNameCompare';
 
 const { operators, selectedOperators } = storeToRefs(usePlannerStore());
 

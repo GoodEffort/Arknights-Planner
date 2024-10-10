@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import Modal from './Modal.vue';
-import NavTabList from './NavTabList.vue';
-import ImportTab from './DefaultImportExportTab.vue';
-import PenguinStatsTab from './PenguinStatsTab.vue';
-import CSVInventoryImportTab from './CSVInventoryImportTab.vue';
-import ArkPRTSImportTab from './ArkPRTSImportTab.vue';
+import Modal from '@/components/generic/Modal.vue';
+import NavTabList from '@/components/generic/NavTabList.vue';
+import ImportTab from '@/components/ImportExport/DefaultImportExportTab.vue';
+import PenguinStatsTab from '@/components/ImportExport/PenguinStatsTab.vue';
+import CSVInventoryImportTab from '@/components/ImportExport/CSVInventoryImportTab.vue';
+import ArkPRTSImportTab from '@/components/ImportExport/ArkPRTSImportTab.vue';
 
 const props = defineProps<{
     modelValue: boolean | string;

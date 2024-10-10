@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import Modal from './Modal.vue';
+import Modal from '@/components/generic/Modal.vue';
 
 const props = defineProps<{
   modelValue: boolean;

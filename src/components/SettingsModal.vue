@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import Modal from './Modal.vue';
-import { usePlannerStore } from '../store/planner-store';
+import Modal from '@/components/generic/Modal.vue';
+import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
 
 const props = defineProps<{

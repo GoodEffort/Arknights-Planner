@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
-import type { SelectedOperator } from '../../types/planner-types';
+import type { SelectedOperator } from '@/types/planner-types';
 import { debounce } from 'lodash';
 
 const props = defineProps<{

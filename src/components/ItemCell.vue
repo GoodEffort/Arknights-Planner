@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Item } from '../types/outputdata';
-import ImageFinder from './ImageFinder.vue';
+import { Item } from '@/types/outputdata';
+import ImageFinder from '@/components/ImageFinder.vue';
 
 defineProps<{
     item: Item;

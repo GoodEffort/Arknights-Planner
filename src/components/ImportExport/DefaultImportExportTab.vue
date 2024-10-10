@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { usePlannerStore } from '../store/planner-store';
-import { setImportData } from '../store/store-operator-functions';
+import { usePlannerStore } from '@/store/planner-store';
+import { setImportData } from '@/store/store-operator-functions';
 
 const emit = defineEmits<{
   (e: 'imported'): void;

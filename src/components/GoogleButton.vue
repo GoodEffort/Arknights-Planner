@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { usePlannerStore } from '../store/planner-store';
+import { usePlannerStore } from '@/store/planner-store';
 
 const { renderButton, getDriveClient } = usePlannerStore();
 const googleLoginBtn = ref<HTMLElement | null>(null);

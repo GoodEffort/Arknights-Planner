@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import OperatorInputGroup from './OperatorInputGroup.vue';
-import { SelectedOperator } from '../../types/planner-types';
+import OperatorInputGroup from '@/components/controls/OperatorInputGroup.vue';
+import { SelectedOperator } from '@/types/planner-types';
 
 const props = defineProps<{
     selectedOperator: SelectedOperator;

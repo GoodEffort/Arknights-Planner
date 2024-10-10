@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import Modal from './Modal.vue';
-import { Item } from '../types/outputdata';
-import { usePlannerStore } from '../store/planner-store';
+import Modal from '@/components/generic/Modal.vue';
+import type { Item } from '@/types/outputdata';
+import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
-import { TreeNode } from '../types/bomtree';
-import ItemBOM from './ItemBOM.vue';
+import { TreeNode } from '@/types/bomtree';
+import ItemBOM from '@/components/ItemBOM.vue';
 
 const { items, lmdId } = storeToRefs(usePlannerStore());
 
