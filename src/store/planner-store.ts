@@ -4,7 +4,7 @@ import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { debounce } from 'lodash';
 import DriveClient from '@/api/google-drive-api';
-import { getAvailableItems, getEfficentToFarmItemIds, getMissingItems, getNeededEXPItems, getNeededItems } from '@/store/store-item-functions.';
+import { getEfficentToFarmItemIds, getMissingItems, getNeededEXPItems, getNeededItems } from '@/store/store-item-functions.';
 import { SelectedOperator, SaveRecord } from '@/types/planner-types';
 
 import type { LevelUpNeeds, Inventory, EventGains } from '@/types/planner-types';
@@ -120,12 +120,6 @@ export const usePlannerStore = defineStore('planner', () => {
         ),
         ...neededEXPItems.value,
     ].sort((a, b) => a.item.sortId - b.item.sortId));
-
-    const availableItems = computed(() => getAvailableItems(
-        getInventoryCopy(),
-        reservedItems.value,
-        lmdId.value
-    ));
 
     const missingItems = computed(() => getMissingItems(
         totalCosts.value,
@@ -248,7 +242,6 @@ export const usePlannerStore = defineStore('planner', () => {
         googleDriveTest,
         loadReservedItems,
         reservedItems,
-        availableItems,
         itemsToFarm,
         itemsToCraft,
         futureEventGains,

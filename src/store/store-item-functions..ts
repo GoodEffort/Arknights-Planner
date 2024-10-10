@@ -276,20 +276,6 @@ const handleItem = (
     return output;
 }
 
-const getAvailableItems = (inventory: Inventory, _: Inventory, lmdId: string) => {
-    // for (const [itemId, count] of Object.entries(reservedItems)) {
-    //     //inventory[itemId] -= count;
-    // }
-
-    for (const key in inventory) {
-        if (key !== lmdId && (inventory[key] <= 0 || isNaN(inventory[key]))) {
-            delete inventory[key];
-        }
-    }
-
-    return inventory;
-}
-
 const getMissingItems = (
     totalCosts: Inventory,
     available: Inventory,
@@ -373,7 +359,6 @@ const getMissingItems = (
 export {
     getNeededEXPItems,
     getNeededItems,
-    getAvailableItems,
     getMissingItems,
     getEfficentToFarmItemIds,
 }
