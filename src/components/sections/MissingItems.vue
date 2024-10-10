@@ -9,7 +9,15 @@ import ReservedItemsModal from '@/components/modals/ReservedItemsModal.vue';
 import ImportExportModal from '@/components/modals/ImportExportModal.vue';
 import { getMissingItems, getNeededEXPItems, getNeededItems } from '@/store/store-item-functions.';
 
-const { totalCosts, inventory, items, battleRecords, lmdId, reservedItems, futureEventGains } = storeToRefs(usePlannerStore());
+const {
+    totalCosts, 
+    inventory,
+    items,
+    battleRecords,
+    lmdId,
+    reservedItems,
+    futureEventGains
+} = storeToRefs(usePlannerStore());
 
 const missingItems = computed(() => getMissingItems(
     totalCosts.value,
@@ -41,6 +49,7 @@ const itemsToFarm = computed(() => [
 
 const totalEXPValueCost = computed(() => getEXPValue(totalCosts.value, items.value));
 const inventoryEXPValue = computed(() => getEXPValue(inventory.value, items.value));
+
 const neededEXPItems = computed(() => inventoryToList(
     getNeededEXPItems(
         totalEXPValueCost.value - inventoryEXPValue.value,

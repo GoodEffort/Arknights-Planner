@@ -95,8 +95,14 @@ export const usePlannerStore = defineStore('planner', () => {
         return neededItemsByOperator;
     });
 
-    const totalCostsByOperator = computed(() => getTotalCostsByOperator(totalCostsByOperatorCategorized.value, getBlankInventory));
-    const totalCosts = computed(() => getTotalCosts(getBlankInventory(), totalCostsByOperator.value, selectedOperators.value));
+    const totalCosts = computed(() => getTotalCosts(
+        getBlankInventory(),
+        getTotalCostsByOperator(
+            totalCostsByOperatorCategorized.value,
+            getBlankInventory
+        ),
+        selectedOperators.value
+    ));
 
     // Drive API
     const getDriveClient = async () => {
@@ -176,7 +182,6 @@ export const usePlannerStore = defineStore('planner', () => {
         selectedOperators,
         inventory,
         totalCosts,
-        totalCostsByOperator,
         totalCostsByOperatorCategorized,
         battleRecords,
         loadCharacters,
