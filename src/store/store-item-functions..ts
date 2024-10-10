@@ -1,6 +1,6 @@
-import { farmingChips, stages } from "../data/farmingdata";
-import { Item, Recipe } from "../types/outputdata";
-import { Inventory, inventoryToList, isEXPItem, ItemWithRecipe } from "./store-inventory-functions";
+import { farmingChips, stages } from "@/data/farmingdata";
+import { Item, Recipe } from "@/types/outputdata";
+import { Inventory, inventoryToList, isEXPItem, ItemWithRecipe } from "@/store/store-inventory-functions";
 
 const getEfficentToFarmItemIds = (items: {
     [key: string]: Item;

@@ -1,7 +1,7 @@
-import { levelingCostsArray } from "../data/leveling-costs";
-import promotionLMDCosts from "../data/promotionCosts";
-import { Item, Recipe } from "../types/outputdata";
-import { LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from "../types/planner-types";
+import { levelingCostsArray } from "@/data/leveling-costs";
+import promotionLMDCosts from "@/data/promotionCosts";
+import { Item, Recipe } from "@/types/outputdata";
+import { LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from "@/types/planner-types";
 
 // key is item id, value is quantity
 type Inventory = { [key: string]: number; };
