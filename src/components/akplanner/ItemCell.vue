@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Item } from '@/types/outputdata';
-import ImageFinder from '@/components/ImageFinder.vue';
+import ImageFinder from '@/components/akplanner/ImageFinder.vue';
 
 defineProps<{
     item: Item;

@@ -2,7 +2,7 @@
 import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
-import OperatorCostRow from '@/components/OperatorCostRow.vue';
+import OperatorCostRow from '@/components/controls/OperatorCostRow.vue';
 import type { ComputedRef } from 'vue';
 import type { LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from '@/types/planner-types';
 

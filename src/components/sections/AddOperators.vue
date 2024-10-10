@@ -4,8 +4,8 @@ import { storeToRefs } from 'pinia';
 import { usePlannerStore } from '@/store/planner-store';
 
 import type { Operator } from '@/types/outputdata';
-import PlannerSection from '@/components/PlannerSection.vue';
-import AddOperatorsCell from '@/components/AddOperatorsCell.vue';
+import PlannerSection from '@/components/akplanner/PlannerSection.vue';
+import AddOperatorsCell from '@/components/akplanner/AddOperatorsCell.vue';
 import { localeContains, localeStartsWith } from '@/data/operatorNameCompare';
 
 const { operators, selectedOperators } = storeToRefs(usePlannerStore());

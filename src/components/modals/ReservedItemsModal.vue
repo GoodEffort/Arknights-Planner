@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import Modal from '@/components/generic/Modal.vue';
-import ItemsDisplay from '@/components/ItemsDisplay.vue';
+import ItemsDisplay from '@/components/akplanner/ItemsDisplay.vue';
 
 const props = defineProps<{
   modelValue: boolean;

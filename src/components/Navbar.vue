@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import NewFeatures from '@/components/modals/NewFeaturesModal.vue';
-import NightModeToggle from '@/components/NightModeToggle.vue';
+import NightModeToggle from '@/components/generic/NightModeToggle.vue';
 import { ref } from 'vue';
 import { usePlannerStore } from '@/store/planner-store';
 import GoogleButton from '@/components/google/GoogleButton.vue';

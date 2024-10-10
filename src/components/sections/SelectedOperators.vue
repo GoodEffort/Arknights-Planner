@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import PlannerSection from '@/components/PlannerSection.vue';
+import PlannerSection from '@/components/akplanner/PlannerSection.vue';
 import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
 import OperatorControls from '@/components/controls/OperatorControls.vue';

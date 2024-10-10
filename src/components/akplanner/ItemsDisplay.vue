@@ -5,7 +5,7 @@ import { Item } from '@/types/outputdata';
 import { storeToRefs } from 'pinia';
 import ItemModal from '@/components/modals/ItemModal.vue';
 import { inventoryToList } from '@/store/store-inventory-functions';
-import ItemDisplayCell from '@/components/ItemDisplayCell.vue';
+import ItemDisplayCell from '@/components/akplanner/ItemDisplayCell.vue';
 
 const { inventory, reservedItems, items } = storeToRefs(usePlannerStore());
 

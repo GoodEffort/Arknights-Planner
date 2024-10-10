@@ -2,7 +2,7 @@
 import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
-import ItemCell from '@/components/ItemCell.vue';
+import ItemCell from '@/components/akplanner/ItemCell.vue';
 import { Item } from '@/types/outputdata';
 
 const emit = defineEmits<{

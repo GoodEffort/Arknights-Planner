@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
-import ItemsDisplay from '@/components/ItemsDisplay.vue';
+import ItemsDisplay from '@/components/akplanner/ItemsDisplay.vue';
 import { computed, ref, watch } from 'vue';
-import PlannerSection from '@/components/PlannerSection.vue';
+import PlannerSection from '@/components/akplanner/PlannerSection.vue';
 import { inventoryToList } from '@/store/store-inventory-functions';
 import ReservedItemsModal from '@/components/modals/ReservedItemsModal.vue';
 import ImportExportModal from '@/components/modals/ImportExportModal.vue';

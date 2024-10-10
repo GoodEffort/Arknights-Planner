@@ -2,8 +2,8 @@
 import { computed, ref } from 'vue';
 import OperatorSkillMasteries from '@/components/controls/OperatorSkillMasteries.vue';
 import type { SelectedOperator } from '@/types/planner-types';
-import OperatorCosts from '@/components/OperatorCosts.vue';
-import ImageFinder from '@/components/ImageFinder.vue';
+import OperatorCosts from '@/components/controls/OperatorCosts.vue';
+import ImageFinder from '@/components/akplanner/ImageFinder.vue';
 import { usePlannerStore } from '@/store/planner-store';
 import OperatorControlsTabs from '@/components/controls/OperatorControlsTabs.vue';
 import OperatorModules from '@/components/controls/OperatorModules.vue';

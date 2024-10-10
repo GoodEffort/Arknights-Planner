@@ -5,7 +5,7 @@ import type { Item } from '@/types/outputdata';
 import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
 import { TreeNode } from '@/types/bomtree';
-import ItemBOM from '@/components/ItemBOM.vue';
+import ItemBOM from '@/components/akplanner/ItemBOM.vue';
 
 const { items, lmdId } = storeToRefs(usePlannerStore());
 

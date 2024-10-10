@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import type { TreeNode } from '@/types/bomtree';
 import type { Item } from '@/types/outputdata';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import CraftButton from '@/components/CraftButton.vue';
+import CraftButton from '@/components/akplanner/CraftButton.vue';
 import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
 

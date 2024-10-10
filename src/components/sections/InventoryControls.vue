@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import ItemsDisplay from '@/components/ItemsDisplay.vue';
-import PlannerSection from '@/components/PlannerSection.vue';
+import ItemsDisplay from '@/components/akplanner/ItemsDisplay.vue';
+import PlannerSection from '@/components/akplanner/PlannerSection.vue';
 </script>
 
 <template>
