@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import NewFeatures from '@/components/NewFeatures.vue';
+import NewFeatures from '@/components/modals/NewFeaturesModal.vue';
 import NightModeToggle from '@/components/NightModeToggle.vue';
 import { ref } from 'vue';
 import { usePlannerStore } from '@/store/planner-store';
-import GoogleButton from '@/components/GoogleButton.vue';
-import SettingsModal from '@/components/SettingsModal.vue';
-import CreditsModal from '@/components/CreditsModal.vue';
-import ImportExportModal from '@/components/ImportExport/ImportExportModal.vue';
+import GoogleButton from '@/components/google/GoogleButton.vue';
+import SettingsModal from '@/components/modals/SettingsModal.vue';
+import CreditsModal from '@/components/modals/CreditsModal.vue';
+import ImportExportModal from '@/components/modals/ImportExportModal.vue';
 import { storeToRefs } from 'pinia';
 
 const { googleDriveTest } = storeToRefs(usePlannerStore());

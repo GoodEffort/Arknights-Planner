@@ -9,7 +9,7 @@ import OperatorControlsTabs from '@/components/controls/OperatorControlsTabs.vue
 import OperatorModules from '@/components/controls/OperatorModules.vue';
 import OperatorLevelPromotion from '@/components/controls/OperatorLevelPromotion.vue';
 import OperatorSkillLevels from '@/components/controls/OperatorSkillLevels.vue';
-import Tooltip from '@/components/Tooltip.vue';
+import Tooltip from '@/components/generic/Tooltip.vue';
 import { storeToRefs } from 'pinia';
 
 const props = defineProps<{

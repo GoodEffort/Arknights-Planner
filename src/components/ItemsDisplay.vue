@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import { usePlannerStore } from '@/store/planner-store';
 import { Item } from '@/types/outputdata';
 import { storeToRefs } from 'pinia';
-import ItemModal from '@/components/ItemModal.vue';
+import ItemModal from '@/components/modals/ItemModal.vue';
 import { inventoryToList } from '@/store/store-inventory-functions';
 import ItemDisplayCell from '@/components/ItemDisplayCell.vue';
 

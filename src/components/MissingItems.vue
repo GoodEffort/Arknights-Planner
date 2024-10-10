@@ -5,8 +5,8 @@ import ItemsDisplay from '@/components/ItemsDisplay.vue';
 import { computed, ref, watch } from 'vue';
 import PlannerSection from '@/components/PlannerSection.vue';
 import { inventoryToList } from '@/store/store-inventory-functions';
-import ReservedItemsModal from '@/components/ReservedItemsModal.vue';
-import ImportExportModal from '@/components/ImportExport/ImportExportModal.vue';
+import ReservedItemsModal from '@/components/modals/ReservedItemsModal.vue';
+import ImportExportModal from '@/components/modals/ImportExportModal.vue';
 
 const { itemsToCraft, itemsToFarm, totalCosts, neededItems, items } = storeToRefs(usePlannerStore());
 

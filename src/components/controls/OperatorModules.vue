@@ -6,7 +6,7 @@ import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
 import { Module } from '@/types/outputdata';
 import Modal from '@/components/generic/Modal.vue';
-import Tooltip from '@/components/Tooltip.vue';
+import Tooltip from '@/components/generic/Tooltip.vue';
 
 const { selectedOperators } = storeToRefs(usePlannerStore());
 
