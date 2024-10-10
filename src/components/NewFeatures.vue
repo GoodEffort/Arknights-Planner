@@ -37,6 +37,15 @@ watch(doNotShowAgain, (val) => {
         <div>
           <h2>New Features</h2>
           <div>
+            <h4>10/10/2024</h4>
+            <ul>
+              <li>Moved all imports/exports to one modal</li>
+              <li>Added Penguin Stats Import</li>
+              <li>Updated ArkPRTS Import to use the "All Raw Data" Export so only one copy paste is needed</li>
+              <li>Added inventory csv export and import</li>
+            </ul>
+          </div>
+          <div>
             <h4>9/24/2024</h4>
             <ul>
               <li>Fixed reserved items not working</li>
