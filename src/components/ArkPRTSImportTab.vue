@@ -12,6 +12,8 @@ import { combineCurrentRecordsWithImport } from '../data/arkprts-to-record';
 import { Inventory } from '../store/store-inventory-functions';
 import { setImportData } from '../store/store-operator-functions';
 
+type Tmpl = NonNullable<ARKPRTSData["troop"]["chars"]["0"]["tmpl"]>;
+
 const importString = ref('');
 const activateAdded = ref(false);
 
@@ -22,6 +24,27 @@ const importData = () => {
     const data: ARKPRTSData = JSON.parse(importString.value);
 
     const chars = Object.values(data.troop.chars);
+
+    // fix Amiya forms
+    const patchChars = chars.filter(char => char.tmpl !== undefined);
+    if (patchChars.length > 0) {
+        for (const char of patchChars) {
+            for (const patchedCharId in (char.tmpl as Tmpl)) {
+                const patch = (char.tmpl as Tmpl)[patchedCharId];
+                if (patchedCharId === char.charId) {
+                    char.skills = patch.skills;
+                    char.equip = patch.equip;
+                }
+                else {
+                    const patchedChar = JSON.parse(JSON.stringify(char));
+                    patchedChar.charId = patchedCharId;
+                    patchedChar.skills = patch.skills;
+                    patchedChar.equip = patch.equip;
+                    chars.push(patchedChar);
+                }
+            }
+        }
+    }
 
     const inventory = data.inventory;
     inventory[lmdId.value] = data.status.gold;
