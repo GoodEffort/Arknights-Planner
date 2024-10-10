@@ -5,6 +5,7 @@ import { LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from "@/types/planner
 
 // key is item id, value is quantity
 type Inventory = { [key: string]: number; };
+type EventGains = { [key: string]: Inventory; };
 type ItemWithRecipe = Item & { recipe: Recipe };
 type EXPItem = Item & { gainExp: number; };
 
@@ -449,4 +450,5 @@ export {
 export type {
     Inventory,
     ItemWithRecipe,
+    EventGains
 }
