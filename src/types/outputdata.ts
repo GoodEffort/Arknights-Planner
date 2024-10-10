@@ -32,6 +32,7 @@ type Skill = {
 }
 
 type Module = {
+    id: string;
     typeName1: string;
     type: string;
     name: string;
