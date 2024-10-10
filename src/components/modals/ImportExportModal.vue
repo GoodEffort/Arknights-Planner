@@ -27,12 +27,12 @@ const tabs = [
         title: 'Arknights Planner'
     },
     {
-        name: 'penguin-stats',
-        title: 'Penguin Stats'
-    },
-    {
         name: 'inventory-csv',
         title: 'CSV (Inventory)'
+    },
+    {
+        name: 'penguin-stats',
+        title: 'Penguin Stats'
     },
     {
         name: 'ark-prts',

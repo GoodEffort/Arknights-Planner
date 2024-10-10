@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
 import { Inventory } from '@/store/store-inventory-functions';
+import ImportExportTab from '@/components/importExport/ImportExportTab.vue';
 
 type PenguinStatusImport = {
   '@type': "@penguin-statistics/planner/config";
@@ -14,9 +14,6 @@ const emit = defineEmits<{
 }>();
 
 const { totalCosts, inventory } = storeToRefs(usePlannerStore());
-
-const exportString = ref('');
-const importString = ref('');
 
 const exportData = () => {
   const needed = totalCosts.value;// itemListToInventory(itemsToFarm.value);
@@ -38,66 +35,33 @@ const exportData = () => {
     exportDataObject.items.push(exportItem);
   }
 
-  exportString.value = JSON.stringify(exportDataObject);
+  return JSON.stringify(exportDataObject);
 };
 
-const importData = () => {
-  if (importString.value) {
-    const importDataObject = JSON.parse(importString.value) as PenguinStatusImport;
+const importData = (is: string) => {
+  const importDataObject = JSON.parse(is) as PenguinStatusImport;
 
-    const inv: Inventory = JSON.parse(JSON.stringify(inventory.value));
+  const inv: Inventory = JSON.parse(JSON.stringify(inventory.value));
 
-    for (const item of importDataObject.items) {
-      inv[item.id] = item.have;
-    }
-
-    inventory.value = inv;
-
-    importString.value = '';
-    emit('imported');
-  } else {
-    alert('No data to import');
+  for (const item of importDataObject.items) {
+    inv[item.id] = item.have;
   }
-};
 
-const pasteFromClipboard = async () => {
-  const text = await navigator.clipboard.readText();
-  importString.value = text;
-};
-
-const copyToClipboard = () => {
-  navigator.clipboard.writeText(exportString.value);
+  inventory.value = inv;
 };
 
 exportData();
 </script>
 
 <template>
-
-  <div class="row">
-    <div class="col">
-      <h2>Export Data</h2>
-      <div class="mb-2">
-      </div>
-      <div class="mt-4">
-        <textarea rows="10" cols="50" readonly>{{ exportString }}</textarea>
-        <p>Copy this data to the clipboard and import it into the <a href="https://penguin-stats.io/planner"
-            target="_blank">Penguin Stats Planner</a> to see more detailed farming data.</p>
-      </div>
-      <button class="btn btn-success" @click="copyToClipboard">Copy To Clipboard</button>
-    </div>
-    <div class="col">
-      <h2>Import Data</h2>
-      <div class="mb-2">
-      </div>
-      <div class="mt-4">
-        <textarea rows="10" cols="50" v-model="importString"></textarea>
-        <p>Paste data from the <a href="https://penguin-stats.io/planner" target="_blank">Penguin Stats Planner</a> to
-          import it here. The "needed" items are ignored.</p>
-      </div>
-      <button class="btn btn-primary" @click="pasteFromClipboard">Paste from Clipboard</button>
-      <hr />
-      <button class="btn btn-success" @click="importData">Import Data</button>
-    </div>
-  </div>
+  <ImportExportTab :importData="importData" :exportData="exportData" @imported="emit('imported')">
+    <template #export-info>
+      <p>Copy this data to the clipboard and import it into the <a href="https://penguin-stats.io/planner"
+          target="_blank">Penguin Stats Planner</a> to see more detailed farming data.</p>
+    </template>
+    <template #import-info>
+      <p>Paste data from the <a href="https://penguin-stats.io/planner" target="_blank">Penguin Stats Planner</a> to
+        import it here. The "needed" items are ignored.</p>
+    </template>
+  </ImportExportTab>
 </template>

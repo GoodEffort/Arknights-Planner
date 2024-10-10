@@ -8,17 +8,21 @@ import { Operator } from '@/types/outputdata';
 import { combineCurrentRecordsWithImport } from '@/data/arkprts-to-record';
 import { Inventory } from '@/store/store-inventory-functions';
 import { setImportData } from '@/store/store-operator-functions';
+import ImportExportTab from '@/components/importExport/ImportExportTab.vue';
 
 type Tmpl = NonNullable<ARKPRTSData["troop"]["chars"]["0"]["tmpl"]>;
 
-const importString = ref('');
+const emit = defineEmits<{
+    (e: 'imported'): void;
+}>();
+
 const activateAdded = ref(false);
 
 const { lmdId, operators } = storeToRefs(usePlannerStore());
 const { exportSavedRecords, getBlankInventory, loadSavedRecords } = usePlannerStore();
 
-const importData = () => {
-    const data: ARKPRTSData = JSON.parse(importString.value);
+const importData = (is: string) => {
+    const data: ARKPRTSData = JSON.parse(is);
 
     const chars = Object.values(data.troop.chars);
 
@@ -110,37 +114,22 @@ const importData = () => {
 
     loadSavedRecords();
 };
-
-const pasteFromClipboard = async () => {
-    const text = await navigator.clipboard.readText();
-    importString.value = text;
-};
 </script>
 
 <template>
-    <div>
-        <h2>Import Data</h2>
-        <div class="mb-2">
+    <ImportExportTab :importData="importData" @imported="emit('imported')">
+        <template #import-info>
             <p>
                 <a href="https://arkprts.ashlen.top/" target="_blank" rel="noopener noreferrer">ArkPRTS</a> is a tool
                 that allows you to pull data right from your Arknights account. You can use it to export your data and
                 import it here to save time by not having to manually type your info in.
-                <br />
-                <br />
-                <p>Click Login and then click "Export full raw data." up top and copy the results into the textbox below.</p>
-                <p>By default newly imported operators are not set to active since this import can bring in a lot. If you would like them all to be active then check the box below.</p>
             </p>
-        </div>
-        <div>
-            <input type="checkbox" v-model="activateAdded" /> Activate Newly Added Operators
-        </div>
-        <div class="my-4">
-            <textarea rows="10" cols="50" v-model="importString"></textarea>
-        </div>
-        <button class="btn btn-primary" @click="pasteFromClipboard">Paste from Clipboard</button>
-        <hr />
-        <button class="btn btn-success" @click="importData">Import Data</button>
-    </div>
+            <p>Click Login and then click "Export full raw data." up top and copy the results into the textbox below.
+            </p>
+            <p>By default newly imported operators are not set to active since this import can bring in a lot. If you
+                would like them all to be active then check the box below.</p>
+        </template>
+    </ImportExportTab>
 </template>
 
 <style scoped></style>
