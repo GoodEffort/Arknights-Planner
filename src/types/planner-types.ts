@@ -1,5 +1,5 @@
-import { IsOldOperatorPlans, OldOperatorPlans, OperatorPlans } from "./plans";
-import { Operator } from "./outputdata";
+import { IsOldOperatorPlans, OldOperatorPlans, OperatorPlans } from "@/types/plans";
+import { Operator } from "@/types/outputdata";
 
 class SelectedOperator {
     operator: Operator;

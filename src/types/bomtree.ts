@@ -1,4 +1,4 @@
-import { Item } from "./outputdata";
+import { Item } from "@/types/outputdata";
 
 type TreeNode = {
     item: Item;
