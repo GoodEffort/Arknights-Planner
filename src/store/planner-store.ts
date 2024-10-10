@@ -1,10 +1,10 @@
-import { canCraft, getBattleRecords, getCostOfOperator, getEXPValue, getReservedItems, getTotalCosts, getTotalCostsByOperator, inventoryToList } from '@/store/store-inventory-functions';
+import { canCraft, getBattleRecords, getCostOfOperator, getReservedItems, getTotalCosts, getTotalCostsByOperator } from '@/store/store-inventory-functions';
 import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData, getSavedOperatorRecords, getSavedOperatorData } from '@/store/store-operator-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { debounce } from 'lodash';
 import DriveClient from '@/api/google-drive-api';
-import { getEfficentToFarmItemIds, getMissingItems, getNeededEXPItems, getNeededItems } from '@/store/store-item-functions.';
+import { getEfficentToFarmItemIds } from '@/store/store-item-functions.';
 import { SelectedOperator, SaveRecord } from '@/types/planner-types';
 
 import type { LevelUpNeeds, Inventory, EventGains } from '@/types/planner-types';
@@ -98,55 +98,6 @@ export const usePlannerStore = defineStore('planner', () => {
     const totalCostsByOperator = computed(() => getTotalCostsByOperator(totalCostsByOperatorCategorized.value, getBlankInventory));
     const totalCosts = computed(() => getTotalCosts(getBlankInventory(), totalCostsByOperator.value, selectedOperators.value));
 
-    // EXP Value
-    const totalEXPValueCost = computed(() => getEXPValue(totalCosts.value, items.value));
-    const inventoryEXPValue = computed(() => getEXPValue(inventory.value, items.value));
-
-    // Items
-    const neededEXPItems = computed(() => inventoryToList(
-        getNeededEXPItems(
-            totalEXPValueCost.value - inventoryEXPValue.value,
-            battleRecords.value,
-        ),
-        items.value
-    ));
-
-    const neededItems = computed(() => [
-        ...getNeededItems(
-            inventory.value,
-            totalCosts.value,
-            battleRecords.value,
-            items.value,
-        ),
-        ...neededEXPItems.value,
-    ].sort((a, b) => a.item.sortId - b.item.sortId));
-
-    const missingItems = computed(() => getMissingItems(
-        totalCosts.value,
-        JSON.parse(JSON.stringify(inventory.value)),
-        lmdId.value,
-        items.value,
-        reservedItems.value
-    ));
-
-    const itemsToCraft = computed(() => inventoryToList(missingItems.value.itemsToCraft, items.value)
-        .sort((a, b) => {
-            const craftSort = (canCraft(b.item, inventory.value) ? 1 : 0) - (canCraft(a.item, inventory.value) ? 1 : 0);
-
-            if (craftSort !== 0) {
-                return craftSort;
-            }
-            else {
-                return b.item.rarity.localeCompare(a.item.rarity);
-            }
-        })
-    );
-
-    const itemsToFarm = computed(() => [
-        ...inventoryToList(missingItems.value.itemsToFarm, items.value),
-        ...neededEXPItems.value
-    ].sort((a, b) => a.item.sortId - b.item.sortId));
-
     // Drive API
     const getDriveClient = async () => {
         if (!driveClient) {
@@ -228,7 +179,6 @@ export const usePlannerStore = defineStore('planner', () => {
         totalCostsByOperator,
         totalCostsByOperatorCategorized,
         battleRecords,
-        neededItems,
         loadCharacters,
         loadSavedRecords,
         selectCharacter,
@@ -242,8 +192,6 @@ export const usePlannerStore = defineStore('planner', () => {
         googleDriveTest,
         loadReservedItems,
         reservedItems,
-        itemsToFarm,
-        itemsToCraft,
         futureEventGains,
     }
 });

@@ -1,7 +1,7 @@
 import { farmingChips, stages } from "@/data/farmingdata";
 import { inventoryToList, isEXPItem } from "@/store/store-inventory-functions";
 import type { Item, Recipe } from "@/types/outputdata";
-import type { Inventory, ItemWithRecipe } from "@/types/planner-types";
+import type { EventGains, Inventory, ItemWithRecipe } from "@/types/planner-types";
 
 const getEfficentToFarmItemIds = (items: {
     [key: string]: Item;
@@ -282,6 +282,8 @@ const getMissingItems = (
     lmdId: string,
     items: { [key: string]: Item },
     reservedItems: Inventory,
+    futureEventGains: EventGains,
+    excludedEvents: string[],
 ) => {
     // setup our states, we split our needed items and subcomponents into items to farm and items to craft
     const itemsToFarm: Inventory = {};
@@ -317,6 +319,22 @@ const getMissingItems = (
             available[key] = 0;
         }
     }
+
+    // add in our future event gains to available items
+    for (const eventId in futureEventGains) {
+        if (excludedEvents.indexOf(eventId) >= 0) {
+            continue;
+        }
+        
+        for (const itemId in futureEventGains[eventId]) {
+            if (available[itemId] === undefined) {
+                available[itemId] = 0;
+            }
+
+            available[itemId] += futureEventGains[eventId][itemId];
+        }
+    }
+
 
     // for each item we need, see if we can craft and or farm it and do the same for its children
     for (const itemId in needed) {
