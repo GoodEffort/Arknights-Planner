@@ -1,3 +1,4 @@
+import { Inventory } from '../store/store-inventory-functions';
 import { ExportData } from '../store/store-operator-functions';
 import type { ArkPrtsCharacter, ArkPrtsCharacterList } from '../types/arkprts'
 import { Operator } from '../types/outputdata';
@@ -127,8 +128,25 @@ const combineCurrentRecordsWithImport = (currentRecords: SaveRecord[], importedR
     return combinedRecords;
 }
 
+const verifyCSV = (csv: string) => {
+    const lines = csv.split('\n');
+    if (lines.length < 2) {
+        return false;
+    }
+    return lines
+        .slice(1)
+        .every(l =>
+            l.split(',').length === 2 &&
+            !isNaN(parseInt(l.split(',')[1]))
+        );
+}
+
 const convertCSVInventory = (csvInventory: string) => {
-    const inventory: { [key: string]: number } = {};
+    if (!verifyCSV(csvInventory)) {
+        return {};
+    }
+
+    const inventory: Inventory = {};
     const lines = csvInventory.split('\n');
     for (const line of lines) {
         const [itemId, count] = line.split(',');
@@ -142,7 +160,7 @@ const importArkPRTSOperatorData = (arkprts: ArkPrtsCharacterList, operators: Ope
     return combineCurrentRecordsWithImport(currentRecords, importedRecords);
 }
 
-const importArkPRTSInventoryData = (csvInventory: string, blankInventory: { [key: string]: number }): { [key: string]: number } => {
+const importArkPRTSInventoryData = (csvInventory: string, blankInventory: Inventory): Inventory => {
     const importedInventory = convertCSVInventory(csvInventory);
     const newInventory = { ...blankInventory };
     for (const itemId in newInventory) {
@@ -158,7 +176,7 @@ const importArkPRTSData = (
     operators: Operator[],
     currentRecords: SaveRecord[],
     csvInventory: string,
-    blankInventory: { [key: string]: number }
+    blankInventory: Inventory
 ): ExportData => {
     const records = importArkPRTSOperatorData(arkprts, operators, currentRecords);
     const inventory = importArkPRTSInventoryData(csvInventory, blankInventory);
@@ -170,3 +188,4 @@ const importArkPRTSData = (
 }
 
 export default importArkPRTSData;
+export { convertCSVInventory, verifyCSV, combineCurrentRecordsWithImport };

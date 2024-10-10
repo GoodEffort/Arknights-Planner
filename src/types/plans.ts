@@ -24,13 +24,13 @@ class ModuleLevels {
 
 class OldOperatorPlans {
     currentLevel: number;
-    currentElite: 0 | 1 | 2;
+    currentElite: number;
     currentSkillLevels: number;
     currentSkillMasteries: SkillMasteries;
     currentModules: ModuleLevels;
 
     targetLevel: number;
-    targetElite: 0 | 1 | 2;
+    targetElite: number;
     targetSkillLevels: number;
     targetSkillMasteries: SkillMasteries;
     targetModules: ModuleLevels;
@@ -52,7 +52,7 @@ class OldOperatorPlans {
 
 class OperatorPlans {
     currentLevel: number;
-    currentElite: 0 | 1 | 2;
+    currentElite: number;
     currentSkillLevels: number;
     currentSkillMasteries: SkillMasteries;
     currentModules: {
@@ -62,7 +62,7 @@ class OperatorPlans {
 
 
     targetLevel: number;
-    targetElite: 0 | 1 | 2;
+    targetElite: number;
     targetSkillLevels: number;
     targetSkillMasteries: SkillMasteries;
     targetModules: {
