@@ -1,12 +1,14 @@
-import { canCraft, getBattleRecords, getCostOfOperator, getEXPValue, getReservedItems, getTotalCosts, getTotalCostsByOperator, Inventory, inventoryToList } from '@/store/store-inventory-functions';
+import { canCraft, getBattleRecords, getCostOfOperator, getEXPValue, getReservedItems, getTotalCosts, getTotalCostsByOperator, inventoryToList } from '@/store/store-inventory-functions';
 import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData, getSavedOperatorRecords, getSavedOperatorData } from '@/store/store-operator-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { SelectedOperator, LevelUpNeeds, SaveRecord } from '@/types/planner-types';
 import { debounce } from 'lodash';
-import type { Item, Operator } from '@/types/outputdata';
 import DriveClient from '@/api/google-drive-api';
 import { getAvailableItems, getEfficentToFarmItemIds, getMissingItems, getNeededEXPItems, getNeededItems } from '@/store/store-item-functions.';
+import { SelectedOperator, SaveRecord } from '@/types/planner-types';
+
+import type { LevelUpNeeds, Inventory, EventGains } from '@/types/planner-types';
+import type { Item, Operator } from '@/types/outputdata';
 
 export const usePlannerStore = defineStore('planner', () => {
     // Getters
@@ -27,6 +29,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
     const inventory = ref<Inventory>(getSavedInventory());
     const reservedItems = ref(getBlankInventory());
+    const futureEventGains = ref<EventGains>({});
 
     // Functions
     async function loadCharacters() {
@@ -248,5 +251,6 @@ export const usePlannerStore = defineStore('planner', () => {
         availableItems,
         itemsToFarm,
         itemsToCraft,
+        futureEventGains,
     }
 });

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import type { Item } from '@/types/outputdata';
 import { stages } from '@/data/farmingdata';
-import { Inventory } from '@/store/store-inventory-functions';
 import { storeToRefs } from 'pinia';
 import { usePlannerStore } from '@/store/planner-store';
 import CraftButton from '@/components/akplanner/CraftButton.vue';
 import ImageFinder from '@/components/akplanner/ImageFinder.vue';
+
+import type { Inventory } from '@/types/planner-types';
+import type { Item } from '@/types/outputdata';
 
 export interface Props {
     item: Item;

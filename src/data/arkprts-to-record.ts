@@ -1,8 +1,8 @@
-import { Inventory } from '@/store/store-inventory-functions';
 import { ExportData } from '@/store/store-operator-functions';
-import type { ArkPrtsCharacter, ArkPrtsCharacterList } from '@/types/arkprts'
 import { Operator } from '@/types/outputdata';
-import type { SaveRecord } from '@/types/planner-types'
+
+import type { SaveRecord, Inventory } from '@/types/planner-types'
+import type { ArkPrtsCharacter, ArkPrtsCharacterList } from '@/types/arkprts'
 
 const mapArkPrtsToRecord = (arkprts: ArkPrtsCharacterList, operators: Operator[]): SaveRecord[] => {
     const records: SaveRecord[] = [];

@@ -2,13 +2,13 @@
 import { ref } from 'vue';
 import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
-import type { ARKPRTSData } from '@/types/arkprts';
-import type { SaveRecord } from '@/types/planner-types';
 import { Operator } from '@/types/outputdata';
 import { combineCurrentRecordsWithImport } from '@/data/arkprts-to-record';
-import { Inventory } from '@/store/store-inventory-functions';
 import { setImportData } from '@/store/store-operator-functions';
 import ImportExportTab from '@/components/importExport/ImportExportTab.vue';
+
+import type { ARKPRTSData } from '@/types/arkprts';
+import type { Inventory, SaveRecord } from '@/types/planner-types';
 
 type Tmpl = NonNullable<ARKPRTSData["troop"]["chars"]["0"]["tmpl"]>;
 

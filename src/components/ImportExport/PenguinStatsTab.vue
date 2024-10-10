@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
-import { Inventory } from '@/store/store-inventory-functions';
 import ImportExportTab from '@/components/importExport/ImportExportTab.vue';
+import type { Inventory } from '@/types/planner-types';
 
 type PenguinStatusImport = {
   '@type': "@penguin-statistics/planner/config";
