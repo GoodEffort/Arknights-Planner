@@ -82,7 +82,7 @@ export const usePlannerStore = defineStore('planner', () => {
         reservedItems.value = getReservedItems(items.value, getEfficentToFarmItemIds(items.value));
     }
 
-    // Costs
+    // Computed
     const battleRecords = computed(() => getBattleRecords(items.value));
 
     const totalCostsByOperatorCategorized = computed(() => {
