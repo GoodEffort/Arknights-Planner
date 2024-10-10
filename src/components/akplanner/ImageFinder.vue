@@ -2,18 +2,45 @@
 import { computed, ref, watch } from 'vue';
 import { Item, Operator } from '@/types/outputdata';
 
-const operatorSources = [
-    "https://goodeffort.github.io/Arknights-Planner-Data/images/operators/{id}.webp",
-    "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/avatars/{id}.png",
-    "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/charavatars/{id}.png",
-    "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/charportraits/{id}_2.png"
-];
+type URLTree = { [key: string]: false | URLTree };
 
-const itemSources = [
-    "https://goodeffort.github.io/Arknights-Planner-Data/images/items/{id}.webp",
-    "https://raw.githubusercontent.com/Aceship/Arknight-Images/main/items/{id}.png",
-    "https://raw.githubusercontent.com/ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/items/icons/{id}.png"
-];
+const os: URLTree = {
+    "https://": {
+        "goodeffort.github.io/Arknights-Planner-Data/images/operators/{id}.webp": false,
+        "raw.githubusercontent.com/": {
+            "Aceship/Arknight-Images/main/avatars/{id}.png": false,
+            "ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/": {
+                "charavatars/{id}.png": false,
+                "charportraits/{id}_2.png": false
+            }
+        }
+    }
+}
+
+const is: URLTree = {
+    "https://": {
+        "goodeffort.github.io/Arknights-Planner-Data/images/items/{id}.webp": false,
+        "raw.githubusercontent.com/": {
+            "Aceship/Arknight-Images/main/items/{id}.png": false,
+            "ArknightsAssets/ArknightsAssets/cn/assets/torappu/dynamicassets/arts/items/icons/{id}.png": false
+        }
+    }
+};
+
+const buildUrls = (sources: URLTree, urls: string[] = [], base = '') => {
+    for (const [key, value] of Object.entries(sources)) {
+        if (value === false) {
+            urls.push(base + key);
+        } else {
+            buildUrls(value, urls, base + key);
+        }
+    }
+
+    return urls;
+};
+
+const operatorSources = buildUrls(os);
+const itemSources = buildUrls(is);
 
 const errorIndex = ref(0);
 const type = computed(() => 'itemId' in props.subject ? 'item' : 'operator');
