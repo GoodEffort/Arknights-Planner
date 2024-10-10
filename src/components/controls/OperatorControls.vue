@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import OperatorSkillMasteries from '@/components/controls/OperatorSkillMasteries.vue';
+import OperatorSkillMasteries from '@/components/controls/plan/OperatorSkillMasteries.vue';
 import type { SelectedOperator } from '@/types/planner-types';
-import OperatorCosts from '@/components/controls/OperatorCosts.vue';
+import OperatorCosts from '@/components/controls/items/OperatorCosts.vue';
 import ImageFinder from '@/components/akplanner/ImageFinder.vue';
 import { usePlannerStore } from '@/store/planner-store';
 import OperatorControlsTabs from '@/components/controls/OperatorControlsTabs.vue';
-import OperatorModules from '@/components/controls/OperatorModules.vue';
-import OperatorLevelPromotion from '@/components/controls/OperatorLevelPromotion.vue';
-import OperatorSkillLevels from '@/components/controls/OperatorSkillLevels.vue';
+import OperatorModules from '@/components/controls/plan/OperatorModules.vue';
+import OperatorLevelPromotion from '@/components/controls/plan/OperatorLevelPromotion.vue';
+import OperatorSkillLevels from '@/components/controls/plan/OperatorSkillLevels.vue';
 import Tooltip from '@/components/generic/Tooltip.vue';
 import { storeToRefs } from 'pinia';
 

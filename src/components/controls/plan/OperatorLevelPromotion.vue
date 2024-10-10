@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
 import type { SelectedOperator } from '@/types/planner-types';
-import OperatorPromotion from '@/components/controls/OperatorPromotion.vue';
-import OperatorLevel from '@/components/controls/OperatorLevel.vue';
+import OperatorPromotion from '@/components/controls/plan/OperatorPromotion.vue';
+import OperatorLevel from '@/components/controls/plan/OperatorLevel.vue';
 
 const props = defineProps<{
     selectedOperator: SelectedOperator;

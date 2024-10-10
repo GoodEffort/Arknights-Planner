@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { SelectedOperator } from '@/types/planner-types';
-import OperatorInputGroup from '@/components/controls/OperatorInputGroup.vue';
+import OperatorInputGroup from '@/components/controls/plan/OperatorInputGroup.vue';
 import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
 import { Module } from '@/types/outputdata';
