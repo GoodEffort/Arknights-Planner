@@ -6,22 +6,21 @@ import type { EventGains, Inventory, ItemWithRecipe } from "@/types/planner-type
 const getEfficentToFarmItemIds = (items: {
     [key: string]: Item;
 }) => Object.keys(stages).filter(id => {
-        // manual exceptions
-        if (id === '30012') return true; // Orirock Cube
-        if (id === '30013') return false; // Orirock Cluster
-        if (id === '3301') return true; // Skill Summary - 1
-        if (id === '3302') return true; // Skill Summary - 2
-        if (id === '3303') return true; // Skill Summary - 3
-        if (id === '4001') return true; // LMD
+    // manual exceptions
+    if (id === '30012') return true; // Orirock Cube
+    if (id === '30013') return false; // Orirock Cluster
+    if (id === '3301') return true; // Skill Summary - 1
+    if (id === '3302') return true; // Skill Summary - 2
+    if (id === '3303') return true; // Skill Summary - 3
+    if (id === '4001') return true; // LMD
 
-        const item = items[id];
+    const item = items[id];
 
-        if (isEXPItem(item)) return true;
-        if (farmingChips.includes(id)) return true;
+    if (isEXPItem(item)) return true;
+    if (farmingChips.includes(id)) return true;
 
-        return item.rarity === 'TIER_3';
-        
-    })
+    return item.rarity === 'TIER_3';
+})
 
 const getNeededEXPItems = (
     totalEXPValue: number,
@@ -52,7 +51,6 @@ const getNeededEXPItems = (
 
     return needed;
 }
-
 
 const getNeededItems = (
     inventory: Inventory,
@@ -127,7 +125,7 @@ const attemptCraft = (
     let itemsToCraftUpdate: Inventory = duplicateInventory(itemsToCraft);
 
     // find the amount we can craft based on the available resources
-    for (const childNode of costs) {    
+    for (const childNode of costs) {
 
         // calculate the amount of children we need for the amount of crafts we need to do
         const countPerRecipe = childNode.count;
@@ -147,7 +145,7 @@ const attemptCraft = (
 
         if (amountProduced < childNeededQty) {
             const creatableFromChild = Math.floor(amountProduced / countPerRecipe)
-            
+
             if (creatableFromChild < craftable) {
                 craftable = creatableFromChild;
             }
@@ -325,7 +323,7 @@ const getMissingItems = (
         if (excludedEvents.indexOf(eventId) >= 0) {
             continue;
         }
-        
+
         for (const itemId in futureEventGains[eventId]) {
             if (available[itemId] === undefined) {
                 available[itemId] = 0;

@@ -49,7 +49,6 @@ const neededEXPItems = computed(() => inventoryToList(
     items.value
 ));
 
-
 const neededItems = computed(() => [
     ...getNeededItems(
         inventory.value,
