@@ -4,6 +4,8 @@ import Modal from './Modal.vue';
 import NavTabList from './NavTabList.vue';
 import ImportTab from './DefaultImportExportTab.vue';
 import PenguinStatsTab from './PenguinStatsTab.vue';
+import CSVInventoryImportTab from './CSVInventoryImportTab.vue';
+import ArkPRTSImportTab from './ArkPRTSImportTab.vue';
 
 const props = defineProps<{
     modelValue: boolean | string;
@@ -27,6 +29,14 @@ const tabs = [
     {
         name: 'penguin-stats',
         title: 'Penguin Stats'
+    },
+    {
+        name: 'inventory-csv',
+        title: 'CSV (Inventory)'
+    },
+    {
+        name: 'ark-prts',
+        title: 'ArkPRTS Import'
     }
 ];
 </script>
@@ -44,6 +54,12 @@ const tabs = [
                 </template>
                 <template #penguin-stats>
                     <penguin-stats-tab @imported="show = false" />
+                </template>
+                <template #inventory-csv>
+                    <CSVInventoryImportTab @imported="show = false" />
+                </template>
+                <template #ark-prts>
+                    <ArkPRTSImportTab @imported="show = false" />
                 </template>
             </nav-tab-list>
         </template>

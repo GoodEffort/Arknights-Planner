@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import NewFeatures from './NewFeatures.vue';
 import NightModeToggle from './NightModeToggle.vue';
-import ArkPRTSImportModal from './ArkPRTSImportModal.vue';
 import { ref } from 'vue';
 import { usePlannerStore } from '../store/planner-store';
 import GoogleButton from './GoogleButton.vue';
@@ -19,7 +18,6 @@ const showImportExportModal = ref(false);
 const showNewFeaturesModal = ref(lastUse < new Date(BUILD_DATE)); // can use BUILD_DATE but if I push a quick bug fix, I don't want to show it again
 const showSideMenu = ref(false);
 const showSettings = ref(false);
-const showArkPRTSImportModal = ref(false);
 
 const openUpcomingEvents = () => {
   window.open('https://arknights.wiki.gg/wiki/Event', '_blank');
@@ -59,9 +57,6 @@ const openUpcomingEvents = () => {
         <div class="list-group-item" @click="showImportExportModal = !showImportExportModal">
           <div><font-awesome-icon icon="upload" /> Import / Export</div>
         </div>
-        <div class="list-group-item" @click="showArkPRTSImportModal = !showArkPRTSImportModal">
-          <div><font-awesome-icon icon="upload" /> Import from ArkPRTS</div>
-        </div>
         <div class="list-group-item separator"></div>
         <div class="list-group-item" @click="showCreditsmodal = !showCreditsmodal">
           <div><font-awesome-icon icon="info-circle" /> Credits</div>
@@ -90,8 +85,6 @@ const openUpcomingEvents = () => {
   <ImportExportModal v-model="showImportExportModal" />
 
   <NewFeatures v-model="showNewFeaturesModal" />
-
-  <ArkPRTSImportModal v-model="showArkPRTSImportModal" />
 </template>
 
 <style scoped>

@@ -77,16 +77,24 @@ exportData();
   <div class="row">
     <div class="col">
       <h2>Export Data</h2>
-      <textarea rows="10" cols="50" readonly>{{ exportString }}</textarea>
-      <p>Copy this data to the clipboard and import it into the <a href="https://penguin-stats.io/planner"
-          target="_blank">Penguin Stats Planner</a> to see more detailed farming data.</p>
+      <div class="mb-2">
+      </div>
+      <div class="mt-4">
+        <textarea rows="10" cols="50" readonly>{{ exportString }}</textarea>
+        <p>Copy this data to the clipboard and import it into the <a href="https://penguin-stats.io/planner"
+            target="_blank">Penguin Stats Planner</a> to see more detailed farming data.</p>
+      </div>
       <button class="btn btn-success" @click="copyToClipboard">Copy To Clipboard</button>
     </div>
     <div class="col">
       <h2>Import Data</h2>
-      <textarea rows="10" cols="50" v-model="importString"></textarea>
-      <p>Paste data from the <a href="https://penguin-stats.io/planner" target="_blank">Penguin Stats Planner</a> to
-        import it here. The "needed" items are ignored.</p>
+      <div class="mb-2">
+      </div>
+      <div class="mt-4">
+        <textarea rows="10" cols="50" v-model="importString"></textarea>
+        <p>Paste data from the <a href="https://penguin-stats.io/planner" target="_blank">Penguin Stats Planner</a> to
+          import it here. The "needed" items are ignored.</p>
+      </div>
       <button class="btn btn-primary" @click="pasteFromClipboard">Paste from Clipboard</button>
       <hr />
       <button class="btn btn-success" @click="importData">Import Data</button>

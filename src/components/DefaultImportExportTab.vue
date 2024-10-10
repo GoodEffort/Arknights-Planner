@@ -48,7 +48,6 @@ const copyToClipboard = () => {
     <div class="col">
       <h2>Import Data</h2>
       <div class="mb-2">
-        <h5>This will overwrite all data currently on the page with what you paste below!</h5>
       </div>
       <div class="my-4">
         <textarea rows="10" cols="50" v-model="importString"></textarea>
