@@ -4,6 +4,11 @@ import { ref } from 'vue';
 const props = defineProps<{
     tabs: { title: string, name: string }[];
     defaultTab?: number;
+    allowDeselect?: boolean;
+}>();
+
+const emit = defineEmits<{
+    (e: 'changeTab', value: string): void;
 }>();
 
 const selected = ref();
@@ -16,11 +21,12 @@ else if (props.tabs.length >= 0) {
 }
 
 const toggle = (index: number) => {
-    if (selected.value === index) {
+    if (selected.value === index && props.allowDeselect) {
         selected.value = undefined;
     }
     else {
         selected.value = index;
+        emit('changeTab', props.tabs[index].name);
     }
 }
 </script>
