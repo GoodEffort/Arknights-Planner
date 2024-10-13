@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia';
 import { Module, Operator } from '@/types/outputdata';
 import { combineCurrentRecordsWithImport } from '@/data/arkprts-to-record';
 import { setImportData } from '@/store/store-operator-functions';
-import ImportExportTab from '@/components/importExport/ImportExportTab.vue';
+import ImportExportTab from '@/components/datatabs/ImportExportTab.vue';
 
 import type { ARKPRTSData } from '@/types/arkprts';
 import type { Inventory, SaveRecord } from '@/types/planner-types';

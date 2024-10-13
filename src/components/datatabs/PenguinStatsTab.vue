@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
-import ImportExportTab from '@/components/importExport/ImportExportTab.vue';
+import ImportExportTab from '@/components/datatabs/ImportExportTab.vue';
 import type { Inventory } from '@/types/planner-types';
 
 type PenguinStatusImport = {

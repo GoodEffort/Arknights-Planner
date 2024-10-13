@@ -2,7 +2,7 @@
 import { usePlannerStore } from '@/store/planner-store';
 import { convertCSVInventory } from '@/data/arkprts-to-record';
 import { storeToRefs } from 'pinia';
-import ImportExportTab from '@/components/importExport/ImportExportTab.vue';
+import ImportExportTab from '@/components/datatabs/ImportExportTab.vue';
 
 const { inventory, items } = storeToRefs(usePlannerStore());
 
