@@ -1,4 +1,4 @@
-import { Inventory } from "../store/store-inventory-functions"
+import { Inventory } from "./planner-types"
 
 type ArkPrtsCharacter = {
     class: string

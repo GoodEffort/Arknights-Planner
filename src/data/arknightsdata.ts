@@ -1,4 +1,4 @@
-import type { JSONData } from '../types/outputdata';
+import type { JSONData } from '@/types/outputdata';
 
 const jsonLink = //import.meta.env.PROD ?
 "https://goodeffort.github.io/Arknights-Planner-Data/arknights-data.json"

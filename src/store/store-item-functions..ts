@@ -1,26 +1,26 @@
-import { farmingChips, stages } from "../data/farmingdata";
-import { Item, Recipe } from "../types/outputdata";
-import { Inventory, inventoryToList, isEXPItem, ItemWithRecipe } from "./store-inventory-functions";
+import { farmingChips, stages } from "@/data/farmingdata";
+import { inventoryToList, isEXPItem } from "@/store/store-inventory-functions";
+import type { Item, Recipe } from "@/types/outputdata";
+import type { EventGains, Inventory, ItemWithRecipe } from "@/types/planner-types";
 
 const getEfficentToFarmItemIds = (items: {
     [key: string]: Item;
 }) => Object.keys(stages).filter(id => {
-        // manual exceptions
-        if (id === '30012') return true; // Orirock Cube
-        if (id === '30013') return false; // Orirock Cluster
-        if (id === '3301') return true; // Skill Summary - 1
-        if (id === '3302') return true; // Skill Summary - 2
-        if (id === '3303') return true; // Skill Summary - 3
-        if (id === '4001') return true; // LMD
+    // manual exceptions
+    if (id === '30012') return true; // Orirock Cube
+    if (id === '30013') return false; // Orirock Cluster
+    if (id === '3301') return true; // Skill Summary - 1
+    if (id === '3302') return true; // Skill Summary - 2
+    if (id === '3303') return true; // Skill Summary - 3
+    if (id === '4001') return true; // LMD
 
-        const item = items[id];
+    const item = items[id];
 
-        if (isEXPItem(item)) return true;
-        if (farmingChips.includes(id)) return true;
+    if (isEXPItem(item)) return true;
+    if (farmingChips.includes(id)) return true;
 
-        return item.rarity === 'TIER_3';
-        
-    })
+    return item.rarity === 'TIER_3';
+})
 
 const getNeededEXPItems = (
     totalEXPValue: number,
@@ -51,7 +51,6 @@ const getNeededEXPItems = (
 
     return needed;
 }
-
 
 const getNeededItems = (
     inventory: Inventory,
@@ -126,7 +125,7 @@ const attemptCraft = (
     let itemsToCraftUpdate: Inventory = duplicateInventory(itemsToCraft);
 
     // find the amount we can craft based on the available resources
-    for (const childNode of costs) {    
+    for (const childNode of costs) {
 
         // calculate the amount of children we need for the amount of crafts we need to do
         const countPerRecipe = childNode.count;
@@ -146,7 +145,7 @@ const attemptCraft = (
 
         if (amountProduced < childNeededQty) {
             const creatableFromChild = Math.floor(amountProduced / countPerRecipe)
-            
+
             if (creatableFromChild < craftable) {
                 craftable = creatableFromChild;
             }
@@ -275,26 +274,14 @@ const handleItem = (
     return output;
 }
 
-const getAvailableItems = (inventory: Inventory, _: Inventory, lmdId: string) => {
-    // for (const [itemId, count] of Object.entries(reservedItems)) {
-    //     //inventory[itemId] -= count;
-    // }
-
-    for (const key in inventory) {
-        if (key !== lmdId && (inventory[key] <= 0 || isNaN(inventory[key]))) {
-            delete inventory[key];
-        }
-    }
-
-    return inventory;
-}
-
 const getMissingItems = (
     totalCosts: Inventory,
     available: Inventory,
     lmdId: string,
     items: { [key: string]: Item },
     reservedItems: Inventory,
+    futureEventGains: EventGains,
+    excludedEvents: string[],
 ) => {
     // setup our states, we split our needed items and subcomponents into items to farm and items to craft
     const itemsToFarm: Inventory = {};
@@ -330,6 +317,22 @@ const getMissingItems = (
             available[key] = 0;
         }
     }
+
+    // add in our future event gains to available items
+    for (const eventId in futureEventGains) {
+        if (excludedEvents.indexOf(eventId) >= 0) {
+            continue;
+        }
+
+        for (const itemId in futureEventGains[eventId]) {
+            if (available[itemId] === undefined) {
+                available[itemId] = 0;
+            }
+
+            available[itemId] += futureEventGains[eventId][itemId];
+        }
+    }
+
 
     // for each item we need, see if we can craft and or farm it and do the same for its children
     for (const itemId in needed) {
@@ -372,7 +375,6 @@ const getMissingItems = (
 export {
     getNeededEXPItems,
     getNeededItems,
-    getAvailableItems,
     getMissingItems,
     getEfficentToFarmItemIds,
 }

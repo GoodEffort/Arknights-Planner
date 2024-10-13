@@ -1,9 +1,8 @@
-import fetchArknightsData from "../data/arknightsdata";
-import { localeCompare } from "../data/operatorNameCompare";
-import { Item, Operator } from "../types/outputdata";
-import { IsOldSaveRecord, OldSaveRecord, SaveRecord, SelectedOperator } from "../types/planner-types";
-import { OperatorPlans } from "../types/plans";
-import { Inventory } from "./store-inventory-functions";
+import fetchArknightsData from "@/data/arknightsdata";
+import { localeCompare } from "@/data/operatorNameCompare";
+import { Item, Operator } from "@/types/outputdata";
+import { IsOldSaveRecord, Inventory, OldSaveRecord, SaveRecord, SelectedOperator } from "@/types/planner-types";
+import type { OperatorPlans } from "@/types/plans";
 
 type OldExportData = {
     s: string[];

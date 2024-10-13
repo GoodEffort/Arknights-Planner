@@ -1,12 +1,14 @@
-import { canCraft, getBattleRecords, getCostOfOperator, getEXPValue, getReservedItems, getTotalCosts, getTotalCostsByOperator, Inventory, inventoryToList } from './store-inventory-functions';
-import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData, getSavedOperatorRecords, getSavedOperatorData } from './store-operator-functions';
+import { canCraft, getBattleRecords, getCostOfOperator, getReservedItems, getTotalCosts, getTotalCostsByOperator } from '@/store/store-inventory-functions';
+import { getBlankInventoryFromItems, getArknightsData, getExportData, setImportData, getSavedOperatorRecords, getSavedOperatorData } from '@/store/store-operator-functions';
 import { computed, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { SelectedOperator, LevelUpNeeds, SaveRecord } from '../types/planner-types';
 import { debounce } from 'lodash';
-import type { Item, Operator } from '../types/outputdata';
-import DriveClient from '../api/google-drive-api';
-import { getAvailableItems, getEfficentToFarmItemIds, getMissingItems, getNeededEXPItems, getNeededItems } from './store-item-functions.';
+import DriveClient from '@/api/google-drive-api';
+import { getEfficentToFarmItemIds } from '@/store/store-item-functions.';
+import { SelectedOperator, SaveRecord } from '@/types/planner-types';
+
+import type { LevelUpNeeds, Inventory, EventGains } from '@/types/planner-types';
+import type { Item, Operator } from '@/types/outputdata';
 
 export const usePlannerStore = defineStore('planner', () => {
     // Getters
@@ -27,6 +29,7 @@ export const usePlannerStore = defineStore('planner', () => {
 
     const inventory = ref<Inventory>(getSavedInventory());
     const reservedItems = ref(getBlankInventory());
+    const futureEventGains = ref<EventGains>({});
 
     // Functions
     async function loadCharacters() {
@@ -79,7 +82,7 @@ export const usePlannerStore = defineStore('planner', () => {
         reservedItems.value = getReservedItems(items.value, getEfficentToFarmItemIds(items.value));
     }
 
-    // Costs
+    // Computed
     const battleRecords = computed(() => getBattleRecords(items.value));
 
     const totalCostsByOperatorCategorized = computed(() => {
@@ -92,63 +95,14 @@ export const usePlannerStore = defineStore('planner', () => {
         return neededItemsByOperator;
     });
 
-    const totalCostsByOperator = computed(() => getTotalCostsByOperator(totalCostsByOperatorCategorized.value, getBlankInventory));
-    const totalCosts = computed(() => getTotalCosts(getBlankInventory(), totalCostsByOperator.value, selectedOperators.value));
-
-    // EXP Value
-    const totalEXPValueCost = computed(() => getEXPValue(totalCosts.value, items.value));
-    const inventoryEXPValue = computed(() => getEXPValue(inventory.value, items.value));
-
-    // Items
-    const neededEXPItems = computed(() => inventoryToList(
-        getNeededEXPItems(
-            totalEXPValueCost.value - inventoryEXPValue.value,
-            battleRecords.value,
+    const totalCosts = computed(() => getTotalCosts(
+        getBlankInventory(),
+        getTotalCostsByOperator(
+            totalCostsByOperatorCategorized.value,
+            getBlankInventory
         ),
-        items.value
+        selectedOperators.value
     ));
-
-    const neededItems = computed(() => [
-        ...getNeededItems(
-            inventory.value,
-            totalCosts.value,
-            battleRecords.value,
-            items.value,
-        ),
-        ...neededEXPItems.value,
-    ].sort((a, b) => a.item.sortId - b.item.sortId));
-
-    const availableItems = computed(() => getAvailableItems(
-        getInventoryCopy(),
-        reservedItems.value,
-        lmdId.value
-    ));
-
-    const missingItems = computed(() => getMissingItems(
-        totalCosts.value,
-        JSON.parse(JSON.stringify(inventory.value)),
-        lmdId.value,
-        items.value,
-        reservedItems.value
-    ));
-
-    const itemsToCraft = computed(() => inventoryToList(missingItems.value.itemsToCraft, items.value)
-        .sort((a, b) => {
-            const craftSort = (canCraft(b.item, inventory.value) ? 1 : 0) - (canCraft(a.item, inventory.value) ? 1 : 0);
-
-            if (craftSort !== 0) {
-                return craftSort;
-            }
-            else {
-                return b.item.rarity.localeCompare(a.item.rarity);
-            }
-        })
-    );
-
-    const itemsToFarm = computed(() => [
-        ...inventoryToList(missingItems.value.itemsToFarm, items.value),
-        ...neededEXPItems.value
-    ].sort((a, b) => a.item.sortId - b.item.sortId));
 
     // Drive API
     const getDriveClient = async () => {
@@ -228,10 +182,8 @@ export const usePlannerStore = defineStore('planner', () => {
         selectedOperators,
         inventory,
         totalCosts,
-        totalCostsByOperator,
         totalCostsByOperatorCategorized,
         battleRecords,
-        neededItems,
         loadCharacters,
         loadSavedRecords,
         selectCharacter,
@@ -245,8 +197,6 @@ export const usePlannerStore = defineStore('planner', () => {
         googleDriveTest,
         loadReservedItems,
         reservedItems,
-        availableItems,
-        itemsToFarm,
-        itemsToCraft,
+        futureEventGains,
     }
 });

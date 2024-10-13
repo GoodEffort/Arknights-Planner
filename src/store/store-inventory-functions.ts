@@ -1,12 +1,7 @@
-import { levelingCostsArray } from "../data/leveling-costs";
-import promotionLMDCosts from "../data/promotionCosts";
-import { Item, Recipe } from "../types/outputdata";
-import { LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from "../types/planner-types";
-
-// key is item id, value is quantity
-type Inventory = { [key: string]: number; };
-type ItemWithRecipe = Item & { recipe: Recipe };
-type EXPItem = Item & { gainExp: number; };
+import { levelingCostsArray } from "@/data/leveling-costs";
+import promotionLMDCosts from "@/data/promotionCosts";
+import { Item } from "@/types/outputdata";
+import { EXPItem, Inventory, ItemWithRecipe, LevelUpNeeds, LevelUpNeedsKey, SelectedOperator } from "@/types/planner-types";
 
 const isEXPItem = (item: Item): item is EXPItem => {
     return item.gainExp !== undefined;
@@ -444,9 +439,4 @@ export {
     inventoryToList,
     getReservedItems,
     isEXPItem,
-}
-
-export type {
-    Inventory,
-    ItemWithRecipe,
 }

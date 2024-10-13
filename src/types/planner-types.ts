@@ -1,5 +1,11 @@
-import { IsOldOperatorPlans, OldOperatorPlans, OperatorPlans } from "./plans";
-import { Operator } from "./outputdata";
+import { IsOldOperatorPlans, OldOperatorPlans, OperatorPlans } from "@/types/plans";
+import { Item, Operator, Recipe } from "@/types/outputdata";
+
+// key is item id, value is quantity
+type Inventory = { [key: string]: number; };
+type EventGains = { [key: string]: Inventory; };
+type ItemWithRecipe = Item & { recipe: Recipe };
+type EXPItem = Item & { gainExp: number; };
 
 class SelectedOperator {
     operator: Operator;
@@ -73,7 +79,11 @@ const IsOldSaveRecord = (record: OldSaveRecord | SaveRecord): record is OldSaveR
 export type {
     LevelUpNeeds,
     LevelUpNeedsKey,
-    OldSaveRecord
+    OldSaveRecord,
+    EventGains,
+    Inventory,
+    ItemWithRecipe,
+    EXPItem
 }
 
 export {
