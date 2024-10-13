@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { usePlannerStore } from '@/store/planner-store';
 import { storeToRefs } from 'pinia';
-import { Operator } from '@/types/outputdata';
+import { Module, Operator } from '@/types/outputdata';
 import { combineCurrentRecordsWithImport } from '@/data/arkprts-to-record';
 import { setImportData } from '@/store/store-operator-functions';
 import ImportExportTab from '@/components/importExport/ImportExportTab.vue';
@@ -10,7 +10,8 @@ import ImportExportTab from '@/components/importExport/ImportExportTab.vue';
 import type { ARKPRTSData } from '@/types/arkprts';
 import type { Inventory, SaveRecord } from '@/types/planner-types';
 
-type Tmpl = NonNullable<ARKPRTSData["troop"]["chars"]["0"]["tmpl"]>;
+type Char = ARKPRTSData["troop"]["chars"]["0"];
+type Tmpl = NonNullable<Char["tmpl"]>;
 
 const emit = defineEmits<{
     (e: 'imported'): void;
@@ -20,6 +21,13 @@ const activateAdded = ref(false);
 
 const { lmdId, operators } = storeToRefs(usePlannerStore());
 const { exportSavedRecords, getBlankInventory, loadSavedRecords } = usePlannerStore();
+
+const mapARKPRTSModule = (char: Char) => (mod: Module) => {
+    const locked = (char.equip[mod.id]?.locked ?? 1) === 1;
+    const level = locked ? 0 : char.equip[mod.id]?.level ?? 0;
+    const type = mod.type;
+    return { type, level };
+}
 
 const importData = (is: string) => {
     const data: ARKPRTSData = JSON.parse(is);
@@ -70,14 +78,8 @@ const importData = (is: string) => {
                 targetElite: char.evolvePhase,
                 currentLevel: char.level,
                 targetLevel: char.level,
-                currentModules: modules.map(mod => ({
-                    type: mod.type,
-                    level: char.equip[mod.id]?.level ?? 0
-                })),
-                targetModules: modules.map(mod => ({
-                    type: mod.type,
-                    level: char.equip[mod.id]?.level ?? 0
-                })),
+                currentModules: modules.map(mapARKPRTSModule(char)),
+                targetModules: modules.map(mapARKPRTSModule(char)),
                 currentSkillLevels: char.mainSkillLvl,
                 targetSkillLevels: char.mainSkillLvl,
                 currentSkillMasteries: {
