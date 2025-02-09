@@ -29,7 +29,9 @@ export const usePlannerStore = defineStore('planner', () => {
 
     const inventory = ref<Inventory>(getSavedInventory());
     const reservedItems = ref(getBlankInventory());
-    const futureEventGains = ref<EventGains>({});
+    const futureEventGains = ref<EventGains>(JSON.parse(localStorage.getItem("futureEventGains") || "{}"));
+
+    const greedyEventGains = ref<boolean>(localStorage.getItem("greedyEventGains") === "true");
 
     // Functions
     async function loadCharacters() {
@@ -175,6 +177,14 @@ export const usePlannerStore = defineStore('planner', () => {
     }, 1000);
     watch(reservedItems, writeReservedItems, { deep: true });
 
+    watch(greedyEventGains, () => {
+        localStorage.setItem('greedyEventGains', greedyEventGains.value.toString());
+    });
+
+    watch(futureEventGains, () => {
+        localStorage.setItem('futureEventGains', JSON.stringify(futureEventGains.value));
+    });
+
     return {
         items,
         operators,
@@ -198,5 +208,6 @@ export const usePlannerStore = defineStore('planner', () => {
         loadReservedItems,
         reservedItems,
         futureEventGains,
+        greedyEventGains,
     }
 });

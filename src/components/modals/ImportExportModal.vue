@@ -6,6 +6,7 @@ import ImportTab from '@/components/datatabs/DefaultImportExportTab.vue';
 import PenguinStatsTab from '@/components/datatabs/PenguinStatsTab.vue';
 import CSVInventoryImportTab from '@/components/datatabs/CSVInventoryImportTab.vue';
 import ArkPRTSImportTab from '@/components/datatabs/ArkPRTSImportTab.vue';
+import EventGainsTab from '../datatabs/EventGainsTab.vue';
 
 const props = defineProps<{
     modelValue: boolean | string;
@@ -37,6 +38,10 @@ const tabs = [
     {
         name: 'ark-prts',
         title: 'ArkPRTS Import'
+    },
+    {
+        name: 'event-gains',
+        title: 'Event Gains'
     }
 ];
 </script>
@@ -60,6 +65,9 @@ const tabs = [
                 </template>
                 <template #ark-prts>
                     <ArkPRTSImportTab @imported="show = false" />
+                </template>
+                <template #event-gains>
+                    <EventGainsTab @imported="show = false" />
                 </template>
             </nav-tab-list>
         </template>

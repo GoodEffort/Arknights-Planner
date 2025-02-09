@@ -7,6 +7,7 @@ import GoogleButton from '@/components/google/GoogleButton.vue';
 import SettingsModal from '@/components/modals/SettingsModal.vue';
 import CreditsModal from '@/components/modals/CreditsModal.vue';
 import ImportExportModal from '@/components/modals/ImportExportModal.vue';
+import EventGainsModal from './modals/EventGainsModal.vue';
 import { storeToRefs } from 'pinia';
 
 const { googleDriveTest } = storeToRefs(usePlannerStore());
@@ -18,6 +19,7 @@ const showImportExportModal = ref(false);
 const showNewFeaturesModal = ref(lastUse < new Date(BUILD_DATE)); // can use BUILD_DATE but if I push a quick bug fix, I don't want to show it again
 const showSideMenu = ref(false);
 const showSettings = ref(false);
+const showEventGainsModal = ref(false);
 
 const openUpcomingEvents = () => {
   window.open('https://arknights.wiki.gg/wiki/Event', '_blank');
@@ -74,6 +76,10 @@ const openUpcomingEvents = () => {
         <div class="list-group-item" @click="showSettings = true">
           <div><font-awesome-icon icon="gear" /> Settings</div>
         </div>
+        <div class="list-group-item separator"></div>
+        <div class="list-group-item" @click="showEventGainsModal = true">
+          <div><font-awesome-icon icon="calculator" /> Event Gains</div>
+        </div>
       </div>
     </div>
   </Transition>
@@ -85,6 +91,8 @@ const openUpcomingEvents = () => {
   <ImportExportModal v-model="showImportExportModal" />
 
   <NewFeatures v-model="showNewFeaturesModal" />
+
+  <EventGainsModal v-model="showEventGainsModal" />
 </template>
 
 <style scoped>

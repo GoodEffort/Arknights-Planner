@@ -4,11 +4,13 @@ import { storeToRefs } from 'pinia';
 import ItemsDisplay from '@/components/akplanner/ItemsDisplay.vue';
 import { computed, ref } from 'vue';
 import PlannerSection from '@/components/akplanner/PlannerSection.vue';
-import { canCraft, getEXPValue, inventoryToList } from '@/store/store-inventory-functions';
+import { canCraft, getEXPValue, inventoryToList, itemListToInventory } from '@/store/store-inventory-functions';
 import ReservedItemsModal from '@/components/modals/ReservedItemsModal.vue';
 import ImportExportModal from '@/components/modals/ImportExportModal.vue';
 import { getMissingItems, getNeededEXPItems, getNeededItems } from '@/store/store-item-functions.';
 import NavTabList from '../generic/NavTabList.vue';
+import { Inventory } from '@/types/planner-types';
+import { Item } from '@/types/outputdata';
 
 const {
     totalCosts,
@@ -17,8 +19,11 @@ const {
     battleRecords,
     lmdId,
     reservedItems,
-    futureEventGains
+    futureEventGains,
+    greedyEventGains,
 } = storeToRefs(usePlannerStore());
+
+const excludedEvents = ref<string[]>([]);
 
 const missingItems = computed(() => getMissingItems(
     totalCosts.value,
@@ -27,7 +32,8 @@ const missingItems = computed(() => getMissingItems(
     items.value,
     reservedItems.value,
     futureEventGains.value,
-    []
+    excludedEvents.value,
+    greedyEventGains.value,
 ));
 
 const itemsToCraft = computed(() => inventoryToList(missingItems.value.itemsToCraft, items.value)
@@ -59,7 +65,7 @@ const neededEXPItems = computed(() => inventoryToList(
     items.value
 ));
 
-const neededItems = computed(() => [
+const neededItems = computed(() => itemListToInventory([
     ...getNeededItems(
         inventory.value,
         totalCosts.value,
@@ -67,45 +73,77 @@ const neededItems = computed(() => [
         items.value,
     ),
     ...neededEXPItems.value,
-].sort((a, b) => a.item.sortId - b.item.sortId));
+]));
 
-const totalCostsArray = computed(() =>
-    inventoryToList(totalCosts.value, items.value)
-        .filter(cost => cost.count > 0)
-        .sort((a, b) => a.item.sortId - b.item.sortId));
+const totalCostsInv = computed(() => {
+    const inv: Inventory = JSON.parse(JSON.stringify(totalCosts.value));
+    for (const itemId in inv) {
+        if (inv[itemId] === 0) {
+            delete inv[itemId];
+        }
+    }
+    return inv;
+});
 
 const tabs = [
-    { title: 'Total Cost', name: 'total' },
     { title: 'Missing Items', name: 'missing' },
-    { title: 'Items to Farm/Craft', name: 'breakdown' }
+    { title: 'Items to Farm/Craft', name: 'breakdown' },
+    { title: 'Total Cost', name: 'total' }
 ];
 
 const showReservedItemsModal = ref(false);
 const showPenguinExportModal = ref(false);
+
+const addInventoryQty = (item: Item, count: number) => {
+    const inv = JSON.parse(JSON.stringify(inventory.value));
+    inv[item.itemId] += count;
+    inventory.value = inv;
+}
+
 </script>
 
 <template>
     <PlannerSection title="Missing Items and Recommendations" local-storage-id="needed-items-collapsed">
-        <NavTabList :tabs="tabs" selected="total">
+        <NavTabList :tabs="tabs" :default-tab="0">
             <template #total>
                 <hr />
-                <ItemsDisplay :display-items="totalCostsArray" :farming="false" :flash="false" />
+                <ItemsDisplay
+                    :model-value="totalCostsInv"
+                    @increment-item="addInventoryQty"
+                    :farming="false"
+                    :flash="false"
+                    :controls="false"
+                />
             </template>
             <template #missing>
                 <hr />
-                <ItemsDisplay :display-items="neededItems" :farming="true" :flash="false" />
+                <ItemsDisplay
+                    :model-value="neededItems"
+                    @increment-item="addInventoryQty"
+                    :farming="true"
+                    :flash="false"
+                />
             </template>
             <template #breakdown>
                 <hr />
                 <h3 class="mb-4">Items To Farm</h3>
                 <button @click="showPenguinExportModal = true" class="mb-4">Penguin Stats Farming Plan Import</button>
-                <ItemsDisplay :display-items="itemsToFarm" :farming="true" :flash="true" />
+                <ItemsDisplay
+                    :model-value="itemListToInventory(itemsToFarm)"
+                    @increment-item="addInventoryQty"
+                    :farming="true"
+                    :flash="true"
+                />
                 <hr />
                 <h3 class="mb-3">Items To Craft</h3>
                 <div class="mb-4">
                     <button @click="showReservedItemsModal = true">Edit Reserved Items</button>
                 </div>
-                <ItemsDisplay :display-items="itemsToCraft" :flash="true" />
+                <ItemsDisplay 
+                    :model-value="itemListToInventory(itemsToCraft)"
+                    @increment-item="addInventoryQty"
+                    :flash="true"
+                />
                 <div>
                     If using the +1/-1 buttons in the crafting section it will remove from the "Items to Farm" section
                     above first.

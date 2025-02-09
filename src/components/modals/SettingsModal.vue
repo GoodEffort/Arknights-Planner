@@ -18,7 +18,7 @@ const show = computed({
 });
 
 const store = usePlannerStore();
-const { googleDriveTest } = storeToRefs(store);
+const { googleDriveTest, greedyEventGains } = storeToRefs(store);
 
 const joinGoogleDriveTest = () => {
   if (confirm('Make sure you export your data before trying this. Are you sure you want to try Google Drive Sync Test?')) {
@@ -36,21 +36,28 @@ const leaveGoogleDriveTest = () => {
 </script>
 
 <template>
-    <modal v-model="show">
-        <template #header>
-            Settings (not much here yet, more to come)
-        </template>
-        <template #body>
-            <div>
-                <div>
-                    <button class="btn btn-primary" @click="joinGoogleDriveTest">Try Google Drive Sync Test</button>
-                    <hr />
-                    <button class="btn btn-danger" @click="leaveGoogleDriveTest">Leave Google Drive Sync Test</button>
-                </div>
-            </div>
-        </template>
-        <template #footer>
-            <button class="btn btn-danger" @click="show = false">Close</button>
-        </template>
-    </modal>
+  <modal v-model="show">
+    <template #header>
+      Settings (not much here yet, more to come)
+    </template>
+    <template #body>
+      <div>
+        <div>
+          <div>
+            <h4>Use Greedy Event Gains Calculation</h4>
+            <input type="checkbox" v-model="greedyEventGains" />
+          </div>
+        </div>
+        <hr />
+        <div>
+          <button class="btn btn-primary" @click="joinGoogleDriveTest">Try Google Drive Sync Test</button>
+          <hr />
+          <button class="btn btn-danger" @click="leaveGoogleDriveTest">Leave Google Drive Sync Test</button>
+        </div>
+      </div>
+    </template>
+    <template #footer>
+      <button class="btn btn-danger" @click="show = false">Close</button>
+    </template>
+  </modal>
 </template>

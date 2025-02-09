@@ -274,6 +274,27 @@ const handleItem = (
     return output;
 }
 
+const applyEventGains = (
+    available: Inventory,
+    futureEventGains: EventGains,
+    excludedEvents: string[],
+) => {
+    // add in our future event gains to available items
+    for (const eventId in futureEventGains) {
+        if (excludedEvents.indexOf(eventId) >= 0) {
+            continue;
+        }
+
+        for (const itemId in futureEventGains[eventId]) {
+            if (available[itemId] === undefined) {
+                available[itemId] = 0;
+            }
+
+            available[itemId] += futureEventGains[eventId][itemId];
+        }
+    }
+}
+
 const getMissingItems = (
     totalCosts: Inventory,
     available: Inventory,
@@ -282,6 +303,7 @@ const getMissingItems = (
     reservedItems: Inventory,
     futureEventGains: EventGains,
     excludedEvents: string[],
+    greedyEventGains: boolean = false
 ) => {
     // setup our states, we split our needed items and subcomponents into items to farm and items to craft
     const itemsToFarm: Inventory = {};
@@ -305,6 +327,11 @@ const getMissingItems = (
         available[item.itemId] -= subtractAmount;
     }
 
+    // if we want to be greedy with event gains we apply them before we reserve items
+    if (greedyEventGains) {
+        applyEventGains(available, futureEventGains, excludedEvents);
+    }
+
     // for each reserved item value we remove it from the available items
     for (const key in reservedItems) {
         if (available[key] === undefined) {
@@ -317,22 +344,11 @@ const getMissingItems = (
             available[key] = 0;
         }
     }
-
-    // add in our future event gains to available items
-    for (const eventId in futureEventGains) {
-        if (excludedEvents.indexOf(eventId) >= 0) {
-            continue;
-        }
-
-        for (const itemId in futureEventGains[eventId]) {
-            if (available[itemId] === undefined) {
-                available[itemId] = 0;
-            }
-
-            available[itemId] += futureEventGains[eventId][itemId];
-        }
+    
+    // apply event gains here if not greedy
+    if (!greedyEventGains) {
+        applyEventGains(available, futureEventGains, excludedEvents);
     }
-
 
     // for each item we need, see if we can craft and or farm it and do the same for its children
     for (const itemId in needed) {

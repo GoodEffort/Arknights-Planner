@@ -6,66 +6,50 @@ import { storeToRefs } from 'pinia';
 import ItemModal from '@/components/modals/ItemModal.vue';
 import { inventoryToList } from '@/store/store-inventory-functions';
 import ItemDisplayCell from '@/components/akplanner/ItemDisplayCell.vue';
+import { Inventory } from '@/types/planner-types';
 
-const { inventory, reservedItems, items } = storeToRefs(usePlannerStore());
+const { items, inventory } = storeToRefs(usePlannerStore());
+
+const emit = defineEmits<{
+    (e: 'update:modelValue', value: Inventory): void;
+    (e: 'increment-item', item: Item, count: number): void;
+}>();
 
 export interface Props {
-    displayItems?: {
-        item: Item;
-        count: number;
-    }[];
     controls?: boolean;
     craftButton?: boolean;
     farming?: boolean;
-    reservedItems?: boolean;
     flash?: boolean;
+    sort?: (a: {
+        item: Item;
+        count: number;
+    }, b: {
+        item: Item;
+        count: number;
+    }) => number
+    modelValue: Inventory;
+    useInput?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     controls: true,
     farming: false,
     craftButton: true,
-    reservedItems: false,
     flash: false,
+    sort: (a, b) => a.item.sortId - b.item.sortId
 });
 
 const displayItems = computed<ReturnType<typeof inventoryToList>>(() => {
-    if (props.displayItems !== undefined) {
-        return props.displayItems;
-    }
-    else {
-        return inventoryToList(
-            (props.reservedItems ?
-                reservedItems.value :
-                inventory.value
-            ),
-            items.value)
-            .sort((a, b) => props.reservedItems? a.item.rarity.localeCompare(b.item.rarity) : a.item.sortId - b.item.sortId);
-    }
+    const inventory = props.modelValue;
+    const list = inventoryToList(inventory, items.value);
+    return list.sort(props.sort);
 });
 
-const editInventory = computed(() => {
-    return props.displayItems === undefined;
-});
-
-const editableInv = computed({
-    get: () => {
-        if (props.reservedItems) {
-            return reservedItems.value;
-        }
-        else {
-            return inventory.value;
-        }
-    },
-    set: value => {
-        if (props.reservedItems) {
-            reservedItems.value = value;
-        }
-        else {
-            inventory.value = value;
-        }
-    }
-});
+const setItemQuantity = (item: Item, count: number) => {
+    const inv = JSON.parse(JSON.stringify(props.modelValue));
+    inv[item.itemId] = count;
+    emit('update:modelValue', inv);
+}
 
 const showItem = ref<Item>();
 </script>
@@ -75,17 +59,17 @@ const showItem = ref<Item>();
         <div class="row">
             <div class="col-md-3 col-lg-2 col-6" v-for="{ item, count } in displayItems">
                 <ItemDisplayCell
-                    :item="item"
-                    :count="count"
-                    :controls="props.controls"
-                    :craftButton="props.craftButton"
+                    :model-value="count"
+                    @update:model-value="(value) => setItemQuantity(item, value)"
+                    @increment-item="(item, count) => emit('increment-item', item, count)"
+                    :item="item" 
+                    :useInput="useInput ?? false"
+                    :controls="props.controls" 
+                    :craftButton="props.craftButton" 
                     :farming="props.farming"
-                    :edit-inventory="editInventory"
-                    :editable-inv="editableInv"
-                    :reservedItem="props.reservedItems"
-                    :flash="props.flash"
-                    @show-item="showItem = $event"
-                />
+                    :flash="props.flash" 
+                    :disable-decrement="inventory[item.itemId] === 0"
+                    @show-item="showItem = $event" />
             </div>
         </div>
     </div>

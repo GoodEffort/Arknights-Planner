@@ -6,47 +6,33 @@ import { usePlannerStore } from '@/store/planner-store';
 import CraftButton from '@/components/akplanner/CraftButton.vue';
 import ImageFinder from '@/components/akplanner/ImageFinder.vue';
 
-import type { Inventory } from '@/types/planner-types';
 import type { Item } from '@/types/outputdata';
 
 export interface Props {
     item: Item;
-    count: number;
+    modelValue: number; // count
     controls: boolean;
     craftButton: boolean;
     farming: boolean;
-    editInventory: boolean;
-    editableInv: Inventory;
-    reservedItem: boolean;
+    useInput: boolean;
     flash: boolean;
+    disableDecrement?: boolean;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
     (e: 'show-item', item: Item): void;
+    (e: 'update:modelValue', count: number): void;
+    (e: 'increment-item', item: Item, count: number): void;
 }>();
 
-const { inventory, reservedItems, lmdId } = storeToRefs(usePlannerStore());
-
-const editableInv = computed({
-    get: () => {
-        if (props.reservedItem) {
-            return reservedItems.value;
-        }
-        else {
-            return inventory.value;
-        }
-    },
-    set: value => {
-        if (props.reservedItem) {
-            reservedItems.value = value;
-        }
-        else {
-            inventory.value = value;
-        }
-    }
+const qty = computed({
+    get: () => props.modelValue,
+    set: (value) => emit('update:modelValue', value)
 });
+
+const { lmdId } = storeToRefs(usePlannerStore());
 
 const changeInterval = computed(() => {
     if (props.item.itemId === lmdId.value) {
@@ -57,21 +43,9 @@ const changeInterval = computed(() => {
     }
 });
 
-const changeItemAmount = ({ itemId }: Item, amount: number) => {
-    const inv: Inventory = JSON.parse(JSON.stringify(editableInv.value));
-
-    if (inv[itemId] === undefined) {
-        inv[itemId] = 0;
-    }
-
-    inv[itemId] += amount;
-
-    editableInv.value = inv;
-};
-
 const flash = ref(props.flash);
 
-watch(() => props.count, (newCount, oldCount) => {
+watch(() => qty.value, (newCount, oldCount) => {
     if (newCount !== oldCount && flash.value && props.flash) {
         if (showHighlight.value) {
             showHighlight.value = false;
@@ -108,24 +82,24 @@ const showHighlight = ref(false);
             </div>
         </div>
         <div class="count">
-            <input v-if="editInventory" type="number" class="form-control" min="0" v-model="editableInv[item.itemId]" />
+            <input v-if="useInput" type="number" class="form-control" min="0" v-model="qty"/>
             <span v-else>
-                <b>{{ count }}</b>
+                <b>{{ qty }}</b>
             </span>
             <div v-if="farming">
                 <hr class="my-1" />
                 {{ stages[item.itemId] ?? 'Craft/Buy' }}
             </div>
         </div>
-        <div v-if="!editInventory && controls" class="row mb-2">
+        <div v-if="!useInput && controls" class="row mb-2">
             <div class="col px-0">
                 <button class="btn btn-primary"
-                    :disabled="editableInv[item.itemId] === undefined || editableInv[item.itemId] === 0"
-                    @click="changeItemAmount(item, -changeInterval)">-{{
+                    :disabled="disableDecrement"
+                    @click="emit('increment-item', item, -changeInterval)">-{{
                         item.itemId === lmdId ? '10k' : '1' }}</button>
             </div>
             <div class="col px-0">
-                <button class="btn btn-primary" @click="changeItemAmount(item, changeInterval)">+{{
+                <button class="btn btn-primary" @click="emit('increment-item', item, +changeInterval)">+{{
                     item.itemId === lmdId ? '10k' : '1' }}</button>
             </div>
         </div>

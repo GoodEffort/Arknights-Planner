@@ -1,4 +1,4 @@
-import { faMoon, faSun, faCircleInfo, faUpload, faDownload, faCalendarDay, faCaretDown, faCaretRight, faHammer, faBars, faGear, faLightbulb, faClock } from '@fortawesome/free-solid-svg-icons';
+import { faMoon, faSun, faCircleInfo, faUpload, faDownload, faCalendarDay, faCaretDown, faCaretRight, faHammer, faBars, faGear, faLightbulb, faClock, faCalculator, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 export default [
     faMoon,
@@ -13,5 +13,7 @@ export default [
     faBars,
     faGear,
     faLightbulb,
-    faClock
+    faClock,
+    faCalculator,
+    faPlus
 ]
