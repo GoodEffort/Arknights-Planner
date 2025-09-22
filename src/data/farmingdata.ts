@@ -31,6 +31,7 @@ const stages: { [key: string]: string } = {
     "31063": "11-15",           // Transmuted Salt
     "31073": "13-5",            // Fuscous Fiber
     "31083": "13-15",           // Aggregate Cyclicene
+    "31093": "15-9",            // Chiral Refractor
     "3301": "CA-5",             // Skill Summarry - 1
     "3302": "CA-5",             // Skill Summarry - 2
     "3303": "CA-5",             // Skill Summarry - 3
